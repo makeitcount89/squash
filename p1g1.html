@@ -18,7 +18,7 @@
   }   
 
 .content-container {
-  transform: scale(0.7); /* Scale content to 50% */
+  transform: scale(0.6); /* Scale content to 50% */
   transform-origin: top; /* Center of the content */
   width: 100%; /* Align content to the top vertically within .content-container */
 }
@@ -95,6 +95,9 @@
             transform-origin: top; /* Center of the content */
             width: 100%; /* Align content to the top vertically within .content-container */
             }
+        #undoButton {
+          align-items: center;
+        }
 
         #totalCounters {
             position: absolute; /* Position the counters absolutely within the container */
@@ -164,8 +167,8 @@
     <div class="heading-container">
       <h3 id="left-heading">Left</h3>
       <h3 id="right-heading">Right</h3>
-    
-    <button id="undoButton" style="font-size: 2em;">Undo</button>
+    </div>
+    <button id="undoButton">Undo</button>
 
     <div class="heading-container">
       <h4 id="shot">Drive</h4>
@@ -1062,5 +1065,4 @@ function saveToHistory() {
     </script>
   </body>
 
-  </html>
-  
+</html>
