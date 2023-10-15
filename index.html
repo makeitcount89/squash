@@ -73,7 +73,7 @@
     <script>
         function scrollToGame(game) {
             const element = document.getElementById(game);
-            element.style.display = 'block';
+            element.style display = 'block';
             window.scrollTo({ top: element.offsetTop - 25, behavior: 'smooth' });
 
             // Add or remove the active-button class based on the selected button
@@ -86,6 +86,14 @@
                 }
             });
         }
+
+        const buttons = document.querySelectorAll('.button');
+        buttons.forEach(button => {
+            button.addEventListener('click', function() {
+                buttons.forEach(btn => btn.classList.remove('active-button'));
+                this.classList.add('active-button');
+            });
+        });
     </script>
 </body>
 </html>
