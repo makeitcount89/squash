@@ -59,6 +59,7 @@
     <div class="button-container">
         <button class="button" onclick="showGame('game1', this)">Game 1</button>
         <button class="button" onclick="showGame('game2', this)">Game 2</button>
+        <button class="button" onclick="generateAndSharePDF(this)">Generate PDF</button>
     </div>
 
     <div id="game1" class="iframe-container">
@@ -69,6 +70,7 @@
         <iframe src="p1g2.html" width="100%" height="100%"></iframe>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
     <script>
         let activeIframe = null;
 
@@ -84,12 +86,34 @@
             }
         }
 
-        // Automatically show "p1g1" and select/enlarge the first button when the page loads
+        // Automatically show "p1g1" when the page loads
         window.onload = function() {
-            const firstButton = document.querySelector('.button');
-            showGame('game1', firstButton);
-            document.getElementById('game1').classList.add('active');
-        };
+            showGame('game1', document.querySelector('.button'));
+        }
+
+        function generateAndSharePDF(button) {
+            var pdf = new jsPDF();
+
+            var iframes = document.getElementsByTagName('iframe');
+
+            for (var i = 0; i < iframes.length; i++) {
+                var iframe = iframes[i];
+                var iframeContent = iframe.contentDocument.body;
+                pdf.fromHTML(iframeContent);
+
+                if (i < iframes.length - 1) {
+                    pdf.addPage();
+                }
+            }
+
+            var pdfDataUri = pdf.output('datauristring');
+            var pdfLink = document.createElement('a');
+            pdfLink.href = pdfDataUri;
+            pdfLink.download = 'iframes.pdf';
+            pdfLink.style.display = 'none';
+            document.body.appendChild(pdfLink);
+            pdfLink.click();
+        }
     </script>
 </body>
 </html>
