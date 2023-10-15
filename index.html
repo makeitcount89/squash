@@ -1,15 +1,24 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Two Pages Embedded in Iframes</title>
+    <title>Three Pages Embedded in Iframes</title>
     <style>
         .iframe-container {
             position: absolute;
             top: 50px; /* Leave room for the buttons */
             left: 0;
             width: 100%;
-            height: calc(100% - 50px); /* Adjust for button height */
+            height: calc(75% - 50px); /* Adjust for button height */
             display: none;
+        }
+
+        .totals-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 25%;
+            background-color: #f0f0f0;
         }
 
         .active {
@@ -18,7 +27,7 @@
 
         .button-container {
             position: absolute;
-            top: 0;
+            top: 25%;
             left: 0;
             width: 100%;
             background-color: #f0f0f0;
@@ -34,9 +43,13 @@
     </style>
 </head>
 <body>
+    <div class="totals-container">
+        <iframe src="Totalsp1.html" width="100%" height="100%"></iframe>
+    </div>
+
     <div class="button-container">
         <button class="button" onclick="showGame('game1')">Game 1</button>
-        <button class="button" onclick="showGame('game2')">Game 2</button>
+        <button class "button" onclick="showGame('game2')">Game 2</button>
     </div>
 
     <div id="game1" class="iframe-container active">
