@@ -8,7 +8,7 @@
             top: 30%; /* Start from 30% down the page */
             left: 0;
             width: 100%;
-            height: 70%; /* Adjust for button height */
+            height: 70%; /* Adjust for button and totals height */
             display: none;
         }
 
@@ -73,7 +73,7 @@
                 if (activeIframe) {
                     document.getElementById(activeIframe).classList.remove('active');
                 }
-                document.getElementById(game).classList add('active');
+                document.getElementById(game).classList.add('active');
                 activeIframe = game;
             }
         }
