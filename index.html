@@ -4,35 +4,17 @@
     <title>Two Pages Embedded in Iframes</title>
     <style>
         .iframe-container {
-            position: absolute;
-            top: 30%; /* Start from 30% down the page */
-            left: 0;
             width: 100%;
-            height: 70%; /* Adjust for button and totals height */
+            height: 100vh;
             display: none;
         }
 
         .totals-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 25%;
             background-color: #f0f0f0;
-        }
-
-        .active {
-            display: block;
         }
 
         .button-container {
-            position: fixed;
-            top: 25%; /* Start from 25% down the page */
-            left: 0;
-            width: 100%;
             background-color: #f0f0f0;
-            text-align: center;
-            padding: 10px 0;
         }
 
         .button {
@@ -45,10 +27,6 @@
         .button:active {
             transform: scale(1.2);
         }
-
-        .active-button {
-            transform: scale(1.2);
-        }
     </style>
 </head>
 <body>
@@ -57,9 +35,8 @@
     </div>
 
     <div class="button-container">
-        <button class="button" onclick="showGame('game1', this)">Game 1</button>
-        <button class="button" onclick="showGame('game2', this)">Game 2</button>
-        <button class="button" onclick="captureAndDownloadJPGs()">Share</button>
+        <button class="button" onclick="scrollToGame('game1')">Game 1</button>
+        <button class="button" onclick="scrollToGame('game2')">Game 2</button>
     </div>
 
     <div id="game1" class="iframe-container">
@@ -70,41 +47,11 @@
         <iframe src="p1g2.html" width="100%" height="100%"></iframe>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.0.0/html2canvas.min.js"></script>
     <script>
-        let activeIframe = null;
-
-        function showGame(game, button) {
-            if (activeIframe !== game) {
-                if (activeIframe) {
-                    document.getElementById(activeIframe).classList.remove('active');
-                    document.querySelector('.active-button').classList.remove('active-button');
-                }
-                document.getElementById(game).classList.add('active');
-                activeIframe = game;
-                button.classList.add('active-button');
-            }
-        }
-
-        // Automatically show "p1g1" when the page loads
-        window.onload = function() {
-            showGame('game1', document.querySelector('.button'));
-        }
-
-        function captureAndDownloadJPGs() {
-            const iframes = document.querySelectorAll('.iframe-container iframe');
-
-            iframes.forEach((iframe, index) => {
-                html2canvas(iframe, {
-                    scale: 2,
-                }).then(canvas => {
-                    const jpgDataUrl = canvas.toDataURL('image/jpeg', 0.8);
-                    const a = document.createElement('a');
-                    a.href = jpgDataUrl;
-                    a.download = `iframe_${index + 1}.jpg`;
-                    a.click();
-                });
-            });
+        function scrollToGame(game) {
+            const element = document.getElementById(game);
+            element.style.display = 'block';
+            window.scrollTo({ top: element.offsetTop, behavior: 'smooth' });
         }
     </script>
 </body>
