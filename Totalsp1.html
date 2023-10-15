@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body {
+      font-size: 40%;
+      display: flex;
+      flex-direction: column; /* Stack elements vertically */
+      align-items: center; /* Center elements horizontally */
+      text-align: center; /* Center text within elements */
+      height: 100vh; /* Ensure full viewport height */
+      transform: scale(0.7); /* Scale content to 50% */
+      transform-origin: top; /* Center of the content */
+      width: 100%; /* Align content to the top vertically within .content-container */
+      background-image: url('https://drive.google.com/uc?export=download&id=1yBDd-FfqQQ0V-z9e5X4FMr2qhb2Qc3RA');
+      background-size: 60%; /* Reduce background size to 30% */
+      background-repeat: no-repeat;
+      background-position: top center; /* Center the background from the top */
+      }
+  
+    h4, h5, p {
+      font-size: 110%;
+    }
+    .header {
+      width: 100%; /* Set the width to 100% to span the full width */
+    }
+    .header h2 {
+      font-size: 150%;
+    }
+    .header input[type="text"] {
+      width: 60%; /* Adjust the width as needed */
+      margin: 10px auto; /* Center the text box horizontally and add spacing */
+    }
+    
+    h2#counters {
+      font-size: 150%; 
+    }
+    /* Style for the chart container */
+    #pieChart {
+      position: relative;
+      transform: scale(0.5); /* Scale content to 50% */
+      transform-origin: top; /* Center of the content */
+      width: 100%; /* Align content to the top vertically within .content-container */
+      }
+  </style>
+
+  <!-- Load Google Charts API -->
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+</head>
+<body>
+  <div>
+    <!-- Display the W Count and E Count values as an h2 element -->
+    <h3 id="counters">Winners = <span id="WCount">0</span> Errors = <span id="ECount">0</span></h3>
+    <!-- Display totalWCount, totalECount, totalWCountg2, and totalECountg2 -->
+    <h4>Game 1: W = <span id="totalWCount">0</span> E = <span id="totalECount">0</span></h4>
+    <h4>Game 2: W = <span id="totalWCountg2">0</span> E = <span id="totalECountg2">0</span></h4>
+  </div>
+  <div class="header">
+    <input type="text" size=20 id="player1" placeholder="Enter Player 1's name">
+  </div>
+  <!-- Create a div element for the pie chart -->
+  <div id="pieChart"></div>
+
+  <script>
+    // Function to update the counters on page2.html
+    function updateCountersOnPage2() {
+      const totalWCountElement = document.getElementById('totalWCount');
+      const totalECountElement = document.getElementById('totalECount');
+      const totalWCountg2Element = document.getElementById('totalWCountg2');
+      const totalECountg2Element = document.getElementById('totalECountg2');
+      const WCountElement = document.getElementById('WCount');
+      const ECountElement = document.getElementById('ECount');
+
+      let totalWCount = parseInt(localStorage.getItem('totalWCount')) || 0;
+      let totalECount = parseInt(localStorage.getItem('totalECount')) || 0;
+      let totalWCountg2 = parseInt(localStorage.getItem('totalWCountg2')) || 0;
+      let totalECountg2 = parseInt(localStorage.getItem('totalECountg2')) || 0;
+
+      totalWCountElement.textContent = totalWCount;
+      totalECountElement.textContent = totalECount;
+      totalWCountg2Element.textContent = totalWCountg2;
+      totalECountg2Element.textContent = totalECountg2;
+
+      // Calculate the sum of W Count and E Count
+      let WCount = totalWCount + totalWCountg2;
+      let ECount = totalECount + totalECountg2;
+
+      // Update the content of WCountElement and ECountElement
+      WCountElement.textContent = WCount;
+      ECountElement.textContent = ECount;
+
+      // Update the pie chart
+      drawPieChart(totalWCount, totalECount, totalWCountg2, totalECountg2);
+    }
+
+    // Function to draw the pie chart
+    function drawPieChart(totalWCount, totalECount, totalWCountg2, totalECountg2) {
+      google.charts.load('current', { 'packages': ['corechart'] });
+      google.charts.setOnLoadCallback(function () {
+        var data = google.visualization.arrayToDataTable([
+          ['Category', 'Count'],
+          ['W Count', totalWCount + totalWCountg2],
+          ['E Count', totalECount + totalECountg2]
+        ]);
+
+        var options = {
+          backgroundColor: 'transparent',
+          colors: ['green', 'red'],
+          pieSliceText: 'percentage', // Display percentage values on the slices
+          pieSliceTextStyle: {
+            color: 'black' // Color of the percentage text
+          }
+        };
+
+        var chart = new google.visualization.PieChart(document.getElementById('pieChart'));
+        chart.draw(data, options);
+      });
+    }
+
+    // Call the updateCountersOnPage2 function when the page loads
+    window.addEventListener('load', updateCountersOnPage2);
+
+    // Listen for changes in local storage to update the counters and chart
+    window.addEventListener('storage', updateCountersOnPage2);
+  </script>
+</body>
+</html>
