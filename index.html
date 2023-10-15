@@ -84,9 +84,11 @@
             }
         }
 
-        // Automatically show "p1g1" when the page loads
+        // Automatically show "p1g1" and select/enlarge the first button when the page loads
         window.onload = function() {
-            showGame('game1', document.querySelector('.button'));
+            const firstButton = document.querySelector('.button');
+            showGame('game1', firstButton);
+            document.getElementById('game1').classList.add('active');
         };
     </script>
 </body>
