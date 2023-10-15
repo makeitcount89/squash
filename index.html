@@ -59,7 +59,7 @@
     <div class="button-container">
         <button class="button" onclick="showGame('game1', this)">Game 1</button>
         <button class="button" onclick="showGame('game2', this)">Game 2</button>
-        <button class="button" onclick="captureAndDownloadZIP()">Share</button>
+        <button class="button" onclick="captureAndDownloadJPGs()">Share</button>
     </div>
 
     <div id="game1" class="iframe-container">
@@ -70,6 +70,7 @@
         <iframe src="p1g2.html" width="100%" height="100%"></iframe>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.0.0/html2canvas.min.js"></script>
     <script>
         let activeIframe = null;
 
@@ -90,20 +91,20 @@
             showGame('game1', document.querySelector('.button'));
         }
 
-        function captureAndDownloadZIP() {
-            // You would need to implement server-side logic to capture and bundle iframes into a ZIP file.
-            // Capturing images from iframes on the client-side alone is challenging due to cross-origin restrictions.
-            // The server would have access to the iframe content and can bundle them into a ZIP file.
+        function captureAndDownloadJPGs() {
+            const iframes = document.querySelectorAll('.iframe-container iframe');
 
-            // For demonstration purposes, you can provide a link to a sample ZIP file.
-            const downloadLink = document.createElement('a');
-            downloadLink.href = 'sample.zip';
-            downloadLink.download = 'iframes.zip';
-            downloadLink.style.display = 'none';
-
-            document.body.appendChild(downloadLink);
-            downloadLink.click();
-            document.body.removeChild(downloadLink);
+            iframes.forEach((iframe, index) => {
+                html2canvas(iframe, {
+                    scale: 2,
+                }).then(canvas => {
+                    const jpgDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                    const a = document.createElement('a');
+                    a.href = jpgDataUrl;
+                    a.download = `iframe_${index + 1}.jpg`;
+                    a.click();
+                });
+            });
         }
     </script>
 </body>
