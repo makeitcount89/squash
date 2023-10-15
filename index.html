@@ -54,7 +54,7 @@
 
     <div class="button-container">
         <button class="button" onclick="showGame('game1')">Game 1</button>
-        <button class="button" onclick="showGame('game2')">Game 2</button>
+        <button class "button" onclick="showGame('game2')">Game 2</button>
     </div>
 
     <div id="game1" class="iframe-container">
@@ -77,6 +77,11 @@
                 activeIframe = game;
             }
         }
+
+        // Automatically show "p1g1" when the page loads
+        window.onload = function() {
+            showGame('game1');
+        };
     </script>
 </body>
 </html>
