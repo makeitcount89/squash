@@ -92,11 +92,14 @@
         }
 
         function captureAndConvertToPDF() {
-            // Create an instance of html2pdf
             const pdfElement = document.body;
-            const pdfOptions = { margin: 10, filename: 'iframe_content.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 } };
+            const pdfOptions = {
+                margin: 10,
+                filename: 'iframe_content.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 }
+            };
 
-            // Capture the content and convert it to PDF
             html2pdf()
                 .from(pdfElement)
                 .set(pdfOptions)
@@ -104,13 +107,11 @@
                     const blob = new Blob([pdf], { type: 'application/pdf' });
                     const pdfURL = URL.createObjectURL(blob);
 
-                    // Create a link for downloading the PDF
                     const downloadLink = document.createElement('a');
                     downloadLink.href = pdfURL;
                     downloadLink.download = 'iframe_content.pdf';
                     downloadLink.style.display = 'none';
 
-                    // Trigger the click event to initiate the download
                     document.body.appendChild(downloadLink);
                     downloadLink.click();
                     document.body.removeChild(downloadLink);
