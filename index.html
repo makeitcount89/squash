@@ -59,18 +59,18 @@
     <div class="button-container">
         <button class="button" onclick="showGame('game1', this)">Game 1</button>
         <button class="button" onclick="showGame('game2', this)">Game 2</button>
-        <button class="button" onclick="generateAndSharePDF(this)">Generate PDF</button>
+        <button id="generatePDFButton" class="button">Generate PDF</button>
     </div>
 
     <div id="game1" class="iframe-container">
         <iframe src="p1g1.html" width="100%" height="100%"></iframe>
     </div>
 
-    <div id="game2" class="iframe-container">
+    <div id="game2" class "iframe-container">
         <iframe src="p1g2.html" width="100%" height="100%"></iframe>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
     <script>
         let activeIframe = null;
 
@@ -86,34 +86,49 @@
             }
         }
 
-        // Automatically show "p1g1" when the page loads
+        // Automatically show "game1" when the page loads
         window.onload = function() {
             showGame('game1', document.querySelector('.button'));
         }
 
-        function generateAndSharePDF(button) {
-            var pdf = new jsPDF();
+        document.getElementById('generatePDFButton').addEventListener('click', function () {
+            // Create an element to store the content of iframes
+            const contentToPrint = document.createElement('div');
 
-            var iframes = document.getElementsByTagName('iframe');
+            // Get all iframe elements on the page
+            const iframes = document.getElementsByTagName('iframe');
 
-            for (var i = 0; i < iframes.length; i++) {
-                var iframe = iframes[i];
-                var iframeContent = iframe.contentDocument.body;
-                pdf.fromHTML(iframeContent);
-
-                if (i < iframes.length - 1) {
-                    pdf.addPage();
-                }
+            // Function to add content from iframes to the contentToPrint element
+            function addIframeContent(iframe) {
+                const clone = iframe.contentDocument.cloneNode(true);
+                contentToPrint.appendChild(clone);
             }
 
-            var pdfDataUri = pdf.output('datauristring');
-            var pdfLink = document.createElement('a');
-            pdfLink.href = pdfDataUri;
-            pdfLink.download = 'iframes.pdf';
-            pdfLink.style.display = 'none';
-            document.body.appendChild(pdfLink);
-            pdfLink.click();
-        }
+            // Loop through each iframe and add its content to the contentToPrint element
+            for (let i = 0; i < iframes.length; i++) {
+                addIframeContent(iframes[i]);
+            }
+
+            // Generate PDF from contentToPrint
+            const elementToPrint = contentToPrint;
+            html2pdf()
+                .from(elementToPrint)
+                .outputPdf()
+                .then(function (pdf) {
+                    // Create a data URI from the generated PDF
+                    const pdfDataUri = 'data:application/pdf;base64,' + btoa(pdf);
+
+                    // Create a link to share the PDF
+                    const pdfLink = document.createElement('a');
+                    pdfLink.href = pdfDataUri;
+                    pdfLink.download = 'iframes.pdf';
+                    pdfLink.style.display = 'none';
+                    document.body.appendChild(pdfLink);
+
+                    // Trigger a click event to download the PDF
+                    pdfLink.click();
+                });
+        });
     </script>
 </body>
 </html>
