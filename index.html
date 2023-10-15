@@ -59,17 +59,19 @@
     <div class="button-container">
         <button class="button" onclick="showGame('game1', this)">Game 1</button>
         <button class="button" onclick="showGame('game2', this)">Game 2</button>
-        <button class="button" onclick="shareContent()">Share</button>
+        <button class="button" onclick="saveAsPNG()">Share</button>
     </div>
 
     <div id="game1" class="iframe-container">
         <iframe src="p1g1.html" width="100%" height="100%"></iframe>
     </div>
 
-    <div id="game2" class "iframe-container">
+    <div id="game2" class="iframe-container">
         <iframe src="p1g2.html" width="100%" height="100%"></iframe>
     </div>
 
+    <!-- Include the html2canvas library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.2.10/html2canvas.min.js"></script>
     <script>
         let activeIframe = null;
 
@@ -90,27 +92,46 @@
             showGame('game1', document.querySelector('.button'));
         }
 
-        function shareContent() {
-            // Gather the content from both iframes
-            var iframe1Content = document.getElementById('game1').querySelector('iframe').contentDocument.body.innerText;
-            var iframe2Content = document.getElementById('game2').querySelector('iframe').contentDocument.body.innerText;
+        function saveAsPNG() {
+            // Create a Promise to capture each iframe as a PNG image
+            const captureIframe = async (iframe) => {
+                const canvas = await html2canvas(iframe, {
+                    scale: 2 // You can adjust the scale as needed
+                });
+                return canvas.toDataURL('image/png');
+            };
 
-            // Combine the content
-            var combinedContent = "Content from Game 1:\n" + iframe1Content + "\n\nContent from Game 2:\n" + iframe2Content;
+            // Capture both iframes
+            const capturePromises = [
+                captureIframe(document.querySelector('#game1 iframe')),
+                captureIframe(document.querySelector('#game2 iframe'))
+            ];
 
-            // Create a data URI for downloading the content as a text file
-            var dataUri = "data:text/plain;charset=utf-8," + encodeURIComponent(combinedContent);
+            // When both captures are complete, combine them into a single image
+            Promise.all(capturePromises).then((images) => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = images[0].width;
+                canvas.height = images[0].height * 2; // Adjust for two images vertically
 
-            // Create a link for downloading the content
-            var downloadLink = document.createElement('a');
-            downloadLink.href = dataUri;
-            downloadLink.download = 'combined_content.txt';
-            downloadLink.style.display = 'none';
+                // Draw the images on the canvas
+                ctx.drawImage(images[0], 0, 0);
+                ctx.drawImage(images[1], 0, images[0].height);
 
-            // Trigger the click event to initiate the download
-            document.body.appendChild(downloadLink);
-            downloadLink.click();
-            document.body.removeChild(downloadLink);
+                // Convert the canvas to a data URL (PNG)
+                const combinedImage = canvas.toDataURL('image/png');
+
+                // Create a link for downloading the image
+                const downloadLink = document.createElement('a');
+                downloadLink.href = combinedImage;
+                downloadLink.download = 'combined_images.png';
+                downloadLink.style.display = 'none';
+
+                // Trigger the click event to initiate the download
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+            });
         }
     </script>
 </body>
