@@ -35,8 +35,8 @@
             transition: transform 0.2s;
         }
 
-        .active-button {
-            padding: 15px 25px; /* Bigger size for active button */
+        .button.active-button {
+            transform: scale(1.2); /* Bigger size for active button */
         }
 
         .iframe-container {
@@ -58,7 +58,7 @@
     </div>
 
     <div class="button-container">
-        <button class="button" onclick="scrollToGame('game1')">Game 1</button>
+        <button class="button active-button" onclick="scrollToGame('game1')">Game 1</button>
         <button class="button" onclick="scrollToGame('game2')">Game 2</button>
     </div>
 
