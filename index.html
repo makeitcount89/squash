@@ -1,138 +1,45 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Two Pages Embedded in Iframes</title>
+    <title>Embedded Iframe to PNG</title>
+    <!-- Include the html2canvas library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.2.10/html2canvas.min.js"></script>
     <style>
-        .iframe-container {
-            position: absolute;
-            top: 30%; /* Start from 30% down the page */
-            left: 0;
+        #iframeToCapture {
             width: 100%;
-            height: 70%; /* Adjust for button and totals height */
-            display: none;
-        }
-
-        .totals-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 25%;
-            background-color: #f0f0f0;
-        }
-
-        .active {
-            display: block;
-        }
-
-        .button-container {
-            position: fixed;
-            top: 25%; /* Start from 25% down the page */
-            left: 0;
-            width: 100%;
-            background-color: #f0f0f0;
-            text-align: center;
-            padding: 10px 0;
-        }
-
-        .button {
-            padding: 10px 20px;
-            font-size: 18px;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-
-        .button:active {
-            transform: scale(1.2);
-        }
-
-        .active-button {
-            transform: scale(1.2);
+            height: 100%;
         }
     </style>
 </head>
 <body>
-    <div class="totals-container">
-        <iframe src="Totalsp1.html" width="100%" height="100%"></iframe>
-    </div>
-
-    <div class="button-container">
-        <button class="button" onclick="showGame('game1', this)">Game 1</button>
-        <button class="button" onclick="showGame('game2', this)">Game 2</button>
-        <button class="button" onclick="saveAsPNG()">Share</button>
-    </div>
-
-    <div id="game1" class="iframe-container">
-        <iframe src="p1g1.html" width="100%" height="100%"></iframe>
-    </div>
-
-    <div id="game2" class="iframe-container">
-        <iframe src="p1g2.html" width="100%" height="100%"></iframe>
-    </div>
-
-    <!-- Include the html2canvas library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.2.10/html2canvas.min.js"></script>
+    <iframe src="p1g1.html" id="iframeToCapture"></iframe>
+    <button id="captureButton">Capture and Download as PNG</button>
+    <div id="capturedImageContainer"></div>
+    
     <script>
-        let activeIframe = null;
+        const iframeToCapture = document.getElementById('iframeToCapture');
+        const captureButton = document.getElementById('captureButton');
+        const capturedImageContainer = document.getElementById('capturedImageContainer');
 
-        function showGame(game, button) {
-            if (activeIframe !== game) {
-                if (activeIframe) {
-                    document.getElementById(activeIframe).classList.remove('active');
-                    document.querySelector('.active-button').classList.remove('active-button');
-                }
-                document.getElementById(game).classList.add('active');
-                activeIframe = game;
-                button.classList.add('active-button');
-            }
-        }
+        captureButton.addEventListener('click', () => {
+            html2canvas(iframeToCapture, {
+                scale: 2, // You can adjust the scale as needed
+            }).then(canvas => {
+                // Create an image element to display the captured image
+                const capturedImage = new Image();
+                capturedImage.src = canvas.toDataURL('image/png');
+                capturedImageContainer.appendChild(capturedImage);
 
-        // Automatically show "p1g1" when the page loads
-        window.onload = function() {
-            showGame('game1', document.querySelector('.button'));
-        }
-
-        function saveAsPNG() {
-            // Create a Promise to capture each iframe as a PNG image
-            const captureIframe = async (iframe) => {
-                const canvas = await html2canvas(iframe, {
-                    scale: 2 // You can adjust the scale as needed
-                });
-                return canvas.toDataURL('image/png');
-            };
-
-            // Capture both iframes
-            const capturePromises = [
-                captureIframe(document.querySelector('#game1 iframe')),
-                captureIframe(document.querySelector('#game2 iframe'))
-            ];
-
-            // When both captures are complete, combine them into a single image
-            Promise.all(capturePromises).then((images) => {
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-                canvas.width = images[0].width;
-                canvas.height = images[0].height * 2; // Adjust for two images vertically
-
-                // Draw the images on the canvas
-                ctx.drawImage(images[0], 0, 0);
-                ctx.drawImage(images[1], 0, images[0].height);
-
-                // Convert the canvas to a data URL (PNG)
-                const combinedImage = canvas.toDataURL('image/png');
-
-                // Create a link for downloading the image
+                // Create a link to download the captured image
                 const downloadLink = document.createElement('a');
-                downloadLink.href = combinedImage;
-                downloadLink.download = 'combined_images.png';
-                downloadLink.style.display = 'none';
+                downloadLink.href = canvas.toDataURL('image/png');
+                downloadLink.download = 'captured_image.png';
+                downloadLink.textContent = 'Download Image';
 
-                // Trigger the click event to initiate the download
-                document.body.appendChild(downloadLink);
-                downloadLink.click();
-                document.body.removeChild(downloadLink);
+                // Add the download link to the page
+                capturedImageContainer.appendChild(downloadLink);
             });
-        }
+        });
     </script>
 </body>
 </html>
