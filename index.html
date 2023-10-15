@@ -5,16 +5,16 @@
     <style>
         .iframe-container {
             position: absolute;
-            top: 25%; /* Adjust to leave room for the buttons */
+            top: 50px; /* Adjust for button height */
             left: 0;
             width: 100%;
-            height: 75%; /* Adjust for button and totals height */
+            height: calc(75% - 50px); /* Adjust for button height */
             display: none;
         }
 
         .totals-container {
-            position: fixed;
-            top: 0;
+            position: absolute;
+            top: 0; /* Display below the buttons */
             left: 0;
             width: 100%;
             height: 25%;
@@ -26,8 +26,8 @@
         }
 
         .button-container {
-            position: absolute;
-            top: 0; /* Display buttons at the top */
+            position: fixed;
+            top: 0;
             left: 0;
             width: 100%;
             background-color: #f0f0f0;
@@ -39,6 +39,11 @@
             padding: 10px 20px;
             font-size: 18px;
             cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .button:active {
+            transform: scale(1.2);
         }
     </style>
 </head>
@@ -49,7 +54,7 @@
 
     <div class="button-container">
         <button class="button" onclick="showGame('game1')">Game 1</button>
-        <button class "button" onclick="showGame('game2')">Game 2</button>
+        <button class="button" onclick="showGame('game2')">Game 2</button>
     </div>
 
     <div id="game1" class="iframe-container active">
