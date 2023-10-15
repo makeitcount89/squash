@@ -6,8 +6,8 @@
         .iframe-container {
             position: absolute;
             top: 25%; /* Start from 25% down the page */
-            left: 0;
-            width: 100%;
+            left: 25%; /* Leave room for buttons */
+            width: 75%;
             height: 75%;
             display: none;
         }
@@ -15,24 +15,20 @@
         .totals-container {
             position: fixed;
             top: 0;
-            left: 0;
-            width: 100%;
-            height: 25%;
+            left: 25%; /* Leave room for buttons */
+            width: 75%;
+            height: 100%;
             background-color: #f0f0f0;
-        }
-
-        .active {
-            display: block;
         }
 
         .button-container {
             position: fixed;
-            top: 25%; /* Start from 25% down the page */
+            top: 0;
             left: 0;
-            width: 100%;
+            width: 25%; /* Buttons take 25% of the width */
+            height: 100%;
             background-color: #f0f0f0;
             text-align: center;
-            padding: 10px 0;
         }
 
         .button {
@@ -40,6 +36,8 @@
             font-size: 18px;
             cursor: pointer;
             transition: transform 0.2s;
+            display: block;
+            margin: 10px;
         }
 
         .button:active {
