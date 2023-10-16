@@ -8,15 +8,21 @@
             padding: 0;
             overflow: auto;
         }
+        
+    .totals-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 15vh; /* Top 15% of the page */
+        background-color: #f0f0f0;
+    }
 
-        .totals-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 25vh;
-            background-color: #f0f0f0;
-        }
+    .iframe-container {
+        width: 100%;
+        height: 80vh; /* Bottom 80% of the page */
+        display: none;
+        padding-top: 20vh; /* Adjust the padding for better visibility */
 
         .button-container {
             position: fixed;
@@ -37,13 +43,6 @@
 
         .active-button {
             padding: 15px 25px; /* Bigger size for active button */
-        }
-
-        .iframe-container {
-            width: 100%;
-            height: 70vh; /* Bottom 70% of the page */
-            display: none;
-            padding-top: 30vh; /* Adjust the padding for better visibility */
         }
 
         /* Additional style for game iframes */
