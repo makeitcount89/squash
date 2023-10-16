@@ -60,6 +60,7 @@
     <div class="button-container">
         <button class="button active-button" onclick="scrollToGame('game1', this)">Game 1</button>
         <button class="button" onclick="scrollToGame('game2', this)">Game 2</button>
+        <button class="button" onclick="captureAndShare()">Share</button>
     </div>
 
     <div id="game1" class="iframe-container" style="display: block;">
@@ -70,6 +71,7 @@
         <iframe src="p1g2.html" width="100%" height="100%"></iframe>
     </div>
 
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script>
         function scrollToGame(game, button) {
             const element = document.getElementById(game);
@@ -80,6 +82,26 @@
             const buttons = document.querySelectorAll('.button');
             buttons.forEach(btn => btn.classList.remove('active-button'));
             button.classList.add('active-button');
+        }
+
+        function captureAndShare() {
+            const iframes = document.querySelectorAll('.iframe-container iframe');
+            
+            iframes.forEach((iframe, index) => {
+                // Use html2canvas to capture each iframe
+                html2canvas(iframe, { useCORS: true }).then(canvas => {
+                    // Convert the canvas to a data URL
+                    const imageDataUrl = canvas.toDataURL('image/png');
+                    
+                    // Create an anchor element to allow downloading the image
+                    const downloadLink = document.createElement('a');
+                    downloadLink.href = imageDataUrl;
+                    downloadLink.download = `iframe_${index + 1}.png`;
+                    
+                    // Trigger a click event to initiate the download
+                    downloadLink.click();
+                });
+            });
         }
     </script>
 </body>
