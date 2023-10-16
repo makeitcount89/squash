@@ -42,12 +42,12 @@
         .iframe-container {
             width: 100%; /* Bottom 70% of the page */
             display: none;
-            padding-top: 30vh; /* Adjust the padding for better visibility */
+            padding-top: 10vh; /* Adjust the padding for better visibility */
         }
 
         /* Additional style for game iframes */
         .iframe-container iframe {
-            height: 1200px;
+            height: 1600px;
         }
     </style>
 </head>
@@ -72,7 +72,7 @@
     <script>
         function scrollToGame(game, button) {
             const element = document.getElementById(game);
-            const offset = window.innerHeight * 0.15; // 15% offset from the top
+            const offset = window.innerHeight * 0.05; // 15% offset from the top
             element.style.display = 'block';
             window.scrollTo({ top: element.offsetTop - offset, behavior: 'smooth' });
 
