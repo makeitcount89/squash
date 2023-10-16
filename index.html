@@ -136,6 +136,8 @@
 
             // Disable scrolling on the body
             document.body.style.overflow = "hidden";
+            // Re-enable scrolling for the iframe
+            element.querySelector("iframe").style.overflow = "auto";
 
             window.scrollTo({ top: element.offsetTop - offset, behavior: 'smooth' });
 
