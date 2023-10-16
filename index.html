@@ -73,8 +73,9 @@
     <script>
         function scrollToGame(game, button) {
             const element = document.getElementById(game);
+            const offset = window.innerHeight * 0.15; // 15% offset from the top
             element.style.display = 'block';
-            window.scrollTo({ top: element.offsetTop - 25, behavior: 'smooth' });
+            window.scrollTo({ top: element.offsetTop - offset, behavior: 'smooth' });
 
             // Add or remove the active-button class based on the selected button
             const buttons = document.querySelectorAll('.button');
@@ -84,4 +85,3 @@
     </script>
 </body>
 </html>
-
