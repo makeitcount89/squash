@@ -51,6 +51,7 @@
     <!-- Display totalWCount, totalECount, totalWCountg2, and totalECountg2 -->
     <h4>Game 1: W = <span id="totalWCount">0</span> E = <span id="totalECount">0</span></h4>
     <h4>Game 2: W = <span id="totalWCountg2">0</span> E = <span id="totalECountg2">0</span></h4>
+    <h4>Game 3: W = <span id="totalWg3count">0</span> E = <span id="totalEg3count">0</span></h4>
   </div>
   <div class="header">
     <input type="text" size=20 id="player1" placeholder="Enter Player 1's name">
@@ -65,22 +66,30 @@
       const totalECountElement = document.getElementById('totalECount');
       const totalWCountg2Element = document.getElementById('totalWCountg2');
       const totalECountg2Element = document.getElementById('totalECountg2');
+      const totalWg3countElement = document.getElementById('totalWg3count');
+      const totalEg3countElement = document.getElementById('totalEg3count');
       const WCountElement = document.getElementById('WCount');
       const ECountElement = document.getElementById('ECount');
+      const Wg3countElement = document.getElementById('Wg3count');
+      const Eg3countElement = document.getElementById('Eg3count');
 
       let totalWCount = parseInt(localStorage.getItem('totalWCount')) || 0;
       let totalECount = parseInt(localStorage.getItem('totalECount')) || 0;
       let totalWCountg2 = parseInt(localStorage.getItem('totalWCountg2')) || 0;
       let totalECountg2 = parseInt(localStorage.getItem('totalECountg2')) || 0;
+      let totalWg3count = parseInt(localStorage.getItem('totalWg3count')) || 0;
+      let totalEg3count = parseInt(localStorage.getItem('totalEg3count')) || 0;
 
       totalWCountElement.textContent = totalWCount;
       totalECountElement.textContent = totalECount;
       totalWCountg2Element.textContent = totalWCountg2;
       totalECountg2Element.textContent = totalECountg2;
+      totalWg3countElement.textContent = totalWg3count;
+      totalEg3countElement.textContent = totalEg3count;
 
       // Calculate the sum of W Count and E Count
-      let WCount = totalWCount + totalWCountg2;
-      let ECount = totalECount + totalECountg2;
+      let WCount = totalWCount + totalWCountg2 + totalg3count;
+      let ECount = totalECount + totalECountg2 + totalg3count;
 
       // Update the content of WCountElement and ECountElement
       WCountElement.textContent = WCount;
@@ -91,13 +100,13 @@
     }
 
     // Function to draw the pie chart
-    function drawPieChart(totalWCount, totalECount, totalWCountg2, totalECountg2) {
+    function drawPieChart(totalWCount, totalECount, totalWCountg2, totalECountg2, totalWg3count, totalEg3count) {
       google.charts.load('current', { 'packages': ['corechart'] });
       google.charts.setOnLoadCallback(function () {
         var data = google.visualization.arrayToDataTable([
           ['Category', 'Count'],
-          ['W Count', totalWCount + totalWCountg2],
-          ['E Count', totalECount + totalECountg2]
+          ['W Count', totalWCount + totalWCountg2 + totalWg3count],
+          ['E Count', totalECount + totalECountg2 + totalEg3count]
         ]);
 
         var options = {
