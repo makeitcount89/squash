@@ -17,31 +17,17 @@
   background-color: #f0f0f0; /* Set your background color */
   }   
  /* Create a container div to fill the screen */
-        .container {
+      .container {
             width: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            height: 800px; /* Fixed height */
+            overflow: auto; /* Enable scrolling if content exceeds the fixed height */
             background-color: #f0f0f0; /* Background color */
-            overflow: hidden;
-        }
-
-        /* Create a wrapper with a fixed aspect ratio (16:9, change as needed) */
-        .content-wrapper {
-            width: 100%;
-            padding-top: 56.25%; /* 16:9 aspect ratio */
-            position: relative;
         }
 
         /* Your content styles */
         .content-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
             max-width: 80%; /* Adjust to your preferred width */
-            margin: auto;
+            margin: 0 auto;
             text-align: center;
         }
 
