@@ -153,6 +153,7 @@
   </head>
 
   <body>
+    <div id="content">
     <div class="content-container">
     <h4 style="text-align: center";>Game 1</h4>
 
@@ -317,6 +318,7 @@
         </div>
         <div class="chart" id="barChart13"></div>
       </div>
+    </div>
     </div>
     </div>
 
@@ -1059,7 +1061,7 @@ function saveToHistory() {
   // Initial update when the page loads
     updateTotalCountsAndLocalStorage();
 
-       var content = document.getElementById("content-container");
+       var content = document.getElementById("content");
         var zoomLevel = 1;
 
         content.addEventListener("touchstart", function (e) {
