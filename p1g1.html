@@ -1059,6 +1059,31 @@ function saveToHistory() {
   // Initial update when the page loads
     updateTotalCountsAndLocalStorage();
 
+       var content = document.getElementById("content-container");
+        var zoomLevel = 1;
+
+        content.addEventListener("touchstart", function (e) {
+            if (e.touches.length === 2) {
+                initialPinchDistance = getPinchDistance(e.touches);
+                initialZoomLevel = zoomLevel;
+            }
+        });
+
+        content.addEventListener("touchmove", function (e) {
+            if (e.touches.length === 2) {
+                var currentPinchDistance = getPinchDistance(e.touches);
+                var zoomSpeed = 0.01;
+                zoomLevel = initialZoomLevel * (currentPinchDistance / initialPinchDistance);
+                content.style.transform = `scale(${zoomLevel})`;
+            }
+        });
+
+        function getPinchDistance(touches) {
+            var touch1 = touches[0];
+            var touch2 = touches[1];
+            return Math.hypot(touch1.clientX - touch2.clientX, touch1.clientY - touch2.clientY);
+        }
+
 
 
       
