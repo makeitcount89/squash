@@ -19,7 +19,8 @@
         #qr-result {
             font-size: 24px; /* Increase the font size for the link */
             text-align: center; /* Center the link text */
-            margin-bottom: 20px; /* Add margin to separate the link from the video */
+            position: absolute;
+            bottom: 20px;
         }
         #qr-result a {
             color: blue; /* Change the link text color to blue */
@@ -28,10 +29,8 @@
     </style>
 </head>
 <body>
-    <h1>QR Code Scanner</h1>
-    <div id="qr-result"><a href="#" id="qr-link" target="_blank">QR Code Content</a></div>
-    <button id="toggle-camera" style="display: none;">Toggle Camera</button>
     <video id="qr-video" playsinline></video>
+    <button id="toggle-camera">Toggle Camera</button>
 
     <script src="https://rawgit.com/schmich/instascan-builds/master/instascan.min.js"></script>
     <script>
@@ -58,13 +57,16 @@
             startScannerWithCamera(currentCameraIndex);
 
             if (cameras.length > 1) {
-                const toggleButton = document.getElementById('toggle-camera');
-                toggleButton.style.display = 'block'; // Display the button
-                toggleButton.click(); // Automatically click the button on page load
+                document.getElementById('toggle-camera').addEventListener('click', function () {
+                    currentCameraIndex = (currentCameraIndex + 1) % cameras.length;
+                    scanner.stop();
+                    startScannerWithCamera(currentCameraIndex);
+                });
             }
         }).catch(function (e) {
             console.error(e);
         });
     </script>
+    <div id="qr-result"><a href="#" id="qr-link" target="_blank">QR Code Content</a></div>
 </body>
 </html>
