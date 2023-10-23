@@ -27,31 +27,22 @@
     <video id="qr-video" playsinline></video>
     <div id="qr-result"></div>
 
+    <script src="https://rawgit.com/schmich/instascan-builds/master/instascan.min.js"></script>
     <script>
-        // Request camera access
-        navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
-        .then(function(stream) {
-            const video = document.getElementById("qr-video");
-            video.srcObject = stream;
+        const scanner = new Instascan.Scanner({ video: document.getElementById('qr-video') });
 
-            const qrResult = document.getElementById("qr-result");
+        scanner.addListener('scan', function (content) {
+            document.getElementById('qr-result').textContent = content;
+        });
 
-            // Import and use the zxing-js library
-            import('https://cdn.rawgit.com/zxing-js/library/0.8.0/dist/zhing-wasm.min.js')
-            .then(ZXing => {
-                ZXing.setWasmPath('https://cdn.rawgit.com/zxing-js/library/0.8.0/dist/');
-                const codeReader = new ZXing.BrowserQRCodeReader();
-
-                codeReader
-                .decodeFromVideoDevice(undefined, 'qr-video', (result, err) => {
-                    if (result) {
-                        qrResult.innerText = result.getText();
-                    }
-                });
-            });
-        })
-        .catch(function(error) {
-            console.error("Camera access error: " + error);
+        Instascan.Camera.getCameras().then(function (cameras) {
+            if (cameras.length > 0) {
+                scanner.start(cameras[0]);
+            } else {
+                console.error('No cameras found.');
+            }
+        }).catch(function (e) {
+            console.error(e);
         });
     </script>
 </body>
