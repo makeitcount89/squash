@@ -37,7 +37,10 @@
         });
 
         Instascan.Camera.getCameras().then(function (cameras) {
-            if (cameras.length > 0) {
+            const rearCamera = cameras.find(camera => camera && camera.type === 'environment');
+            if (rearCamera) {
+                scanner.start(rearCamera);
+            } else if (cameras.length > 0) {
                 scanner.start(cameras[0]);
             } else {
                 console.error('No cameras found.');
