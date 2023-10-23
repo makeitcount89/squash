@@ -2,7 +2,7 @@
 <html>
 <head>
     <h1>QR Code Scanner</h1>
-    <div id="qr-result"><a href="#" id="qr-link" target="_blank"></a></div>
+    <div id="qr-result"><a href="#" id="qr-link"></a></div>
     <style>
         body {
             display: flex;
@@ -50,19 +50,6 @@
             const qrLink = document.getElementById('qr-link');
             qrLink.href = content;
             qrLink.textContent = content;
-
-            // Function to open the link in the system's default browser
-            function openLinkInBrowser(link) {
-                window.open(link, '_system');
-            }
-
-            // Add an event listener for link clicks
-            document.addEventListener('click', function (event) {
-                if (event.target.tagName === 'A') {
-                    event.preventDefault();
-                    openLinkInBrowser(event.target.href);
-                }
-            });
 
             scanner.stop();
         });
