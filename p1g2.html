@@ -56,7 +56,7 @@
 
         Instascan.Camera.getCameras().then(function (availableCameras) {
             cameras = availableCameras;
-            startScannerWithCamera(currentCameraIndex);
+            startScannerWithCamera(currentCameraIndex); // Automatically start with the first camera
 
             if (cameras.length > 1) {
                 document.getElementById('toggle-camera').addEventListener('click', function () {
