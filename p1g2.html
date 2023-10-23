@@ -71,6 +71,13 @@
         }).catch(function (e) {
             console.error(e);
         });
+       
+  // Send data to App Inventor when a QR code is scanned
+  function sendQRCodeData(data) {
+    window.AppInventor.setWebViewString(data);
+  }
+
+
     </script>
    
 </body>
