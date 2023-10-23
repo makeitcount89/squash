@@ -29,7 +29,7 @@
 
     <script>
         // Request camera access
-        navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+        navigator.mediaDevices.getUserMedia({ video: true })
         .then(function(stream) {
             const video = document.getElementById("qr-video");
             video.srcObject = stream;
