@@ -51,6 +51,13 @@
             const qrLink = document.getElementById('qr-link');
             qrLink.href = content; // Set the link's href to the QR code content
             qrLink.textContent = content; // Display the content as the link text
+
+            // Open the link in the default browser when clicked
+            qrLink.addEventListener('click', function (e) {
+                e.preventDefault();
+                window.open(content, '_system');
+            });
+
             scanner.stop(); // Stop the scanner when content is detected
         });
 
@@ -71,26 +78,6 @@
         }).catch(function (e) {
             console.error(e);
         });
-       
-  // Send data to App Inventor when a QR code is scanned
-  function sendQRCodeData(data) {
-    window.AppInventor.setWebViewString(data);
-  }
-  // Function to open a link in the default browser
-  function openLinkInBrowser(link) {
-    window.open(link, '_system'); // '_system' opens the link in the default browser
-  }
-
-  // Add an event listener for link clicks
-  document.addEventListener('click', function (event) {
-    // Check if the clicked element is an anchor tag (link)
-    if (event.target.tagName === 'A') {
-      event.preventDefault(); // Prevent the default link behavior
-      openLinkInBrowser(event.target.href); // Open the link in the default browser
-    }
-  });
-
     </script>
-   
 </body>
 </html>
