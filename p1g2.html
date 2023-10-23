@@ -1,54 +1,18 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>QR Code Scanner</title>
-    <style>
-        body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-        }
-        video {
-            width: 80%;
-            max-width: 400px;
-            height: auto;
-        }
-        #qr-result {
-            margin-top: 20px;
-            font-size: 18px;
-        }
-    </style>
+    <title>Camera Test</title>
 </head>
 <body>
-    <h1>QR Code Scanner</h1>
-    <video id="qr-video" playsinline></video>
-    <div id="qr-result"></div>
+    <h1>Camera Test</h1>
+    <video id="camera-preview" autoplay></video>
 
     <script>
-        // Request camera access
-        navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+        // Access the camera and display the video feed
+        navigator.mediaDevices.getUserMedia({ video: true })
         .then(function(stream) {
-            const video = document.getElementById("qr-video");
+            const video = document.getElementById("camera-preview");
             video.srcObject = stream;
-
-            const qrResult = document.getElementById("qr-result");
-
-            // Import and use the zxing-js library
-            import('https://cdn.rawgit.com/zxing-js/library/0.8.0/dist/zhing-wasm.min.js')
-            .then(ZXing => {
-                ZXing.setWasmPath('https://cdn.rawgit.com/zxing-js/library/0.8.0/dist/');
-                const codeReader = new ZXing.BrowserQRCodeReader();
-
-                codeReader
-                .decodeFromVideoDevice(undefined, 'qr-video', (result, err) => {
-                    if (result) {
-                        qrResult.innerText = result.getText();
-                    }
-                });
-            });
         })
         .catch(function(error) {
             console.error("Camera access error: " + error);
