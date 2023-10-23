@@ -2,7 +2,7 @@
 <html>
 <head>
     <h1>QR Code Scanner</h1>
-    <div id="qr-result"><a href="#" id="qr-link"></a></div>
+    <div id="qr-result"><a href="#" id="qr-link" target="_blank"></a></div>
     <style>
         body {
             display: flex;
@@ -52,13 +52,15 @@
             qrLink.href = content;
             qrLink.textContent = content;
 
+            // Function to open the link using an Android Intent URL
+            function openLinkWithIntent(link) {
+                window.location.href = 'intent://' + link + '#Intent;package=com.android.chrome;scheme=https;end';
+            }
+
             // Add an event listener for link clicks
             qrLink.addEventListener('click', function (event) {
                 event.preventDefault();
-                if (navigator.protocol) {
-                    // Use the navigator.protocol feature to provide "Open with" options
-                    navigator.protocol.launch(content);
-                }
+                openLinkWithIntent(qrLink.href);
             });
 
             scanner.stop();
