@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <h1>QR Code Scan</h1>
+    <h1>QR Code Scanner</h1>
+    <div id="qr-result"><a href="#" id="qr-link" target="_blank"></a></div>
     <style>
         body {
             display: flex;
@@ -12,8 +13,8 @@
             margin: 0;
         }
         video {
-            width: 80%;
-            max-width: 400px;
+            width: 90%;
+            max-width: 600px;
             height: auto;
         }
         #qr-result {
@@ -29,7 +30,7 @@
     </style>
 </head>
 <body>
-     <div id="qr-result"><a href="#" id="qr-link" target="_blank"></a></div>
+     
     <video id="qr-video" playsinline></video>
     <button id="toggle-camera">Toggle Camera</button>
 
