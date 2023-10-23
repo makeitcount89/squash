@@ -26,24 +26,36 @@
     <h1>QR Code Scanner</h1>
     <video id="qr-video" playsinline></video>
     <div id="qr-result"></div>
+    <button id="toggle-camera">Toggle Camera</button>
 
     <script src="https://rawgit.com/schmich/instascan-builds/master/instascan.min.js"></script>
     <script>
-        const scanner = new Instascan.Scanner({ video: document.getElementById('qr-video') });
+        const videoElement = document.getElementById('qr-video');
+        const scanner = new Instascan.Scanner({ video: videoElement });
+        let currentCameraIndex = 0;
+        let cameras = [];
+
+        function startScannerWithCamera(cameraIndex) {
+            if (cameraIndex < cameras.length) {
+                scanner.start(cameras[cameraIndex]);
+            }
+        }
 
         scanner.addListener('scan', function (content) {
             document.getElementById('qr-result').textContent = content;
             scanner.stop(); // Stop the scanner when content is detected
         });
 
-        Instascan.Camera.getCameras().then(function (cameras) {
-            const rearCamera = cameras.find(camera => camera && camera.type === 'environment');
-            if (rearCamera) {
-                scanner.start(rearCamera);
-            } else if (cameras.length > 0) {
-                scanner.start(cameras[0]);
-            } else {
-                console.error('No cameras found.');
+        Instascan.Camera.getCameras().then(function (availableCameras) {
+            cameras = availableCameras;
+            startScannerWithCamera(currentCameraIndex);
+
+            if (cameras.length > 1) {
+                document.getElementById('toggle-camera').addEventListener('click', function () {
+                    currentCameraIndex = (currentCameraIndex + 1) % cameras.length;
+                    scanner.stop();
+                    startScannerWithCamera(currentCameraIndex);
+                });
             }
         }).catch(function (e) {
             console.error(e);
