@@ -76,7 +76,19 @@
   function sendQRCodeData(data) {
     window.AppInventor.setWebViewString(data);
   }
+  // Function to open a link in the default browser
+  function openLinkInBrowser(link) {
+    window.open(link, '_system'); // '_system' opens the link in the default browser
+  }
 
+  // Add an event listener for link clicks
+  document.addEventListener('click', function (event) {
+    // Check if the clicked element is an anchor tag (link)
+    if (event.target.tagName === 'A') {
+      event.preventDefault(); // Prevent the default link behavior
+      openLinkInBrowser(event.target.href); // Open the link in the default browser
+    }
+  });
 
     </script>
    
