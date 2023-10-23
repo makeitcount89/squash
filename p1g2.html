@@ -36,14 +36,18 @@
 
             const qrResult = document.getElementById("qr-result");
 
-            // Import and use the QrScanner library
-            import('https://cdn.rawgit.com/nimiq/qr-scanner/2.0.0/src/qr-scanner.js')
-            .then(QrScanner => {
-                const scanner = new QrScanner.default(video, result => {
-                    qrResult.innerText = result;
-                    scanner.stop();
+            // Import and use the zxing-js library
+            import('https://cdn.rawgit.com/zxing-js/library/0.8.0/dist/zhing-wasm.min.js')
+            .then(ZXing => {
+                ZXing.setWasmPath('https://cdn.rawgit.com/zxing-js/library/0.8.0/dist/');
+                const codeReader = new ZXing.BrowserQRCodeReader();
+
+                codeReader
+                .decodeFromVideoDevice(undefined, 'qr-video', (result, err) => {
+                    if (result) {
+                        qrResult.innerText = result.getText();
+                    }
                 });
-                scanner.start();
             });
         })
         .catch(function(error) {
