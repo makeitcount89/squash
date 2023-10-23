@@ -52,10 +52,18 @@
             qrLink.href = content; // Set the link's href to the QR code content
             qrLink.textContent = content; // Display the content as the link text
 
-            // Open the link in the default browser when clicked
-            qrLink.addEventListener('click', function (e) {
-                e.preventDefault();
-                window.open(content, '_system');
+            // Function to open a link in the external browser using an intent URL
+            function openLinkInBrowser(link) {
+                window.location.href = 'intent://' + link + '#Intent;package=com.android.browser;scheme=https;end';
+            }
+
+            // Add an event listener for link clicks
+            document.addEventListener('click', function (event) {
+                // Check if the clicked element is an anchor tag (link)
+                if (event.target.tagName === 'A') {
+                    event.preventDefault(); // Prevent the default link behavior
+                    openLinkInBrowser(event.target.href); // Open the link in the default browser
+                }
             });
 
             scanner.stop(); // Stop the scanner when content is detected
