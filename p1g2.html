@@ -18,19 +18,18 @@
             height: 70%;
         }
         #qr-result {
-            font-size: 58px; /* Increase the font size for the link */
-            text-align: center; /* Center the link text */
+            font-size: 58px;
+            text-align: center;
             position: absolute;
             top: 100px;
         }
         #qr-result a {
-            color: blue; /* Change the link text color to blue */
-            text-decoration: underline; /* Add underline to the link text */
+            color: blue;
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
-     
     <video id="qr-video" playsinline></video>
     <button id="toggle-camera">Toggle Camera</button>
 
@@ -49,24 +48,23 @@
 
         scanner.addListener('scan', function (content) {
             const qrLink = document.getElementById('qr-link');
-            qrLink.href = content; // Set the link's href to the QR code content
-            qrLink.textContent = content; // Display the content as the link text
+            qrLink.href = content;
+            qrLink.textContent = content;
 
-            // Function to open a link in the external browser using an intent URL
+            // Function to open the link in the system's default browser
             function openLinkInBrowser(link) {
-                window.location.href = 'intent://' + link + '#Intent;package=com.android.browser;scheme=https;end';
+                window.open(link, '_system');
             }
 
             // Add an event listener for link clicks
             document.addEventListener('click', function (event) {
-                // Check if the clicked element is an anchor tag (link)
                 if (event.target.tagName === 'A') {
-                    event.preventDefault(); // Prevent the default link behavior
-                    openLinkInBrowser(event.target.href); // Open the link in the default browser
+                    event.preventDefault();
+                    openLinkInBrowser(event.target.href);
                 }
             });
 
-            scanner.stop(); // Stop the scanner when content is detected
+            scanner.stop();
         });
 
         Instascan.Camera.getCameras().then(function (availableCameras) {
@@ -80,7 +78,6 @@
                 });
             }
 
-            // Trigger the click event on the "Toggle Camera" button once when the page first loads
             const toggleCameraButton = document.getElementById('toggle-camera');
             toggleCameraButton.click();
         }).catch(function (e) {
