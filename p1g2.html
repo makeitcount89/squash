@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>QR Code Scanner</title>
+    <h1>QR Code Scan</h1>
     <style>
         body {
             display: flex;
@@ -29,6 +29,7 @@
     </style>
 </head>
 <body>
+     <div id="qr-result"><a href="#" id="qr-link" target="_blank"></a></div>
     <video id="qr-video" playsinline></video>
     <button id="toggle-camera">Toggle Camera</button>
 
@@ -67,6 +68,6 @@
             console.error(e);
         });
     </script>
-    <div id="qr-result"><a href="#" id="qr-link" target="_blank">QR Code Content</a></div>
+   
 </body>
 </html>
