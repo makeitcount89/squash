@@ -51,6 +51,19 @@
             qrLink.href = content;
             qrLink.textContent = content;
 
+            // Function to open the link in Google Chrome
+            function openLinkInChrome(link) {
+                window.location.href = 'googlechrome://navigate?url=' + link;
+            }
+
+            // Add an event listener for link clicks
+            document.addEventListener('click', function (event) {
+                if (event.target.tagName === 'A') {
+                    event.preventDefault();
+                    openLinkInChrome(event.target.href);
+                }
+            });
+
             scanner.stop();
         });
 
