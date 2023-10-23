@@ -26,27 +26,37 @@
     <h1>QR Code Scanner</h1>
     <video id="qr-video" playsinline></video>
     <div id="qr-result"></div>
+    <button id="stop-scan-button">Stop Scanning</button> <!-- Added button to stop scanning -->
 
     <script>
         // Request camera access
-        navigator.mediaDevices.getUserMedia({ video: true })
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
         .then(function(stream) {
             const video = document.getElementById("qr-video");
             video.srcObject = stream;
 
             const qrResult = document.getElementById("qr-result");
+            const stopScanButton = document.getElementById("stop-scan-button");
 
             // Import and use the zxing-js library
             import('https://cdn.rawgit.com/zxing-js/library/0.8.0/dist/zhing-wasm.min.js')
             .then(ZXing => {
                 ZXing.setWasmPath('https://cdn.rawgit.com/zxing-js/library/0.8.0/dist/');
                 const codeReader = new ZXing.BrowserQRCodeReader();
+                let scanning = true;
 
-                codeReader
-                .decodeFromVideoDevice(undefined, 'qr-video', (result, err) => {
-                    if (result) {
+                codeReader.decodeFromVideoDevice(undefined, 'qr-video', (result, err) => {
+                    if (result && scanning) {
                         qrResult.innerText = result.getText();
+                        
+                        // Stop scanning when a QR code is detected
+                        scanning = false;
                     }
+                });
+
+                // Add a click event listener to stop scanning when the button is clicked
+                stopScanButton.addEventListener("click", () => {
+                    scanning = false;
                 });
             });
         })
