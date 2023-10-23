@@ -1,49 +1,1077 @@
 <!DOCTYPE html>
-<html>
-<head>
-    <title>QR Code Scanner</title>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Button Click Counter and Google Charts</title>
+    <!-- Load Google Charts library -->
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <style>
-        body {
+  body {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center; /* Center horizontally */
+  align-items: flex-start; /* Align content to the top vertically */
+  background-color: #f0f0f0; /* Set your background color */
+  }   
+ /* Create a container div to fill the screen */
+      .container {
+            width: 100%;
+            height: 800px; /* Fixed height */
+            background-color: #f0f0f0; /* Background color */
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
+            justify-content: space-between;
         }
-        video {
-            width: 80%;
-            max-width: 400px;
-            height: auto;
+
+        /* Create a content div with proportional scaling */
+        .content-container {
+            max-width: 80%; /* Adjust to your preferred width */
+            max-height: 80vh; /* Maximum height, equivalent to 80% of viewport height */
+            text-align: center;
         }
-        #qr-result {
-            margin-top: 20px;
-            font-size: 18px;
-        }
-    </style>
-</head>
-<body>
-    <h1>QR Code Scanner</h1>
-    <video id="qr-video" playsinline></video>
-    <div id="qr-result"></div>
 
-    <script src="https://rawgit.com/schmich/instascan-builds/master/instascan.min.js"></script>
-    <script>
-        const scanner = new Instascan.Scanner({ video: document.getElementById('qr-video') });
 
-        scanner.addListener('scan', function (content) {
-            document.getElementById('qr-result').textContent = content;
-        });
+      .header {
+        margin-top: 20px;
+        /* Add margin to the header */
+      }
 
-        Instascan.Camera.getCameras().then(function (cameras) {
-            if (cameras.length > 0) {
-                scanner.start(cameras[0]);
-            } else {
-                console.error('No cameras found.');
+      .button-container {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        margin-right: 10px;
+      }
+
+      .button {
+        padding: 10px 10px;
+        font-size: 12px;
+        cursor: pointer;
+        margin-right: 200px;
+      }
+
+      #counterW,
+      #counterW3,
+      #counterW4,
+      #counterW5,
+      #counterW6,
+      #counterW7,
+      #counterW8,
+      #counterW9,
+      #counterW10,
+      #counterW11,
+      #counterW12,
+      #counterW13 {
+        background-color: green;
+        color: white;
+      }
+
+      #counterE,
+      #counterE3,
+      #counterE4,
+      #counterE5,
+      #counterE6,
+      #counterE7,
+      #counterE8,
+      #counterE9,
+      #counterE10,
+      #counterE11,
+      #counterE12,
+      #counterE13 {
+        background-color: red;
+        color: white;
+      }
+
+      .chart-container {
+        float: left;
+        width: 50%;
+        height: 25%;
+        box-sizing: border-box;
+        padding: 10px;
+      }
+
+      .chart {
+        width: 100%;
+        height: 25%;
+        margin: 20px;
+      }
+
+       #pieChartContainer {
+            position: relative; /* Make the container a reference for positioning */
+            transform: scale(0.6); /* Scale content to 50% */
+            transform-origin: top; /* Center of the content */
+            width: 100%; /* Align content to the top vertically within .content-container */
             }
-        }).catch(function (e) {
-            console.error(e);
-        });
+        #undoButton {
+          align-items: center;
+        }
+
+        #totalCounters {
+            position: absolute; /* Position the counters absolutely within the container */
+            top: -50px; /* Adjust this value to control the vertical distance from the pie chart */
+            left: 0; /* You can adjust left as needed */
+        }
+
+      .row1,
+      .row2,
+      .row3,
+      .row4,
+      .row5,
+      .row6 {
+        display: flex;
+        flex-wrap: wrap;
+      }
+
+      /* Add CSS for LEFT and RIGHT headings */
+      h1 {
+        flex: 1;
+        text-align: center;
+      }
+
+      #left-heading {
+        text-align: left;
+        flex: 1;
+        /* Adjust the flex property */
+      }
+
+      #right-heading {
+        text-align: right;
+        flex: 1;
+        /* Adjust the flex property */
+      }
+
+      #shot {
+        text-align: center;
+        flex: 1;
+        /* Adjust the flex property */
+      }
+
+      /* Create a container for LEFT and RIGHT headings */
+      .heading-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        padding: 10px;
+      }
+
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+    <div class="content-container">
+    <h4 style="text-align: center";>Game 1</h4>
+
+    <div id="pieChartContainer">
+      <div class="chart" id="pieChart"></div>
+      
+      <div id="totalCounters">
+        Total W: <span id="totalWCount">0</span><br>
+        Total E: <span id="totalECount">0</span>
+      </div>
+      
+    </div>
+    <div class="heading-container">
+      <h3 id="left-heading">Left</h3>
+      <h3 id="right-heading">Right</h3>
+    </div>
+    <button id="undoButton">Undo</button>
+
+    <div class="heading-container">
+      <h4 id="shot">Drive</h4>
+
+    </div>
+    <div class="row1">
+      <div class="chart-container">
+
+
+        
+          <div class="left-buttons">
+          <button class="button" id="counterW">W: <span id="wCount">0</span></button>
+          <button class="button" id="counterE">E: <span id="eCount">0</span></button>
+        </div>
+        <div class="chart" id="barChart2">
+
+        </div>
+
+      </div>
+
+      <div class="chart-container">
+        
+          <div class="right-buttons">
+          <button class="button" id="counterW3">W: <span id="wCount3">0</span></button>
+          <button class="button" id="counterE3">E: <span id="eCount3">0</span></button>
+        </div>
+        <div class="chart" id="barChart3"></div>
+      </div>
+    </div>
+    <div class="heading-container">
+      <h4 id="shot">Cross-court</h4>
+
+    </div>
+    <div class="row2">
+      <div class="chart-container">
+        
+          <div class="left-buttons">
+          <button class="button" id="counterW4">W: <span id="wCount4">0</span></button>
+          <button class="button" id="counterE4">E: <span id="eCount4">0</span></button>
+        </div>
+        <div class="chart" id="barChart4"></div>
+      </div>
+
+      <div class="chart-container">
+        
+          <div class="right-buttons">
+          <button class="button" id="counterW5">W: <span id="wCount5">0</span></button>
+          <button class="button" id="counterE5">E: <span id="eCount5">0</span></button>
+        </div>
+        <div class="chart" id="barChart5"></div>
+      </div>
+    </div>
+    <div class="heading-container">
+      <h4 id="shot">Volley [+ click shot type]</h4>
+
+    </div>
+    <div class="row3">
+      <div class="chart-container">
+        
+          <div class="left-buttons">
+          <button class="button" id="counterW6">W: <span id="wCount6">0</span></button>
+          <button class="button" id="counterE6">E: <span id="eCount6">0</span></button>
+        </div>
+        <div class="chart" id="barChart6"></div>
+      </div>
+
+      <div class="chart-container">
+        
+          <div class="right-buttons">
+          <button class="button" id="counterW7">W: <span id="wCount7">0</span></button>
+          <button class="button" id="counterE7">E: <span id="eCount7">0</span></button>
+        </div>
+        <div class="chart" id="barChart7"></div>
+      </div>
+    </div>
+    <div class="heading-container">
+      <h4 id="shot">Drop</h4>
+    </div>
+    <div class="row4">
+      <div class="chart-container">
+
+
+  
+          <div class="left-buttons">
+          <button class="button" id="counterW8">W: <span id="wCount8">0</span></button>
+          <button class="button" id="counterE8">E: <span id="eCount8">0</span></button>
+        </div>
+        <div class="chart" id="barChart8">
+
+        </div>
+
+      </div>
+
+      <div class="chart-container">
+        
+          <div class="right-buttons">
+          <button class="button" id="counterW9">W: <span id="wCount9">0</span></button>
+          <button class="button" id="counterE9">E: <span id="eCount9">0</span></button>
+        </div>
+        <div class="chart" id="barChart9"></div>
+      </div>
+    </div>
+    <div class="heading-container">
+      <h4 id="shot">Lob</h4>
+
+    </div>
+    <div class="row5">
+      <div class="chart-container">
+      
+          <div class="left-buttons">
+          <button class="button" id="counterW10">W: <span id="wCount10">0</span></button>
+          <button class="button" id="counterE10">E: <span id="eCount10">0</span></button>
+        </div>
+        <div class="chart" id="barChart10"></div>
+      </div>
+
+      <div class="chart-container">
+        
+          <div class="right-buttons">
+          <button class="button" id="counterW11">W: <span id="wCount11">0</span></button>
+          <button class="button" id="counterE11">E: <span id="eCount11">0</span></button>
+        </div>
+        <div class="chart" id="barChart11"></div>
+      </div>
+    </div>
+    <div class="heading-container">
+      <h4 id="shot">Boast</h4>
+
+    </div>
+    <div class="row6">
+      <div class="chart-container">
+        
+          <div class="left-buttons">
+          <button class="button" id="counterW12">W: <span id="wCount12">0</span></button>
+          <button class="button" id="counterE12">E: <span id="eCount12">0</span></button>
+        </div>
+        <div class="chart" id="barChart12"></div>
+      </div>
+
+      <div class="chart-container">
+        
+          <div class="right-buttons">
+          <button class="button" id="counterW13">W: <span id="wCount13">0</span></button>
+          <button class="button" id="counterE13">E: <span id="eCount13">0</span></button>
+        </div>
+        <div class="chart" id="barChart13"></div>
+      </div>
+    </div>
+    </div>
+    </div>
+
+    <script>
+
+    localStorage.setItem('totalWCount', 0);
+    localStorage.setItem('totalECount', 0);
+      // Initialize counters
+      let wCount = 0;
+      let eCount = 0;
+      let wCount3 = 0;
+      let eCount3 = 0;
+      let wCount4 = 0;
+      let eCount4 = 0;
+      let wCount5 = 0;
+      let eCount5 = 0;
+      let wCount6 = 0;
+      let eCount6 = 0;
+      let wCount7 = 0;
+      let eCount7 = 0;
+      let wCount8 = 0;
+      let eCount8 = 0;
+      let wCount9 = 0;
+      let eCount9 = 0;
+      let wCount10 = 0;
+      let eCount10 = 0;
+      let wCount11 = 0;
+      let eCount11 = 0;
+      let wCount12 = 0;
+      let eCount12 = 0;
+      let wCount13 = 0;
+      let eCount13 = 0;
+
+      // Load Google Charts
+      google.charts.load('current', {
+        'packages': ['corechart']
+      });
+      google.charts.setOnLoadCallback(drawCharts);
+
+      // Define chart options
+      const pieOptions = {
+
+        backgroundColor: 'transparent',
+        colors: ['green', 'red', 'LightGreen', 'LightCoral', 'DarkGreen', 'DarkRed', 'LimeGreen', 'Crimson', 'ForestGreen', 'Tomato']
+      };
+
+      const barOptions2 = {
+        title: 'Drive vs Game 1',
+        legend: {
+          position: 'none'
+        },
+        hAxis: {
+          title: 'Drive',
+          minValue: 0,
+          maxValue: 10
+        },
+        vAxis: {
+          title: 'Game1',
+          minValue: 0,
+          maxValue: 1
+        },
+        series: {
+          0: {
+            color: 'green'
+          }, // Set color for "W"
+          1: {
+            color: 'red'
+          } // Set color for "E"
+        },
+        bars: 'horizontal'
+      };
+
+      // Function to draw Google Charts
+      function drawCharts() {
+        // Pie Chart
+        const pieData = new google.visualization.DataTable();
+        pieData.addColumn('string', 'Task');
+        pieData.addColumn('number', 'Percentage');
+        pieData.addRows([
+          ['W',  wCount4 + wCount5 + wCount6 + wCount7 + wCount8 + wCount9 + wCount10 + wCount11 + wCount12 + wCount13],
+          ['E',  eCount4 + eCount5 + eCount6 + eCount7 + eCount8 + eCount9 + eCount10 + eCount11 + eCount12 + eCount13],
+          ['DriveE', eCount],
+          ['DriveW', wCount],
+        ]);
+
+        const pieChart = new google.visualization.PieChart(document.getElementById('pieChart'));
+        pieChart.draw(pieData, pieOptions);
+
+        // Bar Charts
+        const barData2 = new google.visualization.DataTable();
+        barData2.addColumn('string', 'Drive');
+        barData2.addColumn('number', 'W'); // Separate series for "W"
+        barData2.addColumn('number', 'E'); // Separate series for "E"
+        barData2.addRows([
+          ['W', wCount, 0],
+          ['E', 0, eCount]
+        ]);
+
+        const barChart2 = new google.visualization.BarChart(document.getElementById('barChart2'));
+        barChart2.draw(barData2, barOptions2);
+
+        const barData3 = new google.visualization.DataTable();
+        barData3.addColumn('string', 'Drive');
+        barData3.addColumn('number', 'W'); // Separate series for "W"
+        barData3.addColumn('number', 'E'); // Separate series for "E"
+        barData3.addRows([
+          ['W', wCount3, 0],
+          ['E', 0, eCount3]
+        ]);
+
+        const barChart3 = new google.visualization.BarChart(document.getElementById('barChart3'));
+        barChart3.draw(barData3, barOptions2);
+
+        const barData4 = new google.visualization.DataTable();
+        barData4.addColumn('string', 'Drive');
+        barData4.addColumn('number', 'W'); // Separate series for "W"
+        barData4.addColumn('number', 'E'); // Separate series for "E"
+        barData4.addRows([
+          ['W', wCount4, 0],
+          ['E', 0, eCount4]
+        ]);
+
+        const barChart4 = new google.visualization.BarChart(document.getElementById('barChart4'));
+        barChart4.draw(barData4, barOptions2);
+
+        const barData5 = new google.visualization.DataTable();
+        barData5.addColumn('string', 'Drive');
+        barData5.addColumn('number', 'W'); // Separate series for "W"
+        barData5.addColumn('number', 'E'); // Separate series for "E"
+        barData5.addRows([
+          ['W', wCount5, 0],
+          ['E', 0, eCount5]
+        ]);
+
+        const barChart5 = new google.visualization.BarChart(document.getElementById('barChart5'));
+        barChart5.draw(barData5, barOptions2);
+
+        const barData6 = new google.visualization.DataTable();
+        barData6.addColumn('string', 'Drive');
+        barData6.addColumn('number', 'W'); // Separate series for "W"
+        barData6.addColumn('number', 'E'); // Separate series for "E"
+        barData6.addRows([
+          ['W', wCount6, 0],
+          ['E', 0, eCount6]
+        ]);
+
+        const barChart6 = new google.visualization.BarChart(document.getElementById('barChart6'));
+        barChart6.draw(barData6, barOptions2);
+
+        const barData7 = new google.visualization.DataTable();
+        barData7.addColumn('string', 'Drive');
+        barData7.addColumn('number', 'W'); // Separate series for "W"
+        barData7.addColumn('number', 'E'); // Separate series for "E"
+        barData7.addRows([
+          ['W', wCount7, 0],
+          ['E', 0, eCount7]
+        ]);
+
+        const barChart7 = new google.visualization.BarChart(document.getElementById('barChart7'));
+        barChart7.draw(barData7, barOptions2);
+
+        const barData8 = new google.visualization.DataTable();
+        barData8.addColumn('string', 'Drive');
+        barData8.addColumn('number', 'W'); // Separate series for "W"
+        barData8.addColumn('number', 'E'); // Separate series for "E"
+        barData8.addRows([
+          ['W', wCount8, 0],
+          ['E', 0, eCount8]
+        ]);
+
+        const barChart8 = new google.visualization.BarChart(document.getElementById('barChart8'));
+        barChart8.draw(barData8, barOptions2);
+        const barData9 = new google.visualization.DataTable();
+        barData9.addColumn('string', 'Drive');
+        barData9.addColumn('number', 'W'); // Separate series for "W"
+        barData9.addColumn('number', 'E'); // Separate series for "E"
+        barData9.addRows([
+          ['W', wCount9, 0],
+          ['E', 0, eCount9]
+        ]);
+
+        const barChart9 = new google.visualization.BarChart(document.getElementById('barChart9'));
+        barChart9.draw(barData9, barOptions2);
+        const barData10 = new google.visualization.DataTable();
+        barData10.addColumn('string', 'Drive');
+        barData10.addColumn('number', 'W'); // Separate series for "W"
+        barData10.addColumn('number', 'E'); // Separate series for "E"
+        barData10.addRows([
+          ['W', wCount10, 0],
+          ['E', 0, eCount10]
+        ]);
+
+        const barChart10 = new google.visualization.BarChart(document.getElementById('barChart10'));
+        barChart10.draw(barData10, barOptions2);
+        const barData11 = new google.visualization.DataTable();
+        barData11.addColumn('string', 'Drive');
+        barData11.addColumn('number', 'W'); // Separate series for "W"
+        barData11.addColumn('number', 'E'); // Separate series for "E"
+        barData11.addRows([
+          ['W', wCount11, 0],
+          ['E', 0, eCount11]
+        ]);
+
+        const barChart11 = new google.visualization.BarChart(document.getElementById('barChart11'));
+        barChart11.draw(barData11, barOptions2);
+        const barData12 = new google.visualization.DataTable();
+        barData12.addColumn('string', 'Drive');
+        barData12.addColumn('number', 'W'); // Separate series for "W"
+        barData12.addColumn('number', 'E'); // Separate series for "E"
+        barData12.addRows([
+          ['W', wCount12, 0],
+          ['E', 0, eCount12]
+        ]);
+
+        const barChart12 = new google.visualization.BarChart(document.getElementById('barChart12'));
+        barChart12.draw(barData12, barOptions2);
+        const barData13 = new google.visualization.DataTable();
+        barData13.addColumn('string', 'Drive');
+        barData13.addColumn('number', 'W'); // Separate series for "W"
+        barData13.addColumn('number', 'E'); // Separate series for "E"
+        barData13.addRows([
+          ['W', wCount13, 0],
+          ['E', 0, eCount13]
+        ]);
+
+        const barChart13 = new google.visualization.BarChart(document.getElementById('barChart13'));
+        barChart13.draw(barData13, barOptions2);
+      }
+
+      // Button click event handlers
+      document.getElementById('counterW').addEventListener('click', function() {
+        localStorage.setItem('lastClickedButton', 'counterW');
+        wCount++;
+        document.getElementById('wCount').textContent = wCount;
+        updateCharts();
+        saveToHistory();
+        
+      });
+
+      document.getElementById('counterE').addEventListener('click', function() {
+        localStorage.setItem('lastClickedButton', 'counterE');
+        eCount++;
+        document.getElementById('eCount').textContent = eCount;
+        updateCharts();
+        saveToHistory();
+        
+      });
+
+      document.getElementById('counterW3').addEventListener('click', function() {
+        wCount3++;
+        document.getElementById('wCount3').textContent = wCount3;
+        updateCharts();
+        localStorage.setItem('lastClickedButton', 'counterW3');
+        saveToHistory();
+      });
+
+      document.getElementById('counterE3').addEventListener('click', function() {
+        eCount3++;
+        document.getElementById('eCount3').textContent = eCount3;
+        updateCharts();
+        localStorage.setItem('lastClickedButton', 'counterE3');
+        saveToHistory();
+      });
+
+      document.getElementById('counterW4').addEventListener('click', function() {
+        wCount4++;
+        document.getElementById('wCount4').textContent = wCount4;
+        updateCharts();
+        localStorage.setItem('lastClickedButton', 'counterW4');
+        saveToHistory();
+      });
+
+      document.getElementById('counterE4').addEventListener('click', function() {
+        eCount4++;
+        document.getElementById('eCount4').textContent = eCount4;
+        updateCharts();
+        localStorage.setItem('lastClickedButton', 'counterE4');
+        saveToHistory();
+      });
+
+      document.getElementById('counterW5').addEventListener('click', function() {
+        wCount5++;
+        document.getElementById('wCount5').textContent = wCount5;
+        updateCharts();
+        localStorage.setItem('lastClickedButton', 'counterW5');
+        saveToHistory();
+      });
+
+      document.getElementById('counterE5').addEventListener('click', function() {
+        eCount5++;
+        document.getElementById('eCount5').textContent = eCount5;
+        updateCharts();
+        localStorage.setItem('lastClickedButton', 'counterE5');
+        saveToHistory();
+      });
+
+      document.getElementById('counterW6').addEventListener('click', function() {
+        wCount6++;
+        document.getElementById('wCount6').textContent = wCount6;
+        updateCharts();
+        localStorage.setItem('lastClickedButton', 'counterW6');
+        saveToHistory();
+      });
+
+      document.getElementById('counterE6').addEventListener('click', function() {
+        eCount6++;
+        document.getElementById('eCount6').textContent = eCount6;
+        updateCharts();
+        localStorage.setItem('lastClickedButton', 'counterE6');
+        saveToHistory();
+      });
+
+      document.getElementById('counterW7').addEventListener('click', function() {
+        wCount7++;
+        document.getElementById('wCount7').textContent = wCount7;
+        updateCharts();
+        localStorage.setItem('lastClickedButton', 'counterW7');
+        saveToHistory();
+      });
+
+      document.getElementById('counterE7').addEventListener('click', function() {
+        eCount7++;
+        document.getElementById('eCount7').textContent = eCount7;
+        updateCharts();
+        localStorage.setItem('lastClickedButton', 'counterE7');
+        saveToHistory();
+      });
+      document.getElementById('counterW8').addEventListener('click', function() {
+        wCount8++;
+        document.getElementById('wCount8').textContent = wCount8;
+        updateCharts();
+        localStorage.setItem('lastClickedButton', 'counterW8');
+        saveToHistory();
+      });
+
+      document.getElementById('counterE8').addEventListener('click', function() {
+        eCount8++;
+        document.getElementById('eCount8').textContent = eCount8;
+        updateCharts();
+        localStorage.setItem('lastClickedButton', 'counterE8');
+        saveToHistory();
+      });
+      document.getElementById('counterW9').addEventListener('click', function() {
+        wCount9++;
+        document.getElementById('wCount9').textContent = wCount9;
+        updateCharts();
+        localStorage.setItem('lastClickedButton', 'counterW9');
+        saveToHistory();
+      });
+
+      document.getElementById('counterE9').addEventListener('click', function() {
+        eCount9++;
+        document.getElementById('eCount9').textContent = eCount9;
+        updateCharts();
+        localStorage.setItem('lastClickedButton', 'counterE9');
+        saveToHistory();
+      });
+      document.getElementById('counterW10').addEventListener('click', function() {
+        wCount10++;
+        document.getElementById('wCount10').textContent = wCount10;
+        updateCharts();
+        localStorage.setItem('lastClickedButton', 'counterW10');
+        saveToHistory();
+      });
+
+      document.getElementById('counterE10').addEventListener('click', function() {
+        eCount10++;
+        document.getElementById('eCount10').textContent = eCount10;
+        updateCharts();
+        localStorage.setItem('lastClickedButton', 'counterE10');
+        saveToHistory();
+      });
+      document.getElementById('counterW11').addEventListener('click', function() {
+        wCount11++;
+        document.getElementById('wCount11').textContent = wCount11;
+        updateCharts();
+        localStorage.setItem('lastClickedButton', 'counterW11');
+        saveToHistory();
+      });
+
+      document.getElementById('counterE11').addEventListener('click', function() {
+        eCount11++;
+        document.getElementById('eCount11').textContent = eCount11;
+        updateCharts();
+        localStorage.setItem('lastClickedButton', 'counterE11');
+        saveToHistory();
+      });
+      document.getElementById('counterW12').addEventListener('click', function() {
+        wCount12++;
+        document.getElementById('wCount12').textContent = wCount12;
+        updateCharts();
+        localStorage.setItem('lastClickedButton', 'counterW12');
+        saveToHistory();
+      });
+
+      document.getElementById('counterE12').addEventListener('click', function() {
+        eCount12++;
+        document.getElementById('eCount12').textContent = eCount12;
+        updateCharts();
+        localStorage.setItem('lastClickedButton', 'counterE12');
+        saveToHistory();
+      });
+      document.getElementById('counterW13').addEventListener('click', function() {
+        wCount13++;
+        document.getElementById('wCount13').textContent = wCount13;
+        updateCharts();
+        localStorage.setItem('lastClickedButton', 'counterW13');
+        saveToHistory();
+      });
+
+      document.getElementById('counterE13').addEventListener('click', function() {
+        eCount13++;
+        document.getElementById('eCount13').textContent = eCount13;
+        updateCharts();
+        localStorage.setItem('lastClickedButton', 'counterE13');
+        saveToHistory();
+      });
+
+
+document.getElementById('undoButton').addEventListener('click', function () {
+    if (history.length > 1) {
+        // Remove the most recent state
+        history.pop();
+        // Restore the previous state
+        const previousState = history[history.length - 1];
+        wCount = previousState.wCount;
+        eCount = previousState.eCount;
+        wCount3 = previousState.wCount3;
+        eCount3 = previousState.eCount3;
+        wCount4 = previousState.wCount4;
+        eCount4 = previousState.eCount4;
+        wCount5 = previousState.wCount5;
+        eCount5 = previousState.eCount5;
+        wCount6 = previousState.wCoun6;
+        eCount6 = previousState.eCoun6;
+        wCount7 = previousState.wCount7;
+        eCount7 = previousState.eCount7;
+        wCount8 = previousState.wCount8;
+        eCount8 = previousState.eCount8;
+        wCount9 = previousState.wCount9;
+        eCount9 = previousState.eCount9;
+        wCount10 = previousState.wCount10;
+        eCount10 = previousState.eCount10;
+        wCount11 = previousState.wCount11;
+        eCount11 = previousState.eCount11;
+        wCount12 = previousState.wCount12;
+        eCount12 = previousState.eCount12;
+        wCount13 = previousState.wCount13;
+        eCount13 = previousState.eCount13;
+        // Restore other counts as needed
+
+        // Update the count text on the buttons
+        document.getElementById('wCount').textContent = wCount;
+        document.getElementById('eCount').textContent = eCount;
+        document.getElementById('wCount3').textContent = wCount3;
+        document.getElementById('eCount3').textContent = eCount3;
+        document.getElementById('wCount4').textContent = wCount4;
+        document.getElementById('eCount4').textContent = eCount4;
+        document.getElementById('wCount5').textContent = wCount5;
+        document.getElementById('eCount5').textContent = eCount5;
+        document.getElementById('wCount6').textContent = wCount6;
+        document.getElementById('eCount6').textContent = eCount6;
+        document.getElementById('wCount7').textContent = wCount7;
+        document.getElementById('eCount7').textContent = eCount7;
+        document.getElementById('wCount8').textContent = wCount8;
+        document.getElementById('eCount8').textContent = eCount8;
+        document.getElementById('wCount9').textContent = wCount9;
+        document.getElementById('eCount9').textContent = eCount9;
+        document.getElementById('wCount10').textContent = wCount10;
+        document.getElementById('eCount10').textContent = eCount10;
+        document.getElementById('wCount11').textContent = wCount11;
+        document.getElementById('eCount11').textContent = eCount11;
+        document.getElementById('wCount12').textContent = wCount12;
+        document.getElementById('eCount12').textContent = eCount12;
+        document.getElementById('wCount13').textContent = wCount13;
+        document.getElementById('eCount13').textContent = eCount13;
+        // Update other buttons as needed
+
+        // Update charts
+        updateCharts();
+    }
+});
+
+
+   
+
+ let history = [];
+let initialState = {
+    wCount: 0,
+    eCount: 0,
+    wCount3: 0,
+    eCount3: 0,
+    wCount4: 0,
+    eCount4: 0,
+    wCount5: 0,
+    eCount5: 0,
+    wCount6: 0,
+    eCount6: 0,
+    wCount7: 0,
+    eCount7: 0,
+    wCount8: 0,
+    eCount8: 0,
+    wCount9: 0,
+    eCount9: 0,
+    wCount10: 0,
+    eCount10: 0,
+    wCount11: 0,
+    eCount11: 0,
+    wCount12: 0,
+    eCount12: 0,
+    wCount13: 0,
+    eCount13: 0,
+    
+    // Include other counts as needed
+};
+
+// Add the initial state to the history
+history.push(initialState);
+
+// Function to save the current state to the history array
+function saveToHistory() {
+    const currentState = {
+        wCount,
+        eCount,
+        wCount3,
+        eCount3,
+        wCount4,
+        eCount4,
+        wCount5,
+        eCount5,
+        wCount6,
+        eCount6,
+        wCount7,
+        eCount7,
+        wCount8,
+        eCount8,
+        wCount9,
+        eCount9,
+        wCount10,
+        eCount10,
+        wCount11,
+        eCount11,
+        wCount12,
+        eCount12,
+        wCount13,
+        eCount13,
+        
+    };
+    history.push(currentState);
+}
+
+
+
+
+      // Update Google Charts when buttons are clicked
+      function updateCharts() {
+        const pieData = new google.visualization.DataTable();
+        pieData.addColumn('string', 'Task');
+        pieData.addColumn('number', 'Percentage');
+        pieData.addRows([
+
+          ['Drive_W', wCount + wCount3],
+          ['Drive_E', eCount + eCount3],
+          ['Cross_W', wCount4 + wCount5],
+          ['Cross_E', eCount4 + eCount5],
+          ['Drop_W', wCount8 + wCount9],
+          ['Drop_E', eCount8 + eCount9],
+          ['Lob_W', wCount10 + wCount11],
+          ['Lob_E', eCount10 + eCount11],
+          ['Boast_W', wCount12 + wCount13],
+          ['Boast_E', eCount12 + eCount13],
+        ]
+        );
+
+        const barData2 = new google.visualization.DataTable();
+        barData2.addColumn('string', 'Drive');
+        barData2.addColumn('number', 'W'); // Separate series for "W"
+        barData2.addColumn('number', 'E'); // Separate series for "E"
+        barData2.addRows([
+          ['W', wCount, 0],
+          ['E', 0, eCount]
+        ]);
+
+        const barData3 = new google.visualization.DataTable();
+        barData3.addColumn('string', 'Drive');
+        barData3.addColumn('number', 'W'); // Separate series for "W"
+        barData3.addColumn('number', 'E'); // Separate series for "E"
+        barData3.addRows([
+          ['W', wCount3, 0],
+          ['E', 0, eCount3]
+        ]);
+
+        const barData4 = new google.visualization.DataTable();
+        barData4.addColumn('string', 'Drive');
+        barData4.addColumn('number', 'W'); // Separate series for "W"
+        barData4.addColumn('number', 'E'); // Separate series for "E"
+        barData4.addRows([
+          ['W', wCount4, 0],
+          ['E', 0, eCount4]
+        ]);
+
+        const barData5 = new google.visualization.DataTable();
+        barData5.addColumn('string', 'Drive');
+        barData5.addColumn('number', 'W'); // Separate series for "W"
+        barData5.addColumn('number', 'E'); // Separate series for "E"
+        barData5.addRows([
+          ['W', wCount5, 0],
+          ['E', 0, eCount5]
+        ]);
+
+        const barData6 = new google.visualization.DataTable();
+        barData6.addColumn('string', 'Drive');
+        barData6.addColumn('number', 'W'); // Separate series for "W"
+        barData6.addColumn('number', 'E'); // Separate series for "E"
+        barData6.addRows([
+          ['W', wCount6, 0],
+          ['E', 0, eCount6]
+        ]);
+
+        const barData7 = new google.visualization.DataTable();
+        barData7.addColumn('string', 'Drive');
+        barData7.addColumn('number', 'W'); // Separate series for "W"
+        barData7.addColumn('number', 'E'); // Separate series for "E"
+        barData7.addRows([
+          ['W', wCount7, 0],
+          ['E', 0, eCount7]
+        ]);
+        const barData8 = new google.visualization.DataTable();
+        barData8.addColumn('string', 'Drive');
+        barData8.addColumn('number', 'W'); // Separate series for "W"
+        barData8.addColumn('number', 'E'); // Separate series for "E"
+        barData8.addRows([
+          ['W', wCount8, 0],
+          ['E', 0, eCount8]
+        ]);
+        const barData9 = new google.visualization.DataTable();
+        barData9.addColumn('string', 'Drive');
+        barData9.addColumn('number', 'W'); // Separate series for "W"
+        barData9.addColumn('number', 'E'); // Separate series for "E"
+        barData9.addRows([
+          ['W', wCount9, 0],
+          ['E', 0, eCount9]
+        ]);
+        const barData10 = new google.visualization.DataTable();
+        barData10.addColumn('string', 'Drive');
+        barData10.addColumn('number', 'W'); // Separate series for "W"
+        barData10.addColumn('number', 'E'); // Separate series for "E"
+        barData10.addRows([
+          ['W', wCount10, 0],
+          ['E', 0, eCount10]
+        ]);
+        const barData11 = new google.visualization.DataTable();
+        barData11.addColumn('string', 'Drive');
+        barData11.addColumn('number', 'W'); // Separate series for "W"
+        barData11.addColumn('number', 'E'); // Separate series for "E"
+        barData11.addRows([
+          ['W', wCount11, 0],
+          ['E', 0, eCount11]
+        ]);
+        const barData12 = new google.visualization.DataTable();
+        barData12.addColumn('string', 'Drive');
+        barData12.addColumn('number', 'W'); // Separate series for "W"
+        barData12.addColumn('number', 'E'); // Separate series for "E"
+        barData12.addRows([
+          ['W', wCount12, 0],
+          ['E', 0, eCount12]
+        ]);
+        const barData13 = new google.visualization.DataTable();
+        barData13.addColumn('string', 'Drive');
+        barData13.addColumn('number', 'W'); // Separate series for "W"
+        barData13.addColumn('number', 'E'); // Separate series for "E"
+        barData13.addRows([
+          ['W', wCount13, 0],
+          ['E', 0, eCount13]
+        ]);
+
+        const pieChart = new google.visualization.PieChart(document.getElementById('pieChart'));
+        const barChart2 = new google.visualization.BarChart(document.getElementById('barChart2'));
+        const barChart3 = new google.visualization.BarChart(document.getElementById('barChart3'));
+        const barChart4 = new google.visualization.BarChart(document.getElementById('barChart4'));
+        const barChart5 = new google.visualization.BarChart(document.getElementById('barChart5'));
+        const barChart6 = new google.visualization.BarChart(document.getElementById('barChart6'));
+        const barChart7 = new google.visualization.BarChart(document.getElementById('barChart7'));
+        const barChart8 = new google.visualization.BarChart(document.getElementById('barChart8'));
+        const barChart9 = new google.visualization.BarChart(document.getElementById('barChart9'));
+        const barChart10 = new google.visualization.BarChart(document.getElementById('barChart10'));
+        const barChart11 = new google.visualization.BarChart(document.getElementById('barChart11'));
+        const barChart12 = new google.visualization.BarChart(document.getElementById('barChart12'));
+        const barChart13 = new google.visualization.BarChart(document.getElementById('barChart13'));
+
+        pieChart.draw(pieData, pieOptions);
+        barChart2.draw(barData2, barOptions2);
+        barChart3.draw(barData3, barOptions2);
+        barChart4.draw(barData4, barOptions2);
+        barChart5.draw(barData5, barOptions2);
+        barChart6.draw(barData6, barOptions2);
+        barChart7.draw(barData7, barOptions2);
+        barChart8.draw(barData8, barOptions2);
+        barChart9.draw(barData9, barOptions2);
+        barChart10.draw(barData10, barOptions2);
+        barChart11.draw(barData11, barOptions2);
+        barChart12.draw(barData12, barOptions2);
+        barChart13.draw(barData13, barOptions2);
+
+        // Update total counters
+        const totalWCount = wCount + wCount3 + wCount4 + wCount5 + wCount8 + wCount9 + wCount10 + wCount11 + wCount12 + wCount13;
+        const totalECount = eCount + eCount3 + eCount4 + eCount5 + eCount8 + eCount9 + eCount10 + eCount11 + eCount12 + eCount13;
+        document.getElementById('totalWCount').textContent = totalWCount;
+        document.getElementById('totalECount').textContent = totalECount;
+
+      }
+      // Initialize wCount and eCount from localStorage
+      let totalWCount = parseInt(localStorage.getItem('totalWCount')) || 0;
+      let totalECount = parseInt(localStorage.getItem('totalECount')) || 0;
+
+    // Function to update total counters and localStorage
+    function updateTotalCountsAndLocalStorage() {
+    const totalWCount = wCount + wCount3 + wCount4 + wCount5 + wCount8 + wCount9 + wCount10 + wCount11 + wCount12 + wCount13;
+    const totalECount = eCount + eCount3 + eCount4 + eCount5 + eCount8 + eCount9 + eCount10 + eCount11 + eCount12 + eCount13;
+
+    // Update the total counters on the page
+    document.getElementById('totalWCount').textContent = totalWCount;
+    document.getElementById('totalECount').textContent = totalECount;
+
+    // Update localStorage with the new total counts
+    localStorage.setItem('totalWCount', totalWCount);
+    localStorage.setItem('totalECount', totalECount);
+  }
+
+  // Add a click event listener to all buttons on the page
+    const buttons = document.querySelectorAll('button');
+    buttons.forEach(button => {
+    button.addEventListener('click', function() {
+       
+        // Call the function to update total counters and localStorage
+        updateTotalCountsAndLocalStorage();
+    });
+    });
+
+  // Initial update when the page loads
+    updateTotalCountsAndLocalStorage();
+
+      
     </script>
-</body>
+  </body>
+
 </html>
