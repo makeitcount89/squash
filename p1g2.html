@@ -33,6 +33,7 @@
 
         scanner.addListener('scan', function (content) {
             document.getElementById('qr-result').textContent = content;
+            scanner.stop(); // Stop the scanner when content is detected
         });
 
         Instascan.Camera.getCameras().then(function (cameras) {
