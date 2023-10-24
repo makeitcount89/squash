@@ -39,6 +39,8 @@
     <script src="https://rawgit.com/schmich/instascan-builds/master/instascan.min.js"></script>
     <script>
         const videoElement = document.getElementById('qr-video');
+        videoElement.style.transform = 'scaleX(-1)';
+        
         const scanner = new Instascan.Scanner({ video: videoElement });
         let currentCameraIndex = 0;
         let cameras = [];
