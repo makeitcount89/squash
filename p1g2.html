@@ -41,6 +41,7 @@
         const videoElement = document.getElementById('qr-video');
         const canvasElement = document.getElementById('flipped-canvas');
         const canvasContext = canvasElement.getContext('2d');
+        let isFlipped = false; // Variable to track the flip state
 
         const scanner = new Instascan.Scanner({ video: videoElement });
         let currentCameraIndex = 0;
@@ -93,9 +94,16 @@
 
         // Mirror the video feed using canvas
         function mirrorVideo() {
-            canvasContext.translate(canvasElement.width, 0);
-            canvasContext.scale(-1, 1);
+            if (isFlipped) {
+                canvasContext.setTransform(1, 0, 0, 1, 0, 0); // Reset transformation matrix
+            } else {
+                canvasContext.translate(canvasElement.width, 0);
+                canvasContext.scale(-1, 1);
+            }
+
             canvasContext.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
+            isFlipped = !isFlipped; // Toggle the flip state
+
             requestAnimationFrame(mirrorVideo);
         }
 
