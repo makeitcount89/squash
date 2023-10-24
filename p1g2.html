@@ -52,10 +52,16 @@
             qrLink.href = content;
             qrLink.textContent = content;
 
-            // Function to open the link in the Android web browser
-            function openLinkInAndroidBrowser(link) {
-                window.location.href = 'intent://'+ link +'#Intent;package=com.android.browser;scheme=;end';
+            // Function to open the link in a new window
+            function openLinkInNewWindow(link) {
+                window.open(link, '_blank');
             }
+
+            // Add an event listener for link clicks
+            qrLink.addEventListener('click', function (event) {
+                event.preventDefault();
+                openLinkInNewWindow(qrLink.href);
+            });
 
             scanner.stop();
         });
