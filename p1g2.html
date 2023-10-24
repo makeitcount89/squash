@@ -57,12 +57,6 @@
                 window.location.href = 'intent://'+ link +'#Intent;package=com.android.browser;scheme=;end';
             }
 
-            // Add an event listener for link clicks
-            qrLink.addEventListener('click', function (event) {
-                event.preventDefault();
-                openLinkInAndroidBrowser(qrLink.href);
-            });
-
             scanner.stop();
         });
 
