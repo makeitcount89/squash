@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <h1>QR Code Scanner</h1>
+    <div id="qr-result"><a href="#" id="qr-link" target="_blank"></a></div>
+    <style>
+        /* CSS to flip the video feed horizontally */
+        /*.flipped {
+            transform: scaleX(-1); */
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        video {
+            width: 90%;
+            max-width: 600px;
+            height: 70%;
+        }
+        #qr-result {
+            font-size: 58px;
+            text-align: center;
+            position: absolute;
+            top: 100px;
+        }
+        #qr-result a {
+            color: blue;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <video id="qr-video" class="flipped" playsinline></video>
+    <button id="toggle-camera">Toggle Camera</button>
+
+    <script src="https://cdn.rawgit.com/sitepoint-editors/jsqrcode/v1.0.0/dist/jsqrcode.js"></script>
+    <script>
+        const videoElement = document.getElementById('qr-video');
+        const qrResult = document.getElementById('qr-result');
+        const qrLink = document.getElementById('qr-link');
+
+        let currentCameraIndex = 0;
+        let cameras = [];
+
+        function startScannerWithCamera(cameraIndex) {
+            if (cameraIndex < cameras.length) {
+                const canvas = document.createElement('canvas');
+                const canvasContext = canvas.getContext('2d');
+                canvas.width = videoElement.videoWidth;
+                canvas.height = videoElement.videoHeight;
+                canvasContext.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+
+                const imageData = canvasContext.getImageData(0, 0, canvas.width, canvas.height);
+                const code = jsQR(imageData.data, imageData.width, imageData.height);
+
+                if (code) {
+                    qrLink.href = code.data;
+                    qrLink.textContent = code.data;
+
+                    // Function to open the link in a new window
+                    function openLinkInNewWindow(link) {
+                        window.open(link, '_blank');
+                    }
+
+                    // Add an event listener for link clicks
+                    qrLink.addEventListener('click', function (event) {
+                        event.preventDefault();
+                        openLinkInNewWindow(qrLink.href);
+                    });
+
+                    // Set the content in the WebView
+                    window.AppInventor.setWebViewString(code.data);
+                }
+
+                requestAnimationFrame(scanFrame);
+            }
+        }
+
+        function scanFrame() {
+            startScannerWithCamera(currentCameraIndex);
+        }
+
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices
+                .getUserMedia({ video: { facingMode: 'environment' } })
+                .then(function (stream) {
+                    videoElement.srcObject = stream;
+
+                    const toggleCameraButton = document.getElementById('toggle-camera');
+                    toggleCameraButton.addEventListener('click', function () {
+                        currentCameraIndex = (currentCameraIndex + 1) % cameras.length;
+                        qrResult.style.display = 'none';
+                        scanFrame();
+                    });
+
+                    scanFrame();
+                })
+                .catch(function (error) {
+                    console.error(error);
+                });
+        } else {
+            console.error('MediaDevices API not supported in this browser.');
+        }
+    </script>
+</body>
+</html>
