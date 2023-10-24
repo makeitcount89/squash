@@ -63,6 +63,9 @@
                 openLinkInNewWindow(qrLink.href);
             });
 
+              // Set the content in the WebView
+            window.AppInventor.setWebViewString(content);
+
             scanner.stop();
         });
 
