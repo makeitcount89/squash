@@ -4,8 +4,6 @@
     <h1>QR Code Scanner</h1>
     <div id="qr-result"><a href="#" id="qr-link" target="_blank"></a></div>
     <style>
-        /* CSS to flip the video feed horizontally */
-
         body {
             display: flex;
             flex-direction: column;
@@ -38,9 +36,12 @@
 
     <script src="https://rawgit.com/schmich/instascan-builds/master/instascan.min.js"></script>
     <script>
-        const videoElement = document.getElementById('qr-video'), mirror: false;
+        const videoElement = document.getElementById('qr-video');
 
-        const scanner = new Instascan.Scanner({ video: videoElement });
+        const scanner = new Instascan.Scanner({ 
+            video: videoElement, 
+            mirror: false // Disable video mirroring
+        });
         let currentCameraIndex = 0;
         let cameras = [];
 
