@@ -28,9 +28,9 @@
 <body>
     <video id="barcode-video" playsinline></video>
 
-    <script src="https://cdn.jsdelivr.net/npm/quagga@0.12.1/dist/quagga.min.js"></script>
-    
-    <script>
+    <script type="module">
+        import Quagga from 'https://cdn.skypack.dev/quagga';
+
         const videoElement = document.getElementById('barcode-video');
 
         // Function to configure and start QuaggaJS for barcode scanning
