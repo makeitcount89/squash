@@ -38,7 +38,7 @@
             if (cameraIndex < cameras.length) {
                 const constraints = {
                     video: {
-                        facingMode: 'environment',
+                        facingMode: 'environment', // Use the rear camera
                         deviceId: { exact: cameras[cameraIndex].deviceId }
                     }
                 };
