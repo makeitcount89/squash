@@ -63,7 +63,7 @@
             canvas.height = videoElement.videoHeight;
 
             function scanFrame() {
-                context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+                context.drawImage(videoElement, 0, 0, canvas.width, canvas height);
                 const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
 
                 // Perform barcode scanning using jsfeat here
@@ -75,22 +75,23 @@
             requestAnimationFrame(scanFrame);
         }
 
-        navigator.mediaDevices.enumerateDevices().then((devices) => {
-            cameras = devices.filter(device => device.kind === 'videoinput');
-            const rearCameras = cameras.filter(device => device.label.toLowerCase().includes('back') || device.label.toLowerCase().includes('rear'));
-            
-            if (rearCameras.length > 0) {
-                document.getElementById('toggle-camera').addEventListener('click', function () {
-                    currentCameraIndex = (currentCameraIndex + 1) % rearCameras.length;
-                    startScannerWithCamera(currentCameraIndex);
-                });
+        function enumerateCameras() {
+            navigator.mediaDevices.enumerateDevices().then((devices) => {
+                cameras = devices.filter(device => device.kind === 'videoinput');
                 startScannerWithCamera(currentCameraIndex);
-            } else {
-                startScannerWithCamera(currentCameraIndex);
-            }
-        }).catch(function (e) {
-            console.error(e);
-        });
+                if (cameras.length > 1) {
+                    document.getElementById('toggle-camera').addEventListener('click', function () {
+                        currentCameraIndex = (currentCameraIndex + 1) % cameras.length;
+                        startScannerWithCamera(currentCameraIndex);
+                    });
+                }
+            }).catch(function (e) {
+                console.error(e);
+            });
+        }
+
+        // Ensure that you enumerate the cameras when the page loads
+        enumerateCameras();
     </script>
 </body>
 </html>
