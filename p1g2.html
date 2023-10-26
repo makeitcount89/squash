@@ -77,13 +77,17 @@
 
         navigator.mediaDevices.enumerateDevices().then((devices) => {
             cameras = devices.filter(device => device.kind === 'videoinput');
-            if (cameras.length > 1) {
+            const rearCameras = cameras.filter(device => device.label.toLowerCase().includes('back') || device.label.toLowerCase().includes('rear'));
+            
+            if (rearCameras.length > 0) {
                 document.getElementById('toggle-camera').addEventListener('click', function () {
-                    currentCameraIndex = (currentCameraIndex + 1) % cameras.length;
+                    currentCameraIndex = (currentCameraIndex + 1) % rearCameras.length;
                     startScannerWithCamera(currentCameraIndex);
                 });
+                startScannerWithCamera(currentCameraIndex);
+            } else {
+                startScannerWithCamera(currentCameraIndex);
             }
-            startScannerWithCamera(currentCameraIndex);
         }).catch(function (e) {
             console.error(e);
         });
