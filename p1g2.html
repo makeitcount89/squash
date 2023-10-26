@@ -36,40 +36,50 @@
 
         function startScannerWithCamera(cameraIndex) {
             if (cameraIndex < cameras.length) {
-                Quagga.init({
-                    inputStream: {
-                        name: "Live",
-                        type: "LiveStream",
-                        target: videoElement,
-                        constraints: {
-                            deviceId: cameras[cameraIndex].deviceId,
-                        },
-                    },
-                    decoder: {
-                        readers: ["ean_reader", "upc_reader"],
-                    },
-                }, function (err) {
-                    if (err) {
-                        console.error(err);
-                        return;
+                const constraints = {
+                    video: {
+                        facingMode: 'environment',
+                        deviceId: { exact: cameras[cameraIndex].deviceId }
                     }
-                    Quagga.start();
-                });
+                };
+                navigator.mediaDevices.getUserMedia(constraints)
+                    .then(function (stream) {
+                        videoElement.srcObject = stream;
+                        videoElement.onloadedmetadata = function () {
+                            videoElement.play();
+                            scanForBarcode();
+                        };
+                    })
+                    .catch(function (error) {
+                        console.error(error);
+                    });
             }
         }
 
-        Quagga.onDetected(function (result) {
-            const barcodeResult = document.getElementById('barcode-result');
-            barcodeResult.textContent = `Scanned Barcode: ${result.codeResult.code}`;
-            Quagga.stop();
-        });
+        function scanForBarcode() {
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.width = videoElement.videoWidth;
+            canvas.height = videoElement.videoHeight;
+
+            function scanFrame() {
+                context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+                const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+
+                // Perform barcode scanning using jsfeat here
+                // You will need to implement the barcode recognition logic
+
+                requestAnimationFrame(scanFrame);
+            }
+
+            requestAnimationFrame(scanFrame);
+        }
 
         navigator.mediaDevices.enumerateDevices().then((devices) => {
             cameras = devices.filter(device => device.kind === 'videoinput');
             if (cameras.length > 1) {
                 document.getElementById('toggle-camera').addEventListener('click', function () {
                     currentCameraIndex = (currentCameraIndex + 1) % cameras.length;
-                    Quagga.stop();
                     startScannerWithCamera(currentCameraIndex);
                 });
             }
