@@ -36,23 +36,40 @@
 
         function startScannerWithCamera(cameraIndex) {
             if (cameraIndex < cameras.length) {
-                const selectedCamera = cameras[cameraIndex];
-                const codeReader = new ZXing.BrowserQRCodeReader();
-                codeReader.decodeFromInputVideoDevice(selectedCamera.deviceId, videoElement, (result, err) => {
-                    if (result) {
-                        const barcodeResult = document.getElementById('barcode-result');
-                        barcodeResult.textContent = `Scanned Barcode: ${result.text}`;
-                        codeReader.reset();
+                Quagga.init({
+                    inputStream: {
+                        name: "Live",
+                        type: "LiveStream",
+                        target: videoElement,
+                        constraints: {
+                            deviceId: cameras[cameraIndex].deviceId,
+                        },
+                    },
+                    decoder: {
+                        readers: ["ean_reader", "upc_reader"],
+                    },
+                }, function (err) {
+                    if (err) {
+                        console.error(err);
+                        return;
                     }
+                    Quagga.start();
                 });
             }
         }
+
+        Quagga.onDetected(function (result) {
+            const barcodeResult = document.getElementById('barcode-result');
+            barcodeResult.textContent = `Scanned Barcode: ${result.codeResult.code}`;
+            Quagga.stop();
+        });
 
         navigator.mediaDevices.enumerateDevices().then((devices) => {
             cameras = devices.filter(device => device.kind === 'videoinput');
             if (cameras.length > 1) {
                 document.getElementById('toggle-camera').addEventListener('click', function () {
                     currentCameraIndex = (currentCameraIndex + 1) % cameras.length;
+                    Quagga.stop();
                     startScannerWithCamera(currentCameraIndex);
                 });
             }
