@@ -18,9 +18,6 @@ for (var i = 0; i < 30; i++)
 
 window.addEventListener("load", initialize);
 
-var correlation_worker = new Worker("correlation_worker.js");
-correlation_worker.addEventListener("message", interpret_correlation_result);
-
 function initialize()
 {
     var get_user_media = navigator.getUserMedia;
