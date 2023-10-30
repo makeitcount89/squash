@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 <head>
 <script>
@@ -101,12 +102,21 @@ function interpret_correlation_result(event)
 	// with magnitudes significantly above average.
 	var average = magnitudes.reduce(function(a, b) { return a + b; }, 0) / magnitudes.length;
 	var confidence = maximum_magnitude / average;
-	var confidence_threshold = 10; // empirical, arbitrary.
+	var confidence_threshold = 10; // empirical, arbitrary;
 	if (confidence > confidence_threshold)
 	{
 		var dominant_frequency = test_frequencies[maximum_index];
 		document.getElementById("note-name").textContent = dominant_frequency.name;
 		document.getElementById("frequency").textContent = dominant_frequency.frequency;
+
+		// Check if it's a bit sharp or a bit flat
+		if (dominant_frequency.name.includes("sharp")) {
+			document.getElementById("sharp-flat-indicator").textContent = "Red light: Sharp";
+		} else if (dominant_frequency.name.includes("flat")) {
+			document.getElementById("sharp-flat-indicator").textContent = "Red light: Flat";
+		} else {
+			document.getElementById("sharp-flat-indicator").textContent = ""; // Clear the red light indicator
+		}
 	}
 }
 
@@ -139,6 +149,7 @@ function toggle_playing_note()
 	<span>frequency (Hz):</span>
 	<span id="frequency"></span>
 </p>
+<p id="sharp-flat-indicator"></p> <!-- This is the red light signal -->
 <hr>
 <button id="play-note">start/stop an E note</button>
 <hr>
