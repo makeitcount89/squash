@@ -1,27 +1,51 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Simple Gauge</title>
-
-    <!-- Include JustGage library from a CDN -->
-    <script src="https://cdn.jsdelivr.net/gh/toorshia/justgage@1.4.1/justgage.js"></script>
+    <script src="https://cdn.rawgit.com/bernii/gauge.js/master/dist/gauge.min.js"></script>
+    <style>
+        #gauge-container {
+            width: 200px;
+            height: 200px;
+        }
+    </style>
 </head>
 <body>
-    <div id="gauge-container" style="width: 200px; height: 200px;"></div>
+    <div id="gauge-container"></div>
 
     <script>
-        // JavaScript code to create and configure the gauge
-        var g = new JustGage({
-            id: "gauge-container",
-            value: 50, // Initial value
-            min: 0,
-            max: 100,
-            title: "Gauge Title",
-            label: "Gauge Label",
-            levelColors: ["#FF0000", "#FFFF00", "#00FF00"],
-        });
+        var opts = {
+            angle: 0.15, // The span of the gauge arc
+            lineWidth: 0.44, // The line thickness
+            radiusScale: 1, // Relative radius
+            pointer: {
+                length: 0.6, // Relative length
+                strokeWidth: 0.035, // Stroke width
+                color: '#000000', // Pointer color
+            },
+            limitMax: false, // If false, max value increases automatically
+            limitMin: false, // If true, the min value of the gauge will be fixed
+            colorStart: '#6FADCF', // Colors
+            colorStop: '#8FC0DA', // Colors
+            strokeColor: '#E0E0E0', // Border color
+            generateGradient: true, // Generate a gradient for the colors
+        };
+        
+        var target = document.getElementById('gauge-container'); // The DOM element to contain the gauge
+
+        var gauge = new Gauge(target).setOptions(opts); // Create the gauge
+
+        gauge.maxValue = 100; // Set max value
+        gauge.setMinValue(0); // Set min value
+        gauge.animationSpeed = 32; // Animation speed (32 is a good value for a smooth gauge)
+
+        gauge.set(50); // Set the current value
+
+        // Optional: Set a label
+        gauge.setLabel("Tuner");
+
+        // Optional: Set a unit
+        gauge.setUnits("%");
     </script>
 </body>
 </html>
