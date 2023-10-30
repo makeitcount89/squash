@@ -30,6 +30,13 @@
         .sharp {
             background-color: red;
         }
+
+        .circle-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
     </style>
     <script>
         var C2 = 65.41; // C2 note, in Hz
@@ -112,26 +119,31 @@
             var confidence = maximum_magnitude / average;
             var confidence_threshold = 10;
 
+            var flatCircle = document.getElementById("flat-indicator");
+            var inTuneCircle = document.getElementById("in-tune-indicator");
+            var sharpCircle = document.getElementById("sharp-indicator");
+
             if (confidence > confidence_threshold) {
                 var dominant_frequency = test_frequencies[maximum_index];
                 document.getElementById("note-name").textContent = dominant_frequency.name;
                 document.getElementById("frequency").textContent = dominant_frequency.frequency;
 
-                var flatIndicator = document.getElementById("flat-indicator");
-                var inTuneIndicator = document.getElementById("in-tune-indicator");
-                var sharpIndicator = document.getElementById("sharp-indicator");
-
-                flatIndicator.style.display = "none";
-                inTuneIndicator.style.display = "none";
-                sharpIndicator.style.display = "none";
+                flatCircle.style.display = "none";
+                inTuneCircle.style.display = "none";
+                sharpCircle.style display = "none";
 
                 if (dominant_frequency.name.includes("sharp")) {
-                    sharpIndicator.style.display = "block";
+                    sharpCircle.style.display = "block";
                 } else if (dominant_frequency.name.includes("flat")) {
-                    flatIndicator.style.display = "block";
+                    flatCircle.style.display = "block";
                 } else {
-                    inTuneIndicator.style.display = "block";
+                    inTuneCircle.style.display = "block";
                 }
+            } else {
+                // If the confidence is below the threshold, display the middle circle (in-tune).
+                flatCircle.style.display = "none";
+                inTuneCircle.style.display = "block";
+                sharpCircle.style.display = "none";
             }
         }
 
@@ -161,7 +173,7 @@
     <span style="font-size: 2em;">frequency (Hz):</span>
     <span id="frequency" style="font-size: 2em;"></span>
 </p>
-<div class="indicator-container">
+<div class="circle-row">
     <div id="flat-indicator" class="indicator flat"></div>
     <div id="in-tune-indicator" class="indicator in-tune"></div>
     <div id="sharp-indicator" class="indicator sharp"></div>
