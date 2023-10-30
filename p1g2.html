@@ -2,29 +2,17 @@
 <html>
 <head>
     <style>
-        body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-        }
-
         .indicator-container {
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: center; /* Vertically align the circles */
         }
 
         .indicator {
-            width: 90px;
-            height: 90px;
+            width: 30px;
+            height: 30px;
             border-radius: 50%;
-            display: none;
-        }
-
-        .flat, .in-tune, .sharp {
-            font-size: 24px;
+            display: none; /* Hide all circles by default */
         }
 
         .flat {
@@ -66,14 +54,14 @@
             get_user_media = get_user_media || navigator.mozGetUserMedia;
             get_user_media.call(navigator, { "audio": true }, use_stream, function() {});
 
-            document.getElementById("play-note").addEventListener("click", toggle_playing_note);
+            // The play-note button has been removed.
         }
 
         function use_stream(stream)
         {
             var audio_context = new AudioContext();
             var microphone = audio_context.createMediaStreamSource(stream);
-            window.source = microphone;
+            window.source = microphone; // Workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=934512
             var script_processor = audio_context.createScriptProcessor(1024, 1, 1);
 
             script_processor.connect(audio_context.destination);
@@ -150,7 +138,7 @@
                 if (dominant_frequency.name.includes("sharp")) {
                     sharpIndicator.style.display = "block";
                 } else if (dominant_frequency.name.includes("flat")) {
-                    flatIndicator.style display = "block";
+                    flatIndicator.style.display = "block";
                 } else {
                     inTuneIndicator.style.display = "block";
                 }
@@ -179,14 +167,15 @@
 </head>
 
 <body>
+<p>It sounds like you're playing...</p>
 <h1 id="note-name"></h1>
 <p>
-    <span>Frequency (Hz):</span>
+    <span>frequency (Hz):</span>
     <span id="frequency"></span>
 </p>
 <div class="indicator-container">
     <div id="flat-indicator" class="indicator flat"></div>
-    <div id="in-tune-indicator" class="indicator in-tune"></div>
+    <div id "in-tune-indicator" class="indicator in-tune"></div>
     <div id="sharp-indicator" class="indicator sharp"></div>
 </div>
 </body>
