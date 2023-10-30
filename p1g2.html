@@ -2,7 +2,7 @@
 <html>
 <head>
     <style>
-        body {
+       body {
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -13,31 +13,19 @@
 
         .indicator-container {
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .meter-container {
-            display: flex;
+            justify-content: space-between;
             align-items: center;
         }
 
-        .meter {
-            width: 200px;
-            height: 20px;
-            background: linear-gradient(to right, red 0%, yellow 50%, green 100%);
-        }
-
-        .meter-marker {
-            width: 2px;
-            height: 20px;
-            background-color: black;
-            position: absolute;
+        .indicator {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: none;
         }
 
         .flat, .in-tune, .sharp {
-            font-size: 2em; /* Doubled the font size */
+            font-size: 2em;
         }
 
         .flat {
@@ -50,6 +38,30 @@
 
         .sharp {
             background-color: red;
+        }
+
+        .meter-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100px;
+            height: 20px;
+            background-color: #000;
+            margin-top: 20px;
+        }
+
+        .meter {
+            width: 100%;
+            height: 100%;
+            background-color: #fff;
+        }
+
+        .indicator {
+            width: 5px;
+            height: 100%;
+            background-color: #fff;
+            position: absolute;
+            transition: transform 0.2s;
         }
     </style>
     <script>
@@ -141,23 +153,41 @@
                 var flatIndicator = document.getElementById("flat-indicator");
                 var inTuneIndicator = document.getElementById("in-tune-indicator");
                 var sharpIndicator = document.getElementById("sharp-indicator");
-                var meterMarker = document.getElementById("meter-marker");
+                var indicator = document.getElementById("indicator");
 
                 flatIndicator.style.display = "none";
                 inTuneIndicator.style.display = "none";
                 sharpIndicator.style.display = "none";
-                meterMarker.style.left = "50%"; // Reset the meter marker to the center
 
                 if (dominant_frequency.name.includes("sharp")) {
                     sharpIndicator.style.display = "block";
-                    meterMarker.style.left = "75%"; // Move the meter marker to the right (sharp)
+                    indicator.style.transform = "translateX(100%)"; // Shift to the right
                 } else if (dominant_frequency.name.includes("flat")) {
                     flatIndicator.style.display = "block";
-                    meterMarker.style.left = "25%"; // Move the meter marker to the left (flat)
+                    indicator.style.transform = "translateX(0)"; // Shift to the left
                 } else {
                     inTuneIndicator.style.display = "block";
+                    indicator.style.transform = "translateX(50%)"; // In the middle
                 }
             }
+        }
+
+        var note_context = new AudioContext();
+        var note_node = note_context.createOscillator();
+        var gain_node = note_context.createGain();
+        note_node.frequency.value = C2 * Math.pow(2, 4 / 12);
+        gain_node.gain.value = 0;
+        note_node.connect(gain_node);
+        gain_node.connect(note_context.destination);
+        note_node.start();
+
+        var playing = false;
+        function toggle_playing_note() {
+            playing = !playing;
+            if (playing)
+                gain_node.gain.value = 0.1;
+            else
+                gain_node.gain.value = 0;
         }
     </script>
 </head>
@@ -173,9 +203,8 @@
         <div id="sharp-indicator" class="indicator sharp"></div>
     </div>
     <div class="meter-container">
-        <div class="meter">
-            <div id="meter-marker" class="meter-marker"></div>
-        </div>
+        <div id="meter" class="meter"></div>
+        <div id="indicator" class="indicator"></div>
     </div>
 </body>
 </html>
