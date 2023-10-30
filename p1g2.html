@@ -68,11 +68,13 @@
         var correlation_worker = new Worker("correlation_worker.js");
         correlation_worker.addEventListener("message", interpret_correlation_result);
 
-        function initialize() {
-            var get_user_media = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
-            get_user_media.call(navigator, { "audio": true }, use_stream, function() {});
-
-            // The play-note button has been removed.
+        async function initialize() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                use_stream(stream);
+            } catch (error) {
+                console.error("Error accessing microphone:", error);
+            }
         }
 
         function use_stream(stream) {
@@ -88,7 +90,7 @@
             var sample_length_milliseconds = 100;
             var recording = true;
 
-            window.capture_audio = function(event) {
+            window.capture_audio = function (event) {
                 if (!recording)
                     return;
 
@@ -104,7 +106,9 @@
                     });
 
                     buffer = [];
-                    setTimeout(function() { recording = true; }, 250);
+                    setTimeout(function () {
+                        recording = true;
+                    }, 250);
                 }
             };
 
@@ -113,9 +117,11 @@
 
         function interpret_correlation_result(event) {
             var timeseries = event.data.timeseries;
-            var frequency_amplitudes = event.data frequency_amplitudes;
+            var frequency_amplitudes = event.data.frequency_amplitudes;
 
-            var magnitudes = frequency_amplitudes.map(function(z) { return z[0] * z[0] + z[1] * z[1]; });
+            var magnitudes = frequency_amplitudes.map(function (z) {
+                return z[0] * z[0] + z[1] * z[1];
+            });
 
             var maximum_index = -1;
             var maximum_magnitude = 0;
@@ -127,7 +133,9 @@
                 maximum_magnitude = magnitudes[i];
             }
 
-            var average = magnitudes.reduce(function(a, b) { return a + b; }, 0) / magnitudes.length;
+            var average = magnitudes.reduce(function (a, b) {
+                return a + b;
+            }, 0) / magnitudes.length;
             var confidence = maximum_magnitude / average;
             var confidence_threshold = 10;
 
@@ -141,7 +149,7 @@
                 var sharpIndicator = document.getElementById("sharp-indicator");
 
                 flatIndicator.style.display = "none";
-                inTuneIndicator.style display = "none";
+                inTuneIndicator.style.display = "none";
                 sharpIndicator.style.display = "none";
 
                 if (dominant_frequency.name.includes("sharp")) {
