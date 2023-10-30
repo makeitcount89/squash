@@ -20,14 +20,14 @@
         }
 
         .indicator {
-            width: 100px; /* Doubled the width */
-            height: 100px; /* Doubled the height */
+            width: 100px;
+            height: 100px;
             border-radius: 50%;
             display: none;
         }
 
         .flat, .in-tune, .sharp {
-            font-size: 2em; /* Doubled the font size */
+            font-size: 2em;
         }
 
         .flat {
@@ -41,6 +41,10 @@
         .sharp {
             background-color: red;
         }
+
+        #gauge-container {
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -51,10 +55,10 @@
     </p>
     <div class="indicator-container">
         <div id="flat-indicator" class="indicator flat"></div>
-        <div id="in-tune-indicator" class "indicator in-tune"></div>
+        <div id="in-tune-indicator" class="indicator in-tune"></div>
         <div id="sharp-indicator" class="indicator sharp"></div>
     </div>
-    <div id="gauge-container" style="margin-top: 20px;"></div>
+    <div id="gauge-container"></div>
 
     <script>
         var C2 = 65.41; // C2 note, in Hz
@@ -74,91 +78,123 @@
         var correlation_worker = new Worker("correlation_worker.js");
         correlation_worker.addEventListener("message", interpret_correlation_result);
 
+        var audio_context = new AudioContext();
+        var gain_node = audio_context.createGain();
+        var analyser = audio_context.createAnalyser();
+        analyser.fftSize = 2048;
+
+        var buffer = new Float32Array(analyser.frequencyBinCount);
+
+        gain_node.connect(analyser);
+        analyser.connect(audio_context.destination);
+
+        gain_node.gain.value = 0;
+
         function initialize() {
             var get_user_media = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
-            get_user_media.call(navigator, { "audio": true }, use_stream, function() {});
+            get_user_media.call(navigator, { "audio": true }, use_stream, function () { });
+
+            // The play-note button has been removed.
         }
 
         function use_stream(stream) {
-            var audio_context = new AudioContext();
             var microphone = audio_context.createMediaStreamSource(stream);
-            window.source = microphone;
-            var script_processor = audio_context.createScriptProcessor(1024, 1, 1);
 
-            script_processor.connect(audio_context.destination);
-            microphone.connect(script_processor);
+            microphone.connect(gain_node);
 
-            var buffer = [];
-            var sample_length_milliseconds = 100;
-            var recording = true;
-
-            window.capture_audio = function(event) {
-                if (!recording)
-                    return;
-
-                buffer = buffer.concat(Array.prototype.slice.call(event.inputBuffer.getChannelData(0)));
-
-                if (buffer.length > sample_length_milliseconds * audio_context.sampleRate / 1000) {
-                    recording = false;
-
-                    correlation_worker.postMessage({
-                        "timeseries": buffer,
-                        "test_frequencies": test_frequencies,
-                        "sample_rate": audio_context.sampleRate
-                    });
-
-                    buffer = [];
-                    setTimeout(function() { recording = true; }, 250);
-                }
-            };
-
-            script_processor.onaudioprocess = window.capture_audio;
+            setTimeout(startAudioProcessing, 500);
         }
 
-        function interpret_correlation_result(event) {
-            var timeseries = event.data.timeseries;
-            var frequency_amplitudes = event.data.frequency_amplitudes;
+        function startAudioProcessing() {
+            var timeseries = new Float32Array(analyser.fftSize);
+            var dominant_frequency = null;
+            var last_dominant_frequency = null;
+            var confidence = 0;
+            var confidence_threshold = 2;
 
-            var magnitudes = frequency_amplitudes.map(function(z) { return z[0] * z[0] + z[1] * z[1]; });
+            var frameId = requestAnimationFrame(analyzeAudio);
 
-            var maximum_index = -1;
-            var maximum_magnitude = 0;
-            for (var i = 0; i < magnitudes.length; i++) {
-                if (magnitudes[i] <= maximum_magnitude)
-                    continue;
+            function analyzeAudio() {
+                analyser.getFloatTimeDomainData(timeseries);
 
-                maximum_index = i;
-                maximum_magnitude = magnitudes[i];
+                correlation_worker.postMessage({
+                    "timeseries": timeseries,
+                    "test_frequencies": test_frequencies,
+                    "sample_rate": audio_context.sampleRate
+                });
+
+                // Calculate dominant frequency and confidence
+                var magnitudes = new Float32Array(analyser.frequencyBinCount);
+                analyser.getFloatFrequencyData(magnitudes);
+
+                var maximum_index = -1;
+                var maximum_magnitude = -Infinity;
+                var average = 0;
+
+                for (var i = 0; i < magnitudes.length; i++) {
+                    if (magnitudes[i] > maximum_magnitude) {
+                        maximum_index = i;
+                        maximum_magnitude = magnitudes[i];
+                    }
+                    average += magnitudes[i];
+                }
+                average /= magnitudes.length;
+
+                if (maximum_magnitude > average && maximum_magnitude > confidence_threshold) {
+                    dominant_frequency = audio_context.sampleRate * maximum_index / analyser.fftSize;
+                    confidence = maximum_magnitude / average;
+                } else {
+                    dominant_frequency = null;
+                    confidence = 0;
+                }
+
+                if (dominant_frequency !== last_dominant_frequency) {
+                    last_dominant_frequency = dominant_frequency;
+
+                    if (dominant_frequency) {
+                        updateUI(dominant_frequency, confidence);
+                    } else {
+                        updateUI(null, 0);
+                    }
+                }
+
+                frameId = requestAnimationFrame(analyzeAudio);
             }
+        }
 
-            var average = magnitudes.reduce(function(a, b) { return a + b; }, 0) / magnitudes.length;
-            var confidence = maximum_magnitude / average;
-            var confidence_threshold = 10;
-
-            if (confidence > confidence_threshold) {
-                var dominant_frequency = test_frequencies[maximum_index];
-                document.getElementById("note-name").textContent = dominant_frequency.name;
-                document.getElementById("frequency").textContent = dominant_frequency.frequency;
+        function updateUI(frequency, confidence) {
+            if (frequency) {
+                var note_name = getNoteName(frequency);
+                document.getElementById("note-name").textContent = note_name.name;
+                document.getElementById("frequency").textContent = frequency.toFixed(2) + " Hz";
 
                 var flatIndicator = document.getElementById("flat-indicator");
                 var inTuneIndicator = document.getElementById("in-tune-indicator");
                 var sharpIndicator = document.getElementById("sharp-indicator");
 
                 flatIndicator.style.display = "none";
-                inTuneIndicator.style display = "none";
+                inTuneIndicator.style.display = "none";
                 sharpIndicator.style.display = "none";
 
-                if (dominant_frequency.name.includes("sharp")) {
+                if (note_name.name.includes("sharp")) {
                     sharpIndicator.style.display = "block";
-                } else if (dominant_frequency.name.includes("flat")) {
+                } else if (note_name.name.includes("flat")) {
                     flatIndicator.style.display = "block";
                 } else {
                     inTuneIndicator.style.display = "block";
                 }
 
                 // Update the gauge with the current frequency
-                gauge.set(dominant_frequency.frequency);
+                if (gauge) {
+                    gauge.set(frequency);
+                }
             }
+        }
+
+        function getNoteName(frequency) {
+            var noteIndex = Math.round(12 * Math.log2(frequency / C2));
+            var note = test_frequencies[noteIndex];
+            return note;
         }
 
         // Create a gauge
@@ -186,7 +222,7 @@
         gauge.animationSpeed = 32;
         gauge.set(50);
         gauge.setLabel("Tuner");
-        gauge.setUnits("%");
+        gauge.setUnits("Hz");
     </script>
 </body>
 </html>
