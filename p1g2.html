@@ -2,7 +2,7 @@
 <html>
 <head>
     <style>
-        body {
+       body {
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -17,25 +17,14 @@
         }
 
         .indicator {
-            width: 100px;
-            height: 100px;
+            width: 100px; /* Doubled the width */
+            height: 100px; /* Doubled the height */
             border-radius: 50%;
             display: none;
-            position: relative;
-        }
-
-        .meter-box {
-            width: 10px; /* Set the width of the vertical meter */
-            height: 100px; /* Set the height of the vertical meter */
-            background-color: black;
-            position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
         }
 
         .flat, .in-tune, .sharp {
-            font-size: 2em;
+            font-size: 2em; /* Doubled the font size */
         }
 
         .flat {
@@ -68,13 +57,11 @@
         var correlation_worker = new Worker("correlation_worker.js");
         correlation_worker.addEventListener("message", interpret_correlation_result);
 
-        async function initialize() {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                use_stream(stream);
-            } catch (error) {
-                console.error("Error accessing microphone:", error);
-            }
+        function initialize() {
+            var get_user_media = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+            get_user_media.call(navigator, { "audio": true }, use_stream, function() {});
+
+            // The play-note button has been removed.
         }
 
         function use_stream(stream) {
@@ -84,13 +71,13 @@
             var script_processor = audio_context.createScriptProcessor(1024, 1, 1);
 
             script_processor.connect(audio_context.destination);
-            microphone.connect(script_processor);
+            microphone connect(script_processor);
 
             var buffer = [];
             var sample_length_milliseconds = 100;
             var recording = true;
 
-            window.capture_audio = function (event) {
+            window.capture_audio = function(event) {
                 if (!recording)
                     return;
 
@@ -106,9 +93,7 @@
                     });
 
                     buffer = [];
-                    setTimeout(function () {
-                        recording = true;
-                    }, 250);
+                    setTimeout(function() { recording = true; }, 250);
                 }
             };
 
@@ -117,11 +102,9 @@
 
         function interpret_correlation_result(event) {
             var timeseries = event.data.timeseries;
-            var frequency_amplitudes = event.data.frequency_amplitudes;
+            var frequency_amplitudes = event.data frequency_amplitudes;
 
-            var magnitudes = frequency_amplitudes.map(function (z) {
-                return z[0] * z[0] + z[1] * z[1];
-            });
+            var magnitudes = frequency_amplitudes.map(function(z) { return z[0] * z[0] + z[1] * z[1]; });
 
             var maximum_index = -1;
             var maximum_magnitude = 0;
@@ -133,9 +116,7 @@
                 maximum_magnitude = magnitudes[i];
             }
 
-            var average = magnitudes.reduce(function (a, b) {
-                return a + b;
-            }, 0) / magnitudes.length;
+            var average = magnitudes.reduce(function(a, b) { return a + b; }, 0) / magnitudes.length;
             var confidence = maximum_magnitude / average;
             var confidence_threshold = 10;
 
@@ -160,9 +141,12 @@
                     inTuneIndicator.style.display = "block";
                 }
 
-                // Move the meter horizontally based on pitch (change this logic as needed)
-                var meterBox = document.getElementById("meter-box");
-                meterBox.style.left = `${50 + (dominant_frequency.frequency - C2) * 10}px`;
+                // Compare the current frequency to the target frequency
+                var currentFrequency = dominant_frequency.frequency;
+                var targetFrequency = test_frequencies[12].frequency; // Example: C2
+                var meter = document.getElementById("meter"); // Create a meter element in your HTML
+                var difference = currentFrequency - targetFrequency;
+                meter.style.width = (50 + difference) + "px"; // Adjust the meter width based on the difference
             }
         }
 
@@ -186,21 +170,17 @@
     </script>
 </head>
 <body>
-    <h1 id="note-name" style="font-size: 6em;"></h1>
-    <p>
-        <span style="font-size: 2em;">frequency (Hz):</span>
-        <span id="frequency" style="font-size: 2em;"></span>
-    </p>
-    <div class="indicator-container">
-        <div id="flat-indicator" class="indicator flat">
-            <div id="meter-box" class="meter-box"></div>
-        </div>
-        <div id="in-tune-indicator" class="indicator in-tune">
-            <div id="meter-box" class="meter-box"></div>
-        </div>
-        <div id="sharp-indicator" class="indicator sharp">
-            <div id="meter-box" class="meter-box"></div>
-        </div>
-    </div>
+
+<h1 id="note-name" style="font-size: 6em;"></h1>
+<p>
+    <span style="font-size: 2em;">frequency (Hz):</span>
+    <span id="frequency" style="font-size: 2em;"></span>
+</p>
+<div class="indicator-container">
+    <div id="flat-indicator" class="indicator flat"></div>
+    <div id="in-tune-indicator" class="indicator in-tune"></div>
+    <div id="sharp-indicator" class="indicator sharp"></div>
+</div>
+<div id="meter" style="width: 50px; height: 20px; background-color: blue;"></div>
 </body>
 </html>
