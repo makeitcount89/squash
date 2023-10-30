@@ -9,8 +9,8 @@
         }
 
         .indicator {
-            width: 30px;
-            height: 30px;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
             display: none; /* Hide all circles by default */
         }
@@ -28,12 +28,10 @@
         }
     </style>
     <script>
-        // Define the set of test frequencies and other JavaScript code here
         var C2 = 65.41; // C2 note, in Hz;
         var notes = [ "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" ];
         var test_frequencies = [];
-        for (var i = 0; i < 30; i++)
-        {
+        for (var i = 0; i < 30; i++) {
             var note_frequency = C2 * Math.pow(2, i / 12);
             var note_name = notes[i % 12];
             var note = { "frequency": note_frequency, "name": note_name };
@@ -47,8 +45,7 @@
         var correlation_worker = new Worker("correlation_worker.js");
         correlation_worker.addEventListener("message", interpret_correlation_result);
 
-        function initialize()
-        {
+        function initialize() {
             var get_user_media = navigator.getUserMedia;
             get_user_media = get_user_media || navigator.webkitGetUserMedia;
             get_user_media = get_user_media || navigator.mozGetUserMedia;
@@ -57,8 +54,7 @@
             // The play-note button has been removed.
         }
 
-        function use_stream(stream)
-        {
+        function use_stream(stream) {
             var audio_context = new AudioContext();
             var microphone = audio_context.createMediaStreamSource(stream);
             window.source = microphone; // Workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=934512
@@ -71,25 +67,20 @@
             var sample_length_milliseconds = 100;
             var recording = true;
 
-            window.capture_audio = function(event)
-            {
+            window.capture_audio = function(event) {
                 if (!recording)
                     return;
 
                 buffer = buffer.concat(Array.prototype.slice.call(event.inputBuffer.getChannelData(0)));
 
-                if (buffer.length > sample_length_milliseconds * audio_context.sampleRate / 1000)
-                {
+                if (buffer.length > sample_length_milliseconds * audio_context.sampleRate / 1000) {
                     recording = false;
 
-                    correlation_worker.postMessage
-                    (
-                        {
-                            "timeseries": buffer,
-                            "test_frequencies": test_frequencies,
-                            "sample_rate": audio_context.sampleRate
-                        }
-                    );
+                    correlation_worker.postMessage({
+                        "timeseries": buffer,
+                        "test_frequencies": test_frequencies,
+                        "sample_rate": audio_context.sampleRate
+                    });
 
                     buffer = [];
                     setTimeout(function() { recording = true; }, 250);
@@ -99,8 +90,7 @@
             script_processor.onaudioprocess = window.capture_audio;
         }
 
-        function interpret_correlation_result(event)
-        {
+        function interpret_correlation_result(event) {
             var timeseries = event.data.timeseries;
             var frequency_amplitudes = event.data.frequency_amplitudes;
 
@@ -108,8 +98,7 @@
 
             var maximum_index = -1;
             var maximum_magnitude = 0;
-            for (var i = 0; i < magnitudes.length; i++)
-            {
+            for (var i = 0; i < magnitudes.length; i++) {
                 if (magnitudes[i] <= maximum_magnitude)
                     continue;
 
@@ -117,12 +106,11 @@
                 maximum_magnitude = magnitudes[i];
             }
 
-            var average = magnitudes reduce(function(a, b) { return a + b; }, 0) / magnitudes.length;
+            var average = magnitudes.reduce(function(a, b) { return a + b; }, 0) / magnitudes.length;
             var confidence = maximum_magnitude / average;
             var confidence_threshold = 10;
 
-            if (confidence > confidence_threshold)
-            {
+            if (confidence > confidence_threshold) {
                 var dominant_frequency = test_frequencies[maximum_index];
                 document.getElementById("note-name").textContent = dominant_frequency.name;
                 document.getElementById("frequency").textContent = dominant_frequency.frequency;
@@ -132,7 +120,7 @@
                 var sharpIndicator = document.getElementById("sharp-indicator");
 
                 flatIndicator.style.display = "none";
-                inTuneIndicator.style.display = "none";
+                inTuneIndicator.style display = "none";
                 sharpIndicator.style.display = "none";
 
                 if (dominant_frequency.name.includes("sharp")) {
@@ -140,7 +128,7 @@
                 } else if (dominant_frequency.name.includes("flat")) {
                     flatIndicator.style.display = "block";
                 } else {
-                    inTuneIndicator.style display = "block";
+                    inTuneIndicator.style.display = "block";
                 }
             }
         }
@@ -155,8 +143,7 @@
         note_node.start();
 
         var playing = false;
-        function toggle_playing_note()
-        {
+        function toggle_playing_note() {
             playing = !playing;
             if (playing)
                 gain_node.gain.value = 0.1;
