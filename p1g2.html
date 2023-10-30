@@ -9,14 +9,10 @@
         }
 
         .indicator {
-            width: 150px; /* 3 times bigger */
-            height: 150px; /* 3 times bigger */
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
             display: none;
-        }
-
-        .flat, .in-tune, .sharp {
-            font-size: 4em; /* 4 times bigger */
         }
 
         .flat {
@@ -29,10 +25,6 @@
 
         .sharp {
             background-color: red;
-        }
-
-        #frequency {
-            /*visibility: hidden; /* Hide the frequency (Hz) text while keeping it functional */
         }
     </style>
     <script>
@@ -131,7 +123,7 @@
 
                 if (dominant_frequency.name.includes("sharp")) {
                     sharpIndicator.style.display = "block";
-                } else if (dominant_frequency.name includes("flat")) {
+                } else if (dominant_frequency.name.includes("flat")) {
                     flatIndicator.style.display = "block";
                 } else {
                     inTuneIndicator.style.display = "block";
