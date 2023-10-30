@@ -4,7 +4,7 @@
     <title>Guitar Tuner</title>
 </head>
 <body>
-    <h1>G_Tuner</h1>
+    <h1>tuner</h1>
     <p>This page will automatically request microphone access and start tuning when you grant permission.</p>
     
     <div id="tunerDisplay">Waiting for microphone access...</div>
@@ -27,10 +27,14 @@
                 tuner.toDestination();
 
                 function tunerInput() {
-                    const note = tuner.getFrequency();
-                    if (note) {
-                        const closestNote = Tone.Frequency(note).toNote();
-                        tunerDisplay.textContent = `Detected Note: ${closestNote}`;
+                    try {
+                        const note = tuner.getFrequency();
+                        if (note) {
+                            const closestNote = Tone.Frequency(note).toNote();
+                            tunerDisplay.textContent = `Detected Note: ${closestNote}`;
+                        }
+                    } catch (error) {
+                        console.error("Error in tunerInput:", error);
                     }
                     requestAnimationFrame(tunerInput);
                 }
