@@ -1,55 +1,74 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Guitar Tuner</title>
-    <script src="path/to/pitch.js"></script>
+<script>
+var correlation_worker = new Worker(URL.createObjectURL(new Blob([document.querySelector('script[type="correlation-worker"]').textContent], { type: 'application/javascript' })));
+
+correlation_worker.addEventListener("message", interpret_correlation_result);
+
+function interpret_correlation_result(event) {
+    var timeseries = event.data.timeseries;
+    var frequency_amplitudes = event.data.frequency_amplitudes;
+
+    var magnitudes = frequency_amplitudes.map(function(z) { return z[0] * z[0] + z[1] * z[1]; });
+
+    var maximum_index = -1;
+    var maximum_magnitude = 0;
+    for (var i = 0; i < magnitudes.length; i++) {
+        if (magnitudes[i] <= maximum_magnitude) continue;
+
+        maximum_index = i;
+        maximum_magnitude = magnitudes[i];
+    }
+
+    var average = magnitudes.reduce(function(a, b) { return a + b; }, 0) / magnitudes.length;
+    var confidence = maximum_magnitude / average;
+    var confidence_threshold = 10;
+
+    if (confidence > confidence_threshold) {
+        var dominant_frequency = test_frequencies[maximum_index];
+        document.getElementById("note-name").textContent = dominant_frequency.name;
+        document.getElementById("frequency").textContent = dominant_frequency.frequency;
+    }
+}
+</script>
 </head>
+
 <body>
-    <h1>Gtune</h1>
+<p>It sounds like you're playing...</p>
+<h1 id="note-name"></h1>
+<p>
+    <span>frequency (Hz):</span>
+    <span id="frequency"></span>
+</p>
+<hr>
+<button id="play-note">start/stop an E note</button>
+<hr>
+<a href="https://github.com/jbergknoff/guitar-tuner">Source code</a> / <a href="http://jonathan.bergknoff.com/journal/making-a-guitar-tuner-html5">Explanatory article</a>
 
-    <div id="tuner">
-        <button id="start-btn">Start Tuning</button>
-        <div id="tuner-display">Tune your guitar here.</div>
-    </div>
+<script type="correlation-worker">
+self.onmessage = function(event) {
+    var timeseries = event.data.timeseries;
+    var test_frequencies = event.data.test_frequencies;
+    var sample_rate = event.data.sample_rate;
+    var amplitudes = compute_correlations(timeseries, test_frequencies, sample_rate);
+    self.postMessage({ "timeseries": timeseries, "frequency_amplitudes": amplitudes });
+};
 
-    <script>
-        let audioContext = null;
-        let analyser = null;
-        const bufferLength = 2048;
-        const dataArray = new Uint8Array(bufferLength);
-        const pitchDetection = new PitchDetection({
-            sampleRate: 44100, // Set your sample rate
-            bufferSize: bufferLength,
-        });
+function compute_correlations(timeseries, test_frequencies, sample_rate) {
+    var scale_factor = 2 * Math.PI / sample_rate;
+    var amplitudes = test_frequencies.map(function(f) {
+        var frequency = f.frequency;
+        var accumulator = [0, 0];
+        for (var t = 0; t < timeseries.length; t++) {
+            accumulator[0] += timeseries[t] * Math.cos(scale_factor * frequency * t);
+            accumulator[1] += timeseries[t] * Math.sin(scale_factor * frequency * t);
+        }
+        return accumulator;
+    });
+    return amplitudes;
+}
+</script>
 
-        document.getElementById('start-btn').addEventListener('click', () => {
-            if (!audioContext) {
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                analyser = audioContext.createAnalyser();
-                navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
-                    const microphone = audioContext.createMediaStreamSource(stream);
-                    microphone.connect(analyser);
-                }).catch((error) => {
-                    console.error('Error accessing the microphone:', error);
-                });
-            }
-
-            function updatePitch() {
-                analyser.getByteTimeDomainData(dataArray);
-                const pitchValue = pitchDetection.getPitch(dataArray);
-
-                if (pitchValue) {
-                    document.getElementById('tuner-display').textContent = `Detected pitch: ${pitchValue.toFixed(2)} Hz`;
-                } else {
-                    document.getElementById('tuner-display').textContent = 'No pitch detected.';
-                }
-
-                requestAnimationFrame(updatePitch);
-            }
-
-            // Start pitch detection
-            updatePitch();
-        });
-    </script>
 </body>
 </html>
