@@ -5,7 +5,8 @@
         .indicator-container {
             display: flex;
             justify-content: space-between;
-            align-items: center; /* Vertically align the circles */
+            width: 120px; /* Adjust the width to your preference */
+            margin: 0 auto; /* Center the container horizontally */
         }
 
         .indicator {
@@ -61,7 +62,7 @@
         {
             var audio_context = new AudioContext();
             var microphone = audio_context.createMediaStreamSource(stream);
-            window.source = microphone; // Workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=934512
+            window.source = microphone; // Workaround for https://bugzilla.mozilla.org/show_bug.cgi?id/934512
             var script_processor = audio_context.createScriptProcessor(1024, 1, 1);
 
             script_processor.connect(audio_context.destination);
@@ -138,7 +139,7 @@
                 if (dominant_frequency.name.includes("sharp")) {
                     sharpIndicator.style.display = "block";
                 } else if (dominant_frequency.name.includes("flat")) {
-                    flatIndicator.style.display = "block";
+                    flatIndicator.style display = "block";
                 } else {
                     inTuneIndicator.style.display = "block";
                 }
