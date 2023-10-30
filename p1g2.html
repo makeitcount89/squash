@@ -40,7 +40,7 @@
             background-color: red;
         }
     </style>
-    <script src="easypiechart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gauge-chart"></script>
     <script>
         var C2 = 65.41; // C2 note, in Hz
         var notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
@@ -52,6 +52,25 @@
             var just_above = { "frequency": note_frequency * Math.pow(2, 1 / 48), "name": note_name + " (a bit sharp)" };
             var just_below = { "frequency": note_frequency * Math.pow(2, -1 / 48), "name": note_name + " (a bit flat)" };
             test_frequencies = test_frequencies.concat([just_below, note, just_above]);
+        }
+
+        // Initialize the guitar tuner gauge
+        const gauge = GaugeChart.gaugeChart('guitar-tuner-gauge', {
+            animate: true,
+            background: 'white',
+            foreground: '#00FF00', // Color of the needle
+            value: 0, // Initial value (set it according to your needs)
+            min: -50, // Minimum value for the gauge
+            max: 50, // Maximum value for the gauge
+        });
+
+        // Update the tuner gauge's value based on the frequency
+        function updateTunerGauge(frequency) {
+            // Calculate the deviation from the target frequency (adjust as needed)
+            var deviation = targetFrequency - frequency;
+
+            // Update the gauge with the deviation value
+            gauge.update(deviation);
         }
 
         window.addEventListener("load", initialize);
@@ -73,7 +92,7 @@
             var script_processor = audio_context.createScriptProcessor(1024, 1, 1);
 
             script_processor.connect(audio_context.destination);
-            microphone connect(script_processor);
+            microphone.connect(script_processor);
 
             var buffer = [];
             var sample_length_milliseconds = 100;
@@ -102,33 +121,7 @@
             script_processor.onaudioprocess = window.capture_audio;
         }
 
-        // Function to update the frequency chart
-        var chart;
-
-        function initializeChart() {
-            chart = new EasyPieChart(document.getElementById("frequency-chart"), {
-                barColor: 'green',
-                trackColor: 'lightgray',
-                scaleColor: false,
-                lineWidth: 10,
-                lineCap: 'butt',
-                size: 200,
-                animate: false
-            });
-        }
-
-        window.addEventListener("load", function () {
-            initialize();
-            initializeChart();
-        });
-
-        function updateFrequencyChart(frequency) {
-            if (chart) {
-                chart.update(frequency);
-            }
-        }
-
-        // Modify the interpret_correlation_result function to call updateFrequencyChart
+        // Modify the interpret_correlation_result function to call updateTunerGauge
         function interpret_correlation_result(event) {
             var timeseries = event.data.timeseries;
             var frequency_amplitudes = event.data.frequency_amplitudes;
@@ -153,9 +146,9 @@
                 var dominant_frequency = test_frequencies[maximum_index];
                 document.getElementById("note-name").textContent = dominant_frequency.name;
                 document.getElementById("frequency").textContent = dominant_frequency.frequency;
-                
-                // Update the frequency chart
-                updateFrequencyChart(dominant_frequency.frequency);
+
+                // Update the tuner gauge
+                updateTunerGauge(dominant_frequency.frequency);
 
                 var flatIndicator = document.getElementById("flat-indicator");
                 var inTuneIndicator = document.getElementById("in-tune-indicator");
@@ -182,11 +175,11 @@
         <span style="font-size: 2em;">frequency (Hz):</span>
         <span id="frequency" style="font-size: 2em;"></span>
     </p>
-    <!-- Add a container for the frequency chart -->
-    <div id="frequency-chart" style="margin: 20px;"></div>
+    <!-- Add a container for the guitar tuner gauge -->
+    <div id="guitar-tuner-gauge" style="width: 200px; height: 200px;"></div>
     <div class="indicator-container">
         <div id="flat-indicator" class="indicator flat"></div>
-        <div id="in-tune-indicator" class="indicator in-tune"></div>
+        <div id "in-tune-indicator" class="indicator in-tune"></div>
         <div id="sharp-indicator" class="indicator sharp"></div>
     </div>
 </body>
