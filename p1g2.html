@@ -25,11 +25,11 @@
         }
 
         .meter-box {
-            width: 100px;
-            height: 10px;
+            width: 10px; /* Set the width of the vertical meter */
+            height: 100px; /* Set the height of the vertical meter */
             background-color: black;
             position: absolute;
-            bottom: -20px;
+            top: 0;
             left: 50%;
             transform: translateX(-50%);
         }
@@ -159,6 +159,10 @@
                 } else {
                     inTuneIndicator.style.display = "block";
                 }
+
+                // Move the meter horizontally based on pitch (change this logic as needed)
+                var meterBox = document.getElementById("meter-box");
+                meterBox.style.left = `${50 + (dominant_frequency.frequency - C2) * 10}px`;
             }
         }
 
@@ -189,13 +193,13 @@
     </p>
     <div class="indicator-container">
         <div id="flat-indicator" class="indicator flat">
-            <div class="meter-box"></div>
+            <div id="meter-box" class="meter-box"></div>
         </div>
         <div id="in-tune-indicator" class="indicator in-tune">
-            <div class="meter-box"></div>
+            <div id="meter-box" class="meter-box"></div>
         </div>
         <div id="sharp-indicator" class="indicator sharp">
-            <div class="meter-box"></div>
+            <div id="meter-box" class="meter-box"></div>
         </div>
     </div>
 </body>
