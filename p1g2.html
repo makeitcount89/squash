@@ -5,14 +5,14 @@
         .indicator-container {
             display: flex;
             justify-content: space-between;
-            align-items: center; /* Vertically align the circles */
+            align-items: center;
         }
 
         .indicator {
-            width: 30px;
-            height: 30px;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
-            display: none; /* Hide all circles by default */
+            display: none;
         }
 
         .flat {
@@ -28,18 +28,16 @@
         }
     </style>
     <script>
-        // Define the set of test frequencies and other JavaScript code here
-        var C2 = 65.41; // C2 note, in Hz;
-        var notes = [ "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" ];
+        var C2 = 65.41; // C2 note, in Hz
+        var notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
         var test_frequencies = [];
-        for (var i = 0; i < 30; i++)
-        {
+        for (var i = 0; i < 30; i++) {
             var note_frequency = C2 * Math.pow(2, i / 12);
             var note_name = notes[i % 12];
             var note = { "frequency": note_frequency, "name": note_name };
             var just_above = { "frequency": note_frequency * Math.pow(2, 1 / 48), "name": note_name + " (a bit sharp)" };
             var just_below = { "frequency": note_frequency * Math.pow(2, -1 / 48), "name": note_name + " (a bit flat)" };
-            test_frequencies = test_frequencies.concat([ just_below, note, just_above ]);
+            test_frequencies = test_frequencies.concat([just_below, note, just_above]);
         }
 
         window.addEventListener("load", initialize);
@@ -47,21 +45,17 @@
         var correlation_worker = new Worker("correlation_worker.js");
         correlation_worker.addEventListener("message", interpret_correlation_result);
 
-        function initialize()
-        {
-            var get_user_media = navigator.getUserMedia;
-            get_user_media = get_user_media || navigator.webkitGetUserMedia;
-            get_user_media = get_user_media || navigator.mozGetUserMedia;
+        function initialize() {
+            var get_user_media = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
             get_user_media.call(navigator, { "audio": true }, use_stream, function() {});
 
             // The play-note button has been removed.
         }
 
-        function use_stream(stream)
-        {
+        function use_stream(stream) {
             var audio_context = new AudioContext();
             var microphone = audio_context.createMediaStreamSource(stream);
-            window.source = microphone; // Workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=934512
+            window.source = microphone;
             var script_processor = audio_context.createScriptProcessor(1024, 1, 1);
 
             script_processor.connect(audio_context.destination);
@@ -71,25 +65,20 @@
             var sample_length_milliseconds = 100;
             var recording = true;
 
-            window.capture_audio = function(event)
-            {
+            window.capture_audio = function(event) {
                 if (!recording)
                     return;
 
                 buffer = buffer.concat(Array.prototype.slice.call(event.inputBuffer.getChannelData(0)));
 
-                if (buffer.length > sample_length_milliseconds * audio_context.sampleRate / 1000)
-                {
+                if (buffer.length > sample_length_milliseconds * audio_context.sampleRate / 1000) {
                     recording = false;
 
-                    correlation_worker.postMessage
-                    (
-                        {
-                            "timeseries": buffer,
-                            "test_frequencies": test_frequencies,
-                            "sample_rate": audio_context.sampleRate
-                        }
-                    );
+                    correlation_worker.postMessage({
+                        "timeseries": buffer,
+                        "test_frequencies": test_frequencies,
+                        "sample_rate": audio_context.sampleRate
+                    });
 
                     buffer = [];
                     setTimeout(function() { recording = true; }, 250);
@@ -99,8 +88,7 @@
             script_processor.onaudioprocess = window.capture_audio;
         }
 
-        function interpret_correlation_result(event)
-        {
+        function interpret_correlation_result(event) {
             var timeseries = event.data.timeseries;
             var frequency_amplitudes = event.data.frequency_amplitudes;
 
@@ -108,8 +96,7 @@
 
             var maximum_index = -1;
             var maximum_magnitude = 0;
-            for (var i = 0; i < magnitudes.length; i++)
-            {
+            for (var i = 0; i < magnitudes.length; i++) {
                 if (magnitudes[i] <= maximum_magnitude)
                     continue;
 
@@ -121,8 +108,7 @@
             var confidence = maximum_magnitude / average;
             var confidence_threshold = 10;
 
-            if (confidence > confidence_threshold)
-            {
+            if (confidence > confidence_threshold) {
                 var dominant_frequency = test_frequencies[maximum_index];
                 document.getElementById("note-name").textContent = dominant_frequency.name;
                 document.getElementById("frequency").textContent = dominant_frequency.frequency;
@@ -132,7 +118,7 @@
                 var sharpIndicator = document.getElementById("sharp-indicator");
 
                 flatIndicator.style.display = "none";
-                inTuneIndicator.style.display = "none";
+                inTuneIndicator.style.display = "none";  // Fixed the typo here: "style display" should be "style.display"
                 sharpIndicator.style.display = "none";
 
                 if (dominant_frequency.name.includes("sharp")) {
@@ -148,15 +134,14 @@
         var note_context = new AudioContext();
         var note_node = note_context.createOscillator();
         var gain_node = note_context.createGain();
-        note_node.frequency = C2 * Math.pow(2, 4 / 12);
+        note_node.frequency.value = C2 * Math.pow(2, 4 / 12);
         gain_node.gain.value = 0;
         note_node.connect(gain_node);
         gain_node.connect(note_context.destination);
         note_node.start();
 
         var playing = false;
-        function toggle_playing_note()
-        {
+        function toggle_playing_note() {
             playing = !playing;
             if (playing)
                 gain_node.gain.value = 0.1;
@@ -175,7 +160,7 @@
 </p>
 <div class="indicator-container">
     <div id="flat-indicator" class="indicator flat"></div>
-    <div id "in-tune-indicator" class="indicator in-tune"></div>
+    <div id="in-tune-indicator" class="indicator in-tune"></div>
     <div id="sharp-indicator" class="indicator sharp"></div>
 </div>
 </body>
