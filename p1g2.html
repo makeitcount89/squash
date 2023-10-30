@@ -125,25 +125,20 @@
                 document.getElementById("note-name").textContent = dominant_frequency.name;
                 document.getElementById("frequency").textContent = dominant_frequency.frequency;
 
-                var redCircleFlat = document.getElementById("flat-indicator");
-                var greenCircleTune = document.getElementById("tune-indicator");
-                var redCircleSharp = document.getElementById("sharp-indicator");
+                var flatIndicator = document.getElementById("flat-indicator");
+                var inTuneIndicator = document.getElementById("in-tune-indicator");
+                var sharpIndicator = document.getElementById("sharp-indicator");
+
+                flatIndicator.style.display = "none";
+                inTuneIndicator.style.display = "none";
+                sharpIndicator.style.display = "none";
 
                 if (dominant_frequency.name.includes("sharp")) {
-                    redCircleFlat.classList.remove("in-tune");
-                    greenCircleTune.classList.remove("in-tune");
-                    redCircleSharp.classList.remove("in-tune");
-                    redCircleSharp.classList.add("in-tune");
+                    sharpIndicator.style.display = "block";
                 } else if (dominant_frequency.name.includes("flat")) {
-                    redCircleFlat.classList.remove("in-tune");
-                    greenCircleTune.classList.remove("in-tune");
-                    redCircleSharp.classList.remove("in-tune");
-                    redCircleFlat.classList.add("in-tune");
+                    flatIndicator.style.display = "block";
                 } else {
-                    redCircleFlat.classList.remove("in-tune");
-                    greenCircleTune.classList.remove("in-tune");
-                    redCircleSharp.classList.remove("in-tune");
-                    greenCircleTune.classList.add("in-tune");
+                    inTuneIndicator.style.display = "block";
                 }
             }
         }
@@ -178,7 +173,7 @@
 </p>
 <div class="indicator-container">
     <div id="flat-indicator" class="indicator flat"></div>
-    <div id="tune-indicator" class="indicator in-tune"></div>
+    <div id="in-tune-indicator" class="indicator in-tune"></div>
     <div id="sharp-indicator" class="indicator sharp"></div>
 </div>
 <hr>
