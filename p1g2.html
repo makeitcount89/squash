@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>GTuner</title>
+    <title>GTuner2</title>
     <style>
         .needle {
             width: 2px;
@@ -20,11 +20,10 @@
     <div id="pitchDisplay"></div>
     <div class="needle"></div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Tone.js/13.2.4/Tone.js"></script>
+    <script src="https://cdn.rawgit.com/audiocogs/pitch.js/master/pitch.js"></script>
     <script>
         const audioContext = new AudioContext();
-        const tuna = new Tuna(audioContext);
-        let mic, tuner, isTuning = false;
+        let mic, isTuning = false;
         const referenceTones = {
             E2: 82.41,
             A2: 110.00,
@@ -44,24 +43,17 @@
                     .then(function (stream) {
                         mic = audioContext.createMediaStreamSource(stream);
 
-                        tuner = new tuna.PitchDetect();
-                        mic.connect(tuner);
+                        const pitch = new Pitch(audioContext);
+                        mic.connect(pitch);
 
-                        tuner.onNoteDetected = (note, frequency) => {
-                            pitchDisplay.textContent = `Detected Pitch: ${note}`;
+                        pitch.onaudioprocess = (note) => {
+                            pitchDisplay.textContent = `Detected Pitch: ${note.note}`;
+                            const targetFrequency = referenceTones[note.note];
+                            const pitchDifference = note.frequency - targetFrequency;
+                            const maxDifference = 10;
 
-                            // Visual Feedback (Needle): Rotate the needle based on pitch accuracy
-                            const targetFrequency = referenceTones[note];
-                            const pitchDifference = frequency - targetFrequency;
-                            const maxDifference = 10; // Adjust as needed for accuracy
-
-                            // Limit the rotation angle to provide visual feedback
-                            const rotation = Math.min(Math.max(pitchDifference / maxDifference, -1), 1) * 45; // 45 degrees max
-
-                            // Apply rotation to the needle
+                            const rotation = Math.min(Math.max(pitchDifference / maxDifference, -1), 1) * 45;
                             needle.style.transform = `rotate(${rotation}deg)`;
-
-                            // You can also add logic to give feedback on whether the pitch is in tune.
                         };
 
                         isTuning = true;
@@ -74,11 +66,8 @@
                 if (mic) {
                     mic.disconnect();
                 }
-                if (tuner) {
-                    tuner.onNoteDetected = null;
-                }
                 pitchDisplay.textContent = 'Tuning stopped';
-                needle.style.transform = 'rotate(0deg)'; // Reset the needle
+                needle.style.transform = 'rotate(0deg)';
                 isTuning = false;
                 startButton.textContent = 'Start Tuning';
             }
