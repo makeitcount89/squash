@@ -1,61 +1,52 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>GTuner</title>
-    <style>
-        .needle {
-            width: 2px;
-            height: 80px;
-            background-color: red;
-            position: absolute;
-            transform-origin: 50% 100%;
-        }
-    </style>
+    <title>Guitar Tuner</title>
 </head>
 <body>
-    <h1>GTunA</h1>
-    <p>GTuner will start automatically when the page loads.</p>
-    <div id="pitchDisplay"></div>
-    <div class="needle"></div>
+    <h1>Guitar Tuna2</h1>
+    <p>Click the "Start Tuner" button and play a string on your guitar. The tuner will detect the pitch.</p>
+    
+    <button id="startTuner">Start Tuner</button>
+    <div id="tunerDisplay">Waiting for input...</div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tuna/0.9.4/tuna.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tuna/0.4.3/tuna.min.js"></script>
     <script>
-        const audioContext = new AudioContext();
-        let isTuning = true; // Start automatically
+        let audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        let tuner = new Tuna(audioContext);
 
-        const referenceTones = {
-            E2: 82.41,
-            A2: 110.00,
-            D3: 146.83,
-            G3: 196.00,
-            B3: 246.94,
-            highE4: 329.63
-        };
+        let micStream;
+        let tunerNode = new tuner.GuitarTuner({
+            mute: false,
+            bufferLength: 4096,
+            audioContext: audioContext,
+        });
 
-        const pitchDisplay = document.getElementById('pitchDisplay');
-        const needle = document.querySelector('.needle');
+        document.getElementById("startTuner").addEventListener("click", () => {
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then((stream) => {
+                    micStream = stream;
+                    let source = audioContext.createMediaStreamSource(stream);
+                    source.connect(tunerNode.input);
 
-        // Create a new microphone source
-        const mic = new MediaStreamAudioSourceNode(audioContext, { mediaStream: null });
+                    tunerNode.init();
+                    tunerNode.enable();
+                    document.getElementById("tunerDisplay").textContent = "Tuning...";
 
-        // Create a new tuner
-        const tuner = new Tuna.Tuna({ audioContext: audioContext }).Tuna.PitchDetect();
+                    tunerNode.onNoteDetected = (note) => {
+                        document.getElementById("tunerDisplay").textContent = `Detected Note: ${note}`;
+                    };
+                })
+                .catch((error) => {
+                    console.error("Error accessing microphone:", error);
+                });
+        });
 
-        // Connect the microphone source to the tuner
-        mic.connect(tuner);
-
-        // Automatically start the tuner when the microphone is available
-        if (isTuning) {
-            tuner.onNoteDetected = (note, frequency) => {
-                pitchDisplay.textContent = `Detected Pitch: ${note}`;
-                const targetFrequency = referenceTones[note];
-                const pitchDifference = frequency - targetFrequency;
-                const maxDifference = 10;
-                const rotation = Math.min(Math.max(pitchDifference / maxDifference, -1), 1) * 45;
-                needle.style.transform = `rotate(${rotation}deg)`;
-            };
-        }
+        window.addEventListener("beforeunload", () => {
+            if (micStream) {
+                micStream.getTracks().forEach((track) => track.stop());
+            }
+        });
     </script>
 </body>
 </html>
