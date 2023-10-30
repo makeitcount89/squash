@@ -1,46 +1,27 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Analog Guitar Tuner Gauge</title>
-  <!-- Include the JustGage library from a CDN -->
-  <script src="https://cdn.jsdelivr.net/gh/toorshia/justgage@1.4.2/justgage.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Gauge</title>
+
+    <!-- Include JustGage library from a CDN -->
+    <script src="https://cdn.jsdelivr.net/gh/toorshia/justgage@1.4.1/justgage.js"></script>
 </head>
 <body>
-  <!-- Create a container for the gauge -->
-  <div id="guitarTunerGauge" style="width: 300px; height: 200px;"></div>
+    <div id="gauge-container" style="width: 200px; height: 200px;"></div>
 
-  <script>
-    // JavaScript code to initialize and configure the gauge
-    var gaugeOptions = {
-      id: "guitarTunerGauge", // ID of the container element
-      value: 0, // Initial value
-      min: -50, // Minimum value
-      max: 50, // Maximum value
-      title: "Tuner", // Title for the gauge
-      valueFontColor: "#333", // Color of the value display
-      levelColors: ["#ff0000", "#ffff00", "#00ff00"], // Colors for different value ranges
-      counter: true, // Display the current value
-    };
-
-    var guitarTunerGauge = new JustGage(gaugeOptions);
-
-    // Function to update the gauge value (simulated tuning)
-    function tuneGuitar(value) {
-      guitarTunerGauge.refresh(value);
-    }
-
-    // Simulated tuning: Adjust the gauge value
-    setTimeout(function () {
-      tuneGuitar(-30); // Example: Tuning the guitar to -30 (red zone)
-    }, 1000);
-
-    setTimeout(function () {
-      tuneGuitar(0); // Example: Tuning the guitar to 0 (center)
-    }, 2000);
-
-    setTimeout(function () {
-      tuneGuitar(30); // Example: Tuning the guitar to 30 (green zone)
-    }, 3000);
-  </script>
+    <script>
+        // JavaScript code to create and configure the gauge
+        var g = new JustGage({
+            id: "gauge-container",
+            value: 50, // Initial value
+            min: 0,
+            max: 100,
+            title: "Gauge Title",
+            label: "Gauge Label",
+            levelColors: ["#FF0000", "#FFFF00", "#00FF00"],
+        });
+    </script>
 </body>
 </html>
