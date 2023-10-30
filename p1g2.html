@@ -11,11 +11,18 @@
             width: 30px;
             height: 30px;
             border-radius: 50%;
+        }
+
+        .flat {
             background-color: red;
         }
 
         .in-tune {
             background-color: green;
+        }
+
+        .sharp {
+            background-color: red;
         }
     </style>
     <script>
@@ -118,14 +125,25 @@
                 document.getElementById("note-name").textContent = dominant_frequency.name;
                 document.getElementById("frequency").textContent = dominant_frequency.frequency;
 
-                var redCircle = document.getElementById("sharp-flat-indicator");
+                var redCircleFlat = document.getElementById("flat-indicator");
+                var greenCircleTune = document.getElementById("tune-indicator");
+                var redCircleSharp = document.getElementById("sharp-indicator");
 
                 if (dominant_frequency.name.includes("sharp")) {
-                    redCircle.classList.remove("in-tune");
+                    redCircleFlat.classList.remove("in-tune");
+                    greenCircleTune.classList.remove("in-tune");
+                    redCircleSharp.classList.remove("in-tune");
+                    redCircleSharp.classList.add("in-tune");
                 } else if (dominant_frequency.name.includes("flat")) {
-                    redCircle.classList.remove("in-tune");
+                    redCircleFlat.classList.remove("in-tune");
+                    greenCircleTune.classList.remove("in-tune");
+                    redCircleSharp.classList.remove("in-tune");
+                    redCircleFlat.classList.add("in-tune");
                 } else {
-                    redCircle.classList.add("in-tune");
+                    redCircleFlat.classList.remove("in-tune");
+                    greenCircleTune.classList.remove("in-tune");
+                    redCircleSharp.classList.remove("in-tune");
+                    greenCircleTune.classList.add("in-tune");
                 }
             }
         }
@@ -159,9 +177,9 @@
     <span id="frequency"></span>
 </p>
 <div class="indicator-container">
-    <div id="sharp-flat-indicator" class="indicator"></div>
-    <div class="indicator in-tune"></div>
-    <div id="sharp-flat-indicator" class="indicator"></div>
+    <div id="flat-indicator" class="indicator flat"></div>
+    <div id="tune-indicator" class="indicator in-tune"></div>
+    <div id="sharp-indicator" class="indicator sharp"></div>
 </div>
 <hr>
 <button id="play-note">start/stop an E note</button>
