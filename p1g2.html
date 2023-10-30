@@ -1,47 +1,126 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Gauge.js Example</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.1.4/raphael-min.js"></script>
-    <script src="https://bernii.github.io/gauge.js/dist/gauge.min.js"></script>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .indicator-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .indicator {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: none;
+        }
+
+        .flat, .in-tune, .sharp {
+            font-size: 2em;
+        }
+
+        .flat {
+            background-color: red;
+        }
+
+        .in-tune {
+            background-color: green;
+        }
+
+        .sharp {
+            background-color: red;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/raphael@2.1.4/raphael.min.js"></script>
+    <script src="https://cdn.rawgit.com/rendro/easy-pie-chart/v2.1.6/jquery.easypiechart.min.js"></script>
 </head>
 <body>
     <div id="gauge-container"></div>
 
+    <h1 id="note-name" style="font-size: 6em;"></h1>
+    <p>
+        <span style="font-size: 2em;">frequency (Hz):</span>
+        <span id="frequency" style="font-size: 2em;"></span>
+    </p>
+    <div class="indicator-container">
+        <div id="flat-indicator" class="indicator flat"></div>
+        <div id="in-tune-indicator" class="indicator in-tune"></div>
+        <div id="sharp-indicator" class="indicator sharp"></div>
+    </div>
+
     <script>
         var opts = {
-            angle: 0, // The gauge angle (0 to 360)
-            lineWidth: 0.4, // The line thickness
-            radiusScale: 1, // The radius of the gauge
-            pointer: {
-                length: 0.6, // The length of the pointer
-                strokeWidth: 0.035, // The thickness of the pointer
-                color: '#000000' // The color of the pointer
+            lineWidth: 20,
+            size: 200,
+            rotate: 0,
+            animationSpeed: 1000,
+            scale: {
+                enabled: true,
+                type: "lines",
+                color: "black",
+                width: 2,
+                quantity: 20,
+                height: 10,
             },
-            limitMax: true,     // If true, the pointer will not go past the end of the gauge
-            limitMin: true,     // If true, the pointer will not go below the start of the gauge
-            colorStart: '#6FADCF',   // The start color of the gauge
-            colorStop: '#8FC0DA',    // The end color of the gauge
-            strokeColor: '#E0E0E0',  // The color of the gauge stroke
-            generateGradient: true,  // If true, a gradient between colorStart and colorStop will be created
         };
 
-        var target = document.getElementById("gauge-container"); // Get the container element
-        var gauge = new Gauge(target).setOptions(opts); // Create the gauge
-        gauge.maxValue = 100; // Set the maximum value of the gauge
-        gauge.animationSpeed = 32; // Set the animation speed (32 is a reasonable value)
+        var target = document.getElementById("gauge-container");
+        var gauge = new EasyPieChart(target, opts);
 
-        gauge.set(50); // Set the initial value of the gauge to 50
+        var audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        var microphone = null;
+        var bufferSize = 4096;
 
-        // You can update the gauge value dynamically
-        function updateGauge(newValue) {
-            gauge.set(newValue);
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(function (stream) {
+                    microphone = audioContext.createMediaStreamSource(stream);
+                    var scriptProcessor = audioContext.createScriptProcessor(bufferSize, 1, 1);
+                    scriptProcessor.onaudioprocess = processAudio;
+                    microphone.connect(scriptProcessor);
+                    scriptProcessor.connect(audioContext.destination);
+                })
+                .catch(function (error) {
+                    console.error("Error accessing microphone:", error);
+                });
+        } else {
+            console.error("getUserMedia not supported in this browser.");
         }
 
-        // Example: Update the gauge value to 75 after 3 seconds
-        setTimeout(function () {
-            updateGauge(75);
-        }, 3000);
+        var buffer = [];
+        var sampleLengthMilliseconds = 100;
+        var isRecording = true;
+
+        function processAudio(event) {
+            if (!isRecording) return;
+
+            var inputData = event.inputBuffer.getChannelData(0);
+            buffer = buffer.concat(Array.from(inputData));
+
+            if (buffer.length > (sampleLengthMilliseconds * audioContext.sampleRate) / 1000) {
+                isRecording = false;
+
+                // Process the audio buffer and detect the frequency (replace this with your logic)
+                var currentFrequency = Math.random() * 440; // Example: Random frequency
+
+                // Update the gauge with the detected frequency
+                gauge.update(currentFrequency);
+
+                buffer = [];
+                setTimeout(function () {
+                    isRecording = true;
+                }, 250);
+            }
+        }
     </script>
 </body>
 </html>
