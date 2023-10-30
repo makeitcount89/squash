@@ -9,10 +9,14 @@
         }
 
         .indicator {
-            width: 50px;
-            height: 50px;
+            width: 100px; /* Doubled the width */
+            height: 100px; /* Doubled the height */
             border-radius: 50%;
-            background-color: transparent;
+            display: none;
+        }
+
+        .flat, .in-tune, .sharp {
+            font-size: 2em; /* Doubled the font size */
         }
 
         .flat {
@@ -59,7 +63,7 @@
             var script_processor = audio_context.createScriptProcessor(1024, 1, 1);
 
             script_processor.connect(audio_context.destination);
-            microphone connect(script_processor);
+            microphone.connect(script_processor);
 
             var buffer = [];
             var sample_length_milliseconds = 100;
@@ -150,13 +154,12 @@
         }
     </script>
 </head>
-
 <body>
-<p>It sounds like you're playing...</p>
-<h1 id="note-name"></h1>
+<p style="font-size: 2em;">It sounds like you're playing...</p>
+<h1 id="note-name" style="font-size: 2em;"></h1>
 <p>
-    <span>frequency (Hz):</span>
-    <span id="frequency"></span>
+    <span style="font-size: 2em;">frequency (Hz):</span>
+    <span id="frequency" style="font-size: 2em;"></span>
 </p>
 <div class="indicator-container">
     <div id="flat-indicator" class="indicator flat"></div>
