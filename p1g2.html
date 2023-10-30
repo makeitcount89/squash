@@ -13,15 +13,27 @@
 
         .indicator-container {
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .meter-container {
+            display: flex;
             align-items: center;
         }
 
-        .indicator {
-            width: 100px; /* Doubled the width */
-            height: 100px; /* Doubled the height */
-            border-radius: 50%;
-            display: none;
+        .meter {
+            width: 200px;
+            height: 20px;
+            background: linear-gradient(to right, red 0%, yellow 50%, green 100%);
+        }
+
+        .meter-marker {
+            width: 2px;
+            height: 20px;
+            background-color: black;
+            position: absolute;
         }
 
         .flat, .in-tune, .sharp {
@@ -40,7 +52,6 @@
             background-color: red;
         }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/gauge-chart"></script>
     <script>
         var C2 = 65.41; // C2 note, in Hz
         var notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
@@ -52,25 +63,6 @@
             var just_above = { "frequency": note_frequency * Math.pow(2, 1 / 48), "name": note_name + " (a bit sharp)" };
             var just_below = { "frequency": note_frequency * Math.pow(2, -1 / 48), "name": note_name + " (a bit flat)" };
             test_frequencies = test_frequencies.concat([just_below, note, just_above]);
-        }
-
-        // Initialize the guitar tuner gauge
-        const gauge = GaugeChart.gaugeChart('guitar-tuner-gauge', {
-            animate: true,
-            background: 'white',
-            foreground: '#00FF00', // Color of the needle
-            value: 0, // Initial value (set it according to your needs)
-            min: -50, // Minimum value for the gauge
-            max: 50, // Maximum value for the gauge
-        });
-
-        // Update the tuner gauge's value based on the frequency
-        function updateTunerGauge(frequency) {
-            // Calculate the deviation from the target frequency (adjust as needed)
-            var deviation = targetFrequency - frequency;
-
-            // Update the gauge with the deviation value
-            gauge.update(deviation);
         }
 
         window.addEventListener("load", initialize);
@@ -121,7 +113,6 @@
             script_processor.onaudioprocess = window.capture_audio;
         }
 
-        // Modify the interpret_correlation_result function to call updateTunerGauge
         function interpret_correlation_result(event) {
             var timeseries = event.data.timeseries;
             var frequency_amplitudes = event.data.frequency_amplitudes;
@@ -147,21 +138,22 @@
                 document.getElementById("note-name").textContent = dominant_frequency.name;
                 document.getElementById("frequency").textContent = dominant_frequency.frequency;
 
-                // Update the tuner gauge
-                updateTunerGauge(dominant_frequency.frequency);
-
                 var flatIndicator = document.getElementById("flat-indicator");
                 var inTuneIndicator = document.getElementById("in-tune-indicator");
                 var sharpIndicator = document.getElementById("sharp-indicator");
+                var meterMarker = document.getElementById("meter-marker");
 
                 flatIndicator.style.display = "none";
                 inTuneIndicator.style.display = "none";
                 sharpIndicator.style.display = "none";
+                meterMarker.style.left = "50%"; // Reset the meter marker to the center
 
                 if (dominant_frequency.name.includes("sharp")) {
                     sharpIndicator.style.display = "block";
+                    meterMarker.style.left = "75%"; // Move the meter marker to the right (sharp)
                 } else if (dominant_frequency.name.includes("flat")) {
                     flatIndicator.style.display = "block";
+                    meterMarker.style.left = "25%"; // Move the meter marker to the left (flat)
                 } else {
                     inTuneIndicator.style.display = "block";
                 }
@@ -175,12 +167,15 @@
         <span style="font-size: 2em;">frequency (Hz):</span>
         <span id="frequency" style="font-size: 2em;"></span>
     </p>
-    <!-- Add a container for the guitar tuner gauge -->
-    <div id="guitar-tuner-gauge" style="width: 200px; height: 200px;"></div>
     <div class="indicator-container">
         <div id="flat-indicator" class="indicator flat"></div>
-        <div id "in-tune-indicator" class="indicator in-tune"></div>
+        <div id="in-tune-indicator" class="indicator in-tune"></div>
         <div id="sharp-indicator" class="indicator sharp"></div>
+    </div>
+    <div class="meter-container">
+        <div class="meter">
+            <div id="meter-marker" class="meter-marker"></div>
+        </div>
     </div>
 </body>
 </html>
