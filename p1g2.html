@@ -4,50 +4,42 @@
     <title>Guitar Tuner</title>
 </head>
 <body>
-    <h1>tuner</h1>
-    <p>This page will automatically request microphone access and start tuning when you grant permission.</p>
+    <h1>Tuner</h1>
     
-    <div id="tunerDisplay">Waiting for microphone access...</div>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.7/Tone.min.js"></script>
+    <div id="tuner">
+        <button id="start-btn">Start Tuning</button>
+        <div id="tuner-display">Tune your guitar here.</div>
+    </div>
+
     <script>
-        let tunerDisplay = document.getElementById("tunerDisplay");
-
-        async function startTuner() {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                const audioContext = new AudioContext();
-                const microphone = audioContext.createMediaStreamSource(stream);
-                const tuner = new Tone.FrequencyAnalyzer({
-                    size: 2048, // Buffer size
-                    type: "fft",
+        let audioContext = null;
+        let analyser = null;
+        
+        document.getElementById('start-btn').addEventListener('click', () => {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioContext.createAnalyser();
+                navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+                    const microphone = audioContext.createMediaStreamSource(stream);
+                    microphone.connect(analyser);
+                }).catch((error) => {
+                    console.error('Error accessing the microphone:', error);
                 });
-
-                microphone.connect(tuner);
-                tuner.toDestination();
-
-                function tunerInput() {
-                    try {
-                        const note = tuner.getFrequency();
-                        if (note) {
-                            const closestNote = Tone.Frequency(note).toNote();
-                            tunerDisplay.textContent = `Detected Note: ${closestNote}`;
-                        }
-                    } catch (error) {
-                        console.error("Error in tunerInput:", error);
-                    }
-                    requestAnimationFrame(tunerInput);
-                }
-
-                tunerInput();
-            } catch (error) {
-                console.error("Error accessing microphone:", error);
-                tunerDisplay.textContent = "Failed to access the microphone.";
             }
-        }
+            
+            analyser.fftSize = 2048;
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
 
-        // Automatically start the tuner when the page loads
-        startTuner();
+            function updatePitch() {
+                analyser.getByteTimeDomainData(dataArray);
+                // Your pitch detection algorithm can be implemented here.
+
+                requestAnimationFrame(updatePitch);
+            }
+
+            updatePitch();
+        });
     </script>
 </body>
 </html>
