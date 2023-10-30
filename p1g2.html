@@ -2,10 +2,10 @@
 <html>
 <head>
     <title>Guitar Tuner</title>
-    <script src="https://cdn.jsdelivr.net/npm/tone@14"></script>
+    <script src="path/to/pitch.js"></script>
 </head>
 <body>
-    <h1>G2uner</h1>
+    <h1>Gtune</h1>
 
     <div id="tuner">
         <button id="start-btn">Start Tuning</button>
@@ -15,6 +15,12 @@
     <script>
         let audioContext = null;
         let analyser = null;
+        const bufferLength = 2048;
+        const dataArray = new Uint8Array(bufferLength);
+        const pitchDetection = new PitchDetection({
+            sampleRate: 44100, // Set your sample rate
+            bufferSize: bufferLength,
+        });
 
         document.getElementById('start-btn').addEventListener('click', () => {
             if (!audioContext) {
@@ -28,15 +34,9 @@
                 });
             }
 
-            const pitch = new Tone.PitchShift().toDestination();
-
-            analyser.fftSize = 2048;
-            const bufferLength = analyser.frequencyBinCount;
-            const dataArray = new Uint8Array(bufferLength);
-
             function updatePitch() {
                 analyser.getByteTimeDomainData(dataArray);
-                const pitchValue = pitch.getPitch(audioContext.sampleRate, dataArray);
+                const pitchValue = pitchDetection.getPitch(dataArray);
 
                 if (pitchValue) {
                     document.getElementById('tuner-display').textContent = `Detected pitch: ${pitchValue.toFixed(2)} Hz`;
@@ -47,6 +47,7 @@
                 requestAnimationFrame(updatePitch);
             }
 
+            // Start pitch detection
             updatePitch();
         });
     </script>
