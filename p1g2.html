@@ -13,189 +13,27 @@
             margin: 0;
         }
 
-        .indicator-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .indicator {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            display: none;
-        }
-
-        .flat, .in-tune, .sharp {
-            font-size: 2em;
-        }
-
-        .flat {
-            background-color: red;
-        }
-
-        .in-tune {
-            background-color: green;
-        }
-
-        .sharp {
-            background-color: red;
-        }
-
         #gauge-container {
             margin-top: 20px;
         }
     </style>
 </head>
 <body>
-    <h1 id="note-name" style="font-size: 6em;"></h1>
+    <h1 id="note-name" style="font-size: 2em;"></h1>
     <p>
-        <span style="font-size: 2em;">frequency (Hz):</span>
+        <span style="font-size: 2em;">Frequency (Hz):</span>
         <span id="frequency" style="font-size: 2em;"></span>
     </p>
-    <div class="indicator-container">
-        <div id="flat-indicator" class="indicator flat"></div>
-        <div id="in-tune-indicator" class="indicator in-tune"></div>
-        <div id="sharp-indicator" class="indicator sharp"></div>
-    </div>
     <div id="gauge-container"></div>
 
     <script>
-        var C2 = 65.41; // C2 note, in Hz
-        var notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
-        var test_frequencies = [];
-        for (var i = 0; i < 30; i++) {
-            var note_frequency = C2 * Math.pow(2, i / 12);
-            var note_name = notes[i % 12];
-            var note = { "frequency": note_frequency, "name": note_name };
-            var just_above = { "frequency": note_frequency * Math.pow(2, 1 / 48), "name": note_name + " (a bit sharp)" };
-            var just_below = { "frequency": note_frequency * Math.pow(2, -1 / 48), "name": note_name + " (a bit flat)" };
-            test_frequencies = test_frequencies.concat([just_below, note, just_above]);
-        }
-
-        window.addEventListener("load", initialize);
-
-        var correlation_worker = new Worker("correlation_worker.js");
-        correlation_worker.addEventListener("message", interpret_correlation_result);
-
-        var audio_context = new AudioContext();
-        var gain_node = audio_context.createGain();
-        var analyser = audio_context.createAnalyser();
+        var audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        var analyser = audioContext.createAnalyser();
         analyser.fftSize = 2048;
+        var bufferLength = analyser.frequencyBinCount;
+        var dataArray = new Uint8Array(bufferLength);
 
-        var buffer = new Float32Array(analyser.frequencyBinCount);
-
-        gain_node.connect(analyser);
-        analyser.connect(audio_context.destination);
-
-        gain_node.gain.value = 0;
-
-        function initialize() {
-            var get_user_media = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
-            get_user_media.call(navigator, { "audio": true }, use_stream, function () { });
-
-            // The play-note button has been removed.
-        }
-
-        function use_stream(stream) {
-            var microphone = audio_context.createMediaStreamSource(stream);
-
-            microphone.connect(gain_node);
-
-            setTimeout(startAudioProcessing, 500);
-        }
-
-        function startAudioProcessing() {
-            var timeseries = new Float32Array(analyser.fftSize);
-            var dominant_frequency = null;
-            var last_dominant_frequency = null;
-            var confidence = 0;
-            var confidence_threshold = 2;
-
-            var frameId = requestAnimationFrame(analyzeAudio);
-
-            function analyzeAudio() {
-                analyser.getFloatTimeDomainData(timeseries);
-
-                correlation_worker.postMessage({
-                    "timeseries": timeseries,
-                    "test_frequencies": test_frequencies,
-                    "sample_rate": audio_context.sampleRate
-                });
-
-                // Calculate dominant frequency and confidence
-                var magnitudes = new Float32Array(analyser.frequencyBinCount);
-                analyser.getFloatFrequencyData(magnitudes);
-
-                var maximum_index = -1;
-                var maximum_magnitude = -Infinity;
-                var average = 0;
-
-                for (var i = 0; i < magnitudes.length; i++) {
-                    if (magnitudes[i] > maximum_magnitude) {
-                        maximum_index = i;
-                        maximum_magnitude = magnitudes[i];
-                    }
-                    average += magnitudes[i];
-                }
-                average /= magnitudes.length;
-
-                if (maximum_magnitude > average && maximum_magnitude > confidence_threshold) {
-                    dominant_frequency = audio_context.sampleRate * maximum_index / analyser.fftSize;
-                    confidence = maximum_magnitude / average;
-                } else {
-                    dominant_frequency = null;
-                    confidence = 0;
-                }
-
-                if (dominant_frequency !== last_dominant_frequency) {
-                    last_dominant_frequency = dominant_frequency;
-
-                    if (dominant_frequency) {
-                        updateUI(dominant_frequency, confidence);
-                    } else {
-                        updateUI(null, 0);
-                    }
-                }
-
-                frameId = requestAnimationFrame(analyzeAudio);
-            }
-        }
-
-        function updateUI(frequency, confidence) {
-            if (frequency) {
-                var note_name = getNoteName(frequency);
-                document.getElementById("note-name").textContent = note_name.name;
-                document.getElementById("frequency").textContent = frequency.toFixed(2) + " Hz";
-
-                var flatIndicator = document.getElementById("flat-indicator");
-                var inTuneIndicator = document.getElementById("in-tune-indicator");
-                var sharpIndicator = document.getElementById("sharp-indicator");
-
-                flatIndicator.style.display = "none";
-                inTuneIndicator.style.display = "none";
-                sharpIndicator.style.display = "none";
-
-                if (note_name.name.includes("sharp")) {
-                    sharpIndicator.style.display = "block";
-                } else if (note_name.name.includes("flat")) {
-                    flatIndicator.style.display = "block";
-                } else {
-                    inTuneIndicator.style.display = "block";
-                }
-
-                // Update the gauge with the current frequency
-                if (gauge) {
-                    gauge.set(frequency);
-                }
-            }
-        }
-
-        function getNoteName(frequency) {
-            var noteIndex = Math.round(12 * Math.log2(frequency / C2));
-            var note = test_frequencies[noteIndex];
-            return note;
-        }
+        analyser.connect(audioContext.destination);
 
         // Create a gauge
         var opts = {
@@ -217,12 +55,42 @@
 
         var gaugeTarget = document.getElementById('gauge-container');
         var gauge = new Gauge(gaugeTarget).setOptions(opts);
-        gauge.maxValue = 100;
+        gauge.maxValue = 1000; // Adjust this value based on the frequency range you want to display.
         gauge.setMinValue(0);
         gauge.animationSpeed = 32;
-        gauge.set(50);
         gauge.setLabel("Tuner");
         gauge.setUnits("Hz");
+
+        var noteNameElement = document.getElementById("note-name");
+        var frequencyElement = document.getElementById("frequency");
+
+        // Your code for capturing audio, analyzing frequencies, and updating the UI here...
+        // You need to update noteNameElement.textContent, frequencyElement.textContent,
+        // and gauge.set(value) based on your audio analysis.
+
+        function updateUI(note, frequency) {
+            noteNameElement.textContent = note;
+            frequencyElement.textContent = frequency + " Hz";
+            gauge.set(frequency); // Update the gauge with the detected frequency.
+        }
+
+        // Sample code: Detect and update note and frequency
+        function analyzeAudio() {
+            analyser.getByteFrequencyData(dataArray);
+            // Your audio analysis code here...
+
+            // Example: Detecting the note C4 (261.63 Hz) for demonstration
+            var detectedNote = "C4";
+            var detectedFrequency = 261.63;
+
+            // Update the UI with the detected note and frequency
+            updateUI(detectedNote, detectedFrequency);
+
+            requestAnimationFrame(analyzeAudio);
+        }
+
+        // Start audio analysis
+        analyzeAudio();
     </script>
 </body>
 </html>
