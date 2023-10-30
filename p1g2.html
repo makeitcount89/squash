@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>GTuner2</title>
+    <title>GTuner</title>
     <style>
         .needle {
             width: 2px;
@@ -15,15 +15,13 @@
 </head>
 <body>
     <h1>GTuner</h1>
-    <p>Click the button to start tuning:</p>
-    <button id="startButton">Start Tuning</button>
     <div id="pitchDisplay"></div>
     <div class="needle"></div>
 
     <script src="https://cdn.rawgit.com/audiocogs/pitch.js/master/pitch.js"></script>
     <script>
         const audioContext = new AudioContext();
-        let mic, isTuning = false;
+        let mic, isTuning = true; // Start automatically
         const referenceTones = {
             E2: 82.41,
             A2: 110.00,
@@ -33,45 +31,29 @@
             highE4: 329.63
         };
 
-        const startButton = document.getElementById('startButton');
         const pitchDisplay = document.getElementById('pitchDisplay');
         const needle = document.querySelector('.needle');
 
-        startButton.addEventListener('click', () => {
-            if (!isTuning) {
-                navigator.mediaDevices.getUserMedia({ audio: true })
-                    .then(function (stream) {
-                        mic = audioContext.createMediaStreamSource(stream);
+        navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(function (stream) {
+                mic = audioContext.createMediaStreamSource(stream);
 
-                        const pitch = new Pitch(audioContext);
-                        mic.connect(pitch);
+                const pitch = new Pitch(audioContext);
+                mic.connect(pitch);
 
-                        pitch.onaudioprocess = (note) => {
-                            pitchDisplay.textContent = `Detected Pitch: ${note.note}`;
-                            const targetFrequency = referenceTones[note.note];
-                            const pitchDifference = note.frequency - targetFrequency;
-                            const maxDifference = 10;
+                pitch.onaudioprocess = (note) => {
+                    pitchDisplay.textContent = `Detected Pitch: ${note.note}`;
+                    const targetFrequency = referenceTones[note.note];
+                    const pitchDifference = note.frequency - targetFrequency;
+                    const maxDifference = 10;
 
-                            const rotation = Math.min(Math.max(pitchDifference / maxDifference, -1), 1) * 45;
-                            needle.style.transform = `rotate(${rotation}deg)`;
-                        };
-
-                        isTuning = true;
-                        startButton.textContent = 'Stop Tuning';
-                    })
-                    .catch(function (error) {
-                        console.error('Error accessing microphone:', error);
-                    });
-            } else {
-                if (mic) {
-                    mic.disconnect();
-                }
-                pitchDisplay.textContent = 'Tuning stopped';
-                needle.style.transform = 'rotate(0deg)';
-                isTuning = false;
-                startButton.textContent = 'Start Tuning';
-            }
-        });
+                    const rotation = Math.min(Math.max(pitchDifference / maxDifference, -1), 1) * 45;
+                    needle.style.transform = `rotate(${rotation}deg)`;
+                });
+            })
+            .catch(function (error) {
+                console.error('Error accessing microphone:', error);
+            });
     </script>
 </body>
 </html>
