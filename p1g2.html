@@ -1,66 +1,83 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <h1>Barcode Scanner</h1>
-    <div id="barcode-result"></div>
+    <meta charset="UTF-8">
+    <title>Guitar Tuner</title>
     <style>
-        body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-        }
-        video {
-            width: 90%;
-            max-width: 600px;
-            height: 70%;
-        }
-        #barcode-result {
-            font-size: 24px;
-            text-align: center;
+        .needle {
+            width: 2px;
+            height: 80px;
+            background-color: red;
             position: absolute;
-            top: 100px;
+            transform-origin: 50% 100%;
         }
     </style>
 </head>
 <body>
-    <video id="barcode-video" playsinline></video>
+    <h1>Guitar Tuner</h1>
+    <p>Click the button to start tuning:</p>
+    <button id="startButton">Start Tuning</button>
+    <div id="pitchDisplay"></div>
+    <div class="needle"></div>
 
-    <script type="module">
-        import Quagga from 'https://cdn.skypack.dev/quagga';
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Tone.js/13.2.4/Tone.js"></script>
+    <script>
+        const audioContext = new AudioContext();
+        const tuna = new Tuna(audioContext);
+        let mic, tuner, isTuning = false;
+        const referenceTones = {
+            E2: 82.41,
+            A2: 110.00,
+            D3: 146.83,
+            G3: 196.00,
+            B3: 246.94,
+            highE4: 329.63
+        };
 
-        const videoElement = document.getElementById('barcode-video');
+        const startButton = document.getElementById('startButton');
+        const pitchDisplay = document.getElementById('pitchDisplay');
+        const needle = document.querySelector('.needle');
 
-        // Function to configure and start QuaggaJS for barcode scanning
-        function startBarcodeScanning() {
-            Quagga.init({
-                inputStream: {
-                    name: "Live",
-                    type: "LiveStream",
-                    target: document.getElementById('barcode-video'),
-                },
-                decoder: {
-                    readers: ['ean_reader', 'code_128_reader', 'upc_reader'], // You can add more reader types
+        startButton.addEventListener('click', async () => {
+            if (!isTuning) {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mic = audioContext.createMediaStreamSource(stream);
+
+                    tuner = new tuna.PitchDetect();
+                    mic.connect(tuner);
+
+                    tuner.onNoteDetected = (note, frequency) => {
+                        pitchDisplay.textContent = `Detected Pitch: ${note}`;
+                        
+                        // Visual Feedback (Needle): Rotate the needle based on pitch accuracy
+                        const targetFrequency = referenceTones[note];
+                        const pitchDifference = frequency - targetFrequency;
+                        const maxDifference = 10; // Adjust as needed for accuracy
+
+                        // Limit the rotation angle to provide visual feedback
+                        const rotation = Math.min(Math.max(pitchDifference / maxDifference, -1), 1) * 45; // 45 degrees max
+                        
+                        // Apply rotation to the needle
+                        needle.style.transform = `rotate(${rotation}deg)`;
+
+                        // You can also add logic to give feedback on whether the pitch is in tune.
+                    };
+
+                    isTuning = true;
+                    startButton.textContent = 'Stop Tuning';
+                } catch (error) {
+                    console.error('Error accessing microphone:', error);
                 }
-            }, function (err) {
-                if (err) {
-                    console.error(err);
-                    return;
-                }
-                Quagga.start();
-            });
-
-            Quagga.onDetected(function (result) {
-                const code = result.codeResult.code;
-                console.log("Detected barcode: " + code);
-                // Handle the detected barcode here as needed
-            });
-        }
-
-        // Call the function to start barcode scanning
-        startBarcodeScanning();
+            } else {
+                mic.disconnect();
+                tuner = null;
+                pitchDisplay.textContent = 'Tuning stopped';
+                needle.style.transform = 'rotate(0deg)'; // Reset the needle
+                isTuning = false;
+                startButton.textContent = 'Start Tuning';
+            }
+        });
     </script>
 </body>
 </html>
