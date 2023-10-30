@@ -4,18 +4,17 @@
     <title>Guitar Tuner</title>
 </head>
 <body>
-    <h1>Guitatue</h1>
-    <p>Click the "Start Tuner" button, play a string on your guitar, and it will display the detected pitch.</p>
+    <h1>GTuner</h1>
+    <p>This page will automatically request microphone access and start tuning when you grant permission.</p>
 
-    <button id="startTuner">Start Tuner</button>
-    <div id="tunerDisplay">Waiting for input...</div>
+    <div id="tunerDisplay">Waiting for microphone access...</div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.7/Tone.min.js"></script>
     <script>
         let tuner;
         let tunerDisplay = document.getElementById("tunerDisplay");
 
-        document.getElementById("startTuner").addEventListener("click", () => {
+        function startTuner() {
             if (!tuner) {
                 tuner = new Tone.FrequencyAnalyzer({
                     size: 2048, // Buffer size
@@ -32,7 +31,7 @@
                         console.error("Error accessing microphone:", error);
                     });
             }
-        });
+        }
 
         function tunerInput() {
             if (tuner && tuner.isInitialized) {
@@ -44,6 +43,9 @@
                 requestAnimationFrame(tunerInput);
             }
         }
+
+        // Automatically start the tuner when the page loads
+        startTuner();
     </script>
 </body>
 </html>
