@@ -14,15 +14,16 @@
     </style>
 </head>
 <body>
-    <h1>GTuner4</h1>
+    <h1>GTunA</h1>
     <p>GTuner will start automatically when the page loads.</p>
     <div id="pitchDisplay"></div>
     <div class="needle"></div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Tone.js/14.8.0/Tone.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tuna/0.9.4/tuna.min.js"></script>
     <script>
         const audioContext = new AudioContext();
         let isTuning = true; // Start automatically
+
         const referenceTones = {
             E2: 82.41,
             A2: 110.00,
@@ -36,29 +37,25 @@
         const needle = document.querySelector('.needle');
 
         // Create a new microphone source
-        const mic = new Tone.UserMedia();
+        const mic = new MediaStreamAudioSourceNode(audioContext, { mediaStream: null });
 
-        // Create a new pitch detector
-        const pitch = new Tone.FrequencyAnalyzer();
+        // Create a new tuner
+        const tuner = new Tuna.Tuna({ audioContext: audioContext }).Tuna.PitchDetect();
 
-        // Connect the microphone source to the pitch detector
-        mic.connect(pitch);
+        // Connect the microphone source to the tuner
+        mic.connect(tuner);
 
-        // Open the microphone and start listening
-        mic.open().then(() => {
-            // Automatically start the tuner when the microphone is available
-            if (isTuning) {
-                pitch.on("frequency", (frequency) => {
-                    const note = Tone.Frequency(frequency, "Hz").toNote();
-                    pitchDisplay.textContent = `Detected Pitch: ${note}`;
-                    const targetFrequency = referenceTones[note];
-                    const pitchDifference = frequency - targetFrequency;
-                    const maxDifference = 10;
-                    const rotation = Math.min(Math.max(pitchDifference / maxDifference, -1), 1) * 45;
-                    needle.style.transform = `rotate(${rotation}deg)`;
-                });
-            }
-        });
+        // Automatically start the tuner when the microphone is available
+        if (isTuning) {
+            tuner.onNoteDetected = (note, frequency) => {
+                pitchDisplay.textContent = `Detected Pitch: ${note}`;
+                const targetFrequency = referenceTones[note];
+                const pitchDifference = frequency - targetFrequency;
+                const maxDifference = 10;
+                const rotation = Math.min(Math.max(pitchDifference / maxDifference, -1), 1) * 45;
+                needle.style.transform = `rotate(${rotation}deg)`;
+            };
+        }
     </script>
 </body>
 </html>
