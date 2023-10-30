@@ -2,12 +2,16 @@
 <html>
 <head>
     <style>
+        .indicator-container {
+            display: flex;
+            justify-content: space-between;
+        }
+
         .indicator {
             width: 30px;
             height: 30px;
             border-radius: 50%;
             background-color: red;
-            display: inline-block;
         }
 
         .in-tune {
@@ -154,7 +158,9 @@
     <span>frequency (Hz):</span>
     <span id="frequency"></span>
 </p>
-<div id="indicator-container">
+<div class="indicator-container">
+    <div id="sharp-flat-indicator" class="indicator"></div>
+    <div class="indicator in-tune"></div>
     <div id="sharp-flat-indicator" class="indicator"></div>
 </div>
 <hr>
