@@ -47,17 +47,8 @@
         }
     </style>
     <script>
-        var C2 = 65.41; // C2 note, in Hz
-        var notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
-        var test_frequencies = [];
-        for (var i = 0; i < 30; i++) {
-            var note_frequency = C2 * Math.pow(2, i / 12);
-            var note_name = notes[i % 12];
-            var note = { "frequency": note_frequency, "name": note_name };
-            var just_above = { "frequency": note_frequency * Math.pow(2, 1 / 48), "name": note_name + " (a bit sharp)" };
-            var just_below = { "frequency": note_frequency * Math.pow(2, -1 / 48), "name": note_name + " (a bit flat)" };
-            test_frequencies = test_frequencies.concat([just_below, note, just_above]);
-        }
+        var notes = ["A", "E", "D", "G", "B", "E"];
+        var targetFrequencies = [220.00, 329.63, 293.66, 392.00, 246.94, 329.63]; // A, E, D, G, B, E in Hz
 
         window.addEventListener("load", initialize);
 
@@ -95,7 +86,7 @@
 
                     correlation_worker.postMessage({
                         "timeseries": buffer,
-                        "test_frequencies": test_frequencies,
+                        "targetFrequencies": targetFrequencies,
                         "sample_rate": audio_context.sampleRate
                     });
 
@@ -109,6 +100,7 @@
 
         function interpret_correlation_result(event) {
             var timeseries = event.data.timeseries;
+            var targetFrequencies = event.data.targetFrequencies;
             var frequency_amplitudes = event.data.frequency_amplitudes;
 
             var magnitudes = frequency_amplitudes.map(function(z) { return z[0] * z[0] + z[1] * z[1]; });
@@ -128,9 +120,12 @@
             var confidence_threshold = 10;
 
             if (confidence > confidence_threshold) {
-                var dominant_frequency = test_frequencies[maximum_index];
-                document.getElementById("note-name").textContent = dominant_frequency.name;
-                document.getElementById("frequency").textContent = dominant_frequency.frequency;
+                var detectedFrequency = targetFrequencies[maximum_index];
+                var closestNoteIndex = findClosestNoteIndex(detectedFrequency, targetFrequencies);
+                var closestNote = notes[closestNoteIndex];
+
+                document.getElementById("note-name").textContent = closestNote;
+                document.getElementById("frequency").textContent = detectedFrequency.toFixed(2) + " Hz";
 
                 var flatIndicator = document.getElementById("flat-indicator");
                 var inTuneIndicator = document.getElementById("in-tune-indicator");
@@ -140,39 +135,37 @@
                 inTuneIndicator.style.display = "none";
                 sharpIndicator.style.display = "none";
 
-                if (dominant_frequency.name.includes("sharp")) {
+                if (closestNoteIndex === 3) {
+                    // The G note (3rd index in notes) is a bit sharp
                     sharpIndicator.style.display = "block";
-                } else if (dominant_frequency.name.includes("flat")) {
-                    flatIndicator.style.display = "block";
+                } else if (closestNoteIndex === 2) {
+                    // The D note (2nd index in notes) is in tune
+                    inTuneIndicator.style display = "block";
                 } else {
-                    inTuneIndicator.style.display = "block";
+                    // All other notes are a bit flat
+                    flatIndicator.style.display = "block";
                 }
 
-                // Compare the current frequency to the target frequency
-                var currentFrequency = dominant_frequency.frequency;
-                var targetFrequency = test_frequencies[12].frequency; // Example: C2
+                // Compare the detected frequency to the target frequency
                 var meter = document.getElementById("meter");
-                var difference = currentFrequency - targetFrequency;
-                meter.style.width = (50 + difference) + "px";
+                var difference = detectedFrequency - targetFrequencies[closestNoteIndex];
+                meter.style.width = (50 + (difference * 10)) + "px"; // Adjust the scaling factor as needed
             }
         }
 
-        var note_context = new AudioContext();
-        var note_node = note_context.createOscillator();
-        var gain_node = note_context.createGain();
-        note_node.frequency.value = C2 * Math.pow(2, 4 / 12);
-        gain_node.gain.value = 0;
-        note_node.connect(gain_node);
-        gain_node.connect(note_context.destination);
-        note_node.start();
+        function findClosestNoteIndex(detectedFrequency, targetFrequencies) {
+            var closestIndex = 0;
+            var closestDifference = Math.abs(detectedFrequency - targetFrequencies[0]);
 
-        var playing = false;
-        function toggle_playing_note() {
-            playing = !playing;
-            if (playing)
-                gain_node.gain.value = 0.1;
-            else
-                gain_node.gain.value = 0;
+            for (var i = 1; i < targetFrequencies.length; i++) {
+                var difference = Math.abs(detectedFrequency - targetFrequencies[i]);
+                if (difference < closestDifference) {
+                    closestDifference = difference;
+                    closestIndex = i;
+                }
+            }
+
+            return closestIndex;
         }
     </script>
 </head>
@@ -185,7 +178,7 @@
 </p>
 <div class="indicator-container">
     <div id="flat-indicator" class="indicator flat"></div>
-    <div id="in-tune-indicator" class="indicator in-tune"></div>
+    <div id "in-tune-indicator" class="indicator in-tune"></div>
     <div id="sharp-indicator" class="indicator sharp"></div>
 </div>
 <div id="meter" class="meter"></div>
