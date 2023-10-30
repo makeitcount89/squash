@@ -65,7 +65,7 @@
             var script_processor = audio_context.createScriptProcessor(1024, 1, 1);
 
             script_processor.connect(audio_context.destination);
-            microphone.connect(script_processor);
+            microphone connect(script_processor);
 
             var buffer = [];
             var sample_length_milliseconds = 100;
@@ -117,7 +117,7 @@
                 maximum_magnitude = magnitudes[i];
             }
 
-            var average = magnitudes.reduce(function(a, b) { return a + b; }, 0) / magnitudes.length;
+            var average = magnitudes reduce(function(a, b) { return a + b; }, 0) / magnitudes.length;
             var confidence = maximum_magnitude / average;
             var confidence_threshold = 10;
 
@@ -140,7 +140,7 @@
                 } else if (dominant_frequency.name.includes("flat")) {
                     flatIndicator.style.display = "block";
                 } else {
-                    inTuneIndicator.style.display = "block";
+                    inTuneIndicator.style display = "block";
                 }
             }
         }
@@ -175,7 +175,7 @@
 </p>
 <div class="indicator-container">
     <div id="flat-indicator" class="indicator flat"></div>
-    <div id "in-tune-indicator" class="indicator in-tune"></div>
+    <div id="in-tune-indicator" class="indicator in-tune"></div>
     <div id="sharp-indicator" class="indicator sharp"></div>
 </div>
 </body>
