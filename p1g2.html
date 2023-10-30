@@ -76,16 +76,18 @@
         var target = document.getElementById("gauge-container");
         var gauge = new EasyPieChart(target, opts);
 
+        // Initialize the audio context and microphone
         var audioContext = new (window.AudioContext || window.webkitAudioContext)();
         var microphone = null;
-        var bufferSize = 4096;
 
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
             navigator.mediaDevices.getUserMedia({ audio: true })
                 .then(function (stream) {
                     microphone = audioContext.createMediaStreamSource(stream);
-                    var scriptProcessor = audioContext.createScriptProcessor(bufferSize, 1, 1);
+
+                    var scriptProcessor = audioContext.createScriptProcessor(4096, 1, 1);
                     scriptProcessor.onaudioprocess = processAudio;
+
                     microphone.connect(scriptProcessor);
                     scriptProcessor.connect(audioContext.destination);
                 })
@@ -109,8 +111,8 @@
             if (buffer.length > (sampleLengthMilliseconds * audioContext.sampleRate) / 1000) {
                 isRecording = false;
 
-                // Process the audio buffer and detect the frequency (replace this with your logic)
-                var currentFrequency = Math.random() * 440; // Example: Random frequency
+                // Process the audio buffer and detect the frequency
+                var currentFrequency = detectFrequency(buffer, audioContext.sampleRate);
 
                 // Update the gauge with the detected frequency
                 gauge.update(currentFrequency);
@@ -120,6 +122,25 @@
                     isRecording = true;
                 }, 250);
             }
+        }
+
+        function detectFrequency(buffer, sampleRate) {
+            // Here you can implement your own frequency detection algorithm
+            // For simplicity, let's calculate the frequency using the peak detection method.
+            var maxAmplitude = -Infinity;
+            var maxIndex = -1;
+
+            for (var i = 0; i < buffer.length; i++) {
+                if (buffer[i] > maxAmplitude) {
+                    maxAmplitude = buffer[i];
+                    maxIndex = i;
+                }
+            }
+
+            // Calculate the frequency in Hz
+            var frequency = maxIndex / buffer.length * sampleRate;
+
+            return frequency;
         }
     </script>
 </body>
