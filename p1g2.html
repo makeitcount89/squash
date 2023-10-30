@@ -4,42 +4,43 @@
     <title>Guitar Tuner</title>
 </head>
 <body>
-    <h1>Guitar Tuna2</h1>
-    <p>Click the "Start Tuner" button and play a string on your guitar. The tuner will detect the pitch.</p>
+    <h1>Guitar Tuner5</h1>
+    <p>Click the "Start Tuner" button to allow microphone access and start tuning.</p>
     
     <button id="startTuner">Start Tuner</button>
     <div id="tunerDisplay">Waiting for input...</div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tuna/0.4.3/tuna.min.js"></script>
     <script>
-        let audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        let tuner = new Tuna(audioContext);
-
+        let audioContext;
         let micStream;
-        let tunerNode = new tuner.GuitarTuner({
-            mute: false,
-            bufferLength: 4096,
-            audioContext: audioContext,
-        });
-
+        let tunerNode;
+        
         document.getElementById("startTuner").addEventListener("click", () => {
-            navigator.mediaDevices.getUserMedia({ audio: true })
-                .then((stream) => {
-                    micStream = stream;
-                    let source = audioContext.createMediaStreamSource(stream);
-                    source.connect(tunerNode.input);
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                tunerNode = new Tuna(audioContext);
+            }
 
-                    tunerNode.init();
-                    tunerNode.enable();
-                    document.getElementById("tunerDisplay").textContent = "Tuning...";
+            if (!micStream) {
+                navigator.mediaDevices.getUserMedia({ audio: true })
+                    .then((stream) => {
+                        micStream = stream;
+                        let source = audioContext.createMediaStreamSource(stream);
+                        tunerNode.input = source;
 
-                    tunerNode.onNoteDetected = (note) => {
-                        document.getElementById("tunerDisplay").textContent = `Detected Note: ${note}`;
-                    };
-                })
-                .catch((error) => {
-                    console.error("Error accessing microphone:", error);
-                });
+                        tunerNode.init();
+                        tunerNode.enable();
+                        document.getElementById("tunerDisplay").textContent = "Tuning...";
+                        
+                        tunerNode.onNoteDetected = (note) => {
+                            document.getElementById("tunerDisplay").textContent = `Detected Note: ${note}`;
+                        };
+                    })
+                    .catch((error) => {
+                        console.error("Error accessing microphone:", error);
+                    });
+            }
         });
 
         window.addEventListener("beforeunload", () => {
