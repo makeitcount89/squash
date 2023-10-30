@@ -14,14 +14,15 @@
     </style>
 </head>
 <body>
-    <h1>GTuner3</h1>
+    <h1>GTuner4</h1>
+    <p>GTuner will start automatically when the page loads.</p>
     <div id="pitchDisplay"></div>
     <div class="needle"></div>
 
-    <script src="https://cdn.rawgit.com/audiocogs/pitch.js/master/pitch.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Tone.js/14.8.0/Tone.js"></script>
     <script>
         const audioContext = new AudioContext();
-        let mic, isTuning = true; // Start automatically
+        let isTuning = true; // Start automatically
         const referenceTones = {
             E2: 82.41,
             A2: 110.00,
@@ -34,26 +35,30 @@
         const pitchDisplay = document.getElementById('pitchDisplay');
         const needle = document.querySelector('.needle');
 
-        navigator.mediaDevices.getUserMedia({ audio: true })
-            .then(function (stream) {
-                mic = audioContext.createMediaStreamSource(stream);
+        // Create a new microphone source
+        const mic = new Tone.UserMedia();
 
-                const pitch = new Pitch(audioContext);
-                mic.connect(pitch);
+        // Create a new pitch detector
+        const pitch = new Tone.FrequencyAnalyzer();
 
-                pitch.onaudioprocess = (note) => {
-                    pitchDisplay.textContent = `Detected Pitch: ${note.note}`;
-                    const targetFrequency = referenceTones[note.note];
-                    const pitchDifference = note.frequency - targetFrequency;
+        // Connect the microphone source to the pitch detector
+        mic.connect(pitch);
+
+        // Open the microphone and start listening
+        mic.open().then(() => {
+            // Automatically start the tuner when the microphone is available
+            if (isTuning) {
+                pitch.on("frequency", (frequency) => {
+                    const note = Tone.Frequency(frequency, "Hz").toNote();
+                    pitchDisplay.textContent = `Detected Pitch: ${note}`;
+                    const targetFrequency = referenceTones[note];
+                    const pitchDifference = frequency - targetFrequency;
                     const maxDifference = 10;
-
                     const rotation = Math.min(Math.max(pitchDifference / maxDifference, -1), 1) * 45;
                     needle.style.transform = `rotate(${rotation}deg)`;
                 });
-            })
-            .catch(function (error) {
-                console.error('Error accessing microphone:', error);
-            });
+            }
+        });
     </script>
 </body>
 </html>
