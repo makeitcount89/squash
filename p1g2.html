@@ -2,17 +2,29 @@
 <html>
 <head>
     <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
         .indicator-container {
             display: flex;
             justify-content: space-between;
-            align-items: center; /* Vertically align the circles */
+            align-items: center;
         }
 
         .indicator {
-            width: 30px;
-            height: 30px;
+            width: 90px;
+            height: 90px;
             border-radius: 50%;
-            display: none; /* Hide all circles by default */
+            display: none;
+        }
+
+        .flat, .in-tune, .sharp {
+            font-size: 24px;
         }
 
         .flat {
@@ -61,7 +73,7 @@
         {
             var audio_context = new AudioContext();
             var microphone = audio_context.createMediaStreamSource(stream);
-            window.source = microphone; // Workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=934512
+            window.source = microphone;
             var script_processor = audio_context.createScriptProcessor(1024, 1, 1);
 
             script_processor.connect(audio_context.destination);
@@ -138,7 +150,7 @@
                 if (dominant_frequency.name.includes("sharp")) {
                     sharpIndicator.style.display = "block";
                 } else if (dominant_frequency.name.includes("flat")) {
-                    flatIndicator.style.display = "block";
+                    flatIndicator.style display = "block";
                 } else {
                     inTuneIndicator.style.display = "block";
                 }
@@ -167,10 +179,9 @@
 </head>
 
 <body>
-<p>It sounds like you're playing...</p>
 <h1 id="note-name"></h1>
 <p>
-    <span>frequency (Hz):</span>
+    <span>Frequency (Hz):</span>
     <span id="frequency"></span>
 </p>
 <div class="indicator-container">
@@ -178,9 +189,5 @@
     <div id="in-tune-indicator" class="indicator in-tune"></div>
     <div id="sharp-indicator" class="indicator sharp"></div>
 </div>
-<hr>
-<button id="play-note">start/stop an E note</button>
-<hr>
-<a href="https://github.com/jbergknoff/guitar-tuner">Source code</a> / <a href="http://jonathan.bergknoff.com/journal/making-a-guitar-tuner-html5">Explanatory article</a>
 </body>
 </html>
