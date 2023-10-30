@@ -1,40 +1,40 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Gauge.js Example with Needle</title>
+    <title>Gauge.js Example</title>
     <script src="https://cdn.jsdelivr.net/npm/raphael@2.1.4/raphael.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/justgage@1.3.2/justgage.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gauge.js@1.4.1/dist/gauge.min.js"></script>
 </head>
 <body>
     <div id="gauge"></div>
 
     <script>
-        var gauge = new JustGage({
-            id: "gauge",
-            value: 50,
-            min: 0,
-            max: 100,
-            title: "Gauge Example",
-            label: "Units",
-            valueFontColor: "#000",
-            levelColors: ["#FF0000", "#FFFF00", "#00FF00"],
-            // Add a needle to the gauge
-            needle: true,
-            needleOptions: {
-                radius: 20,     // Length of the needle
-                type: "line",   // Type of the needle (line or arrow)
-                bgColor: "#000", // Color of the needle
-                fgColor: "#00F"  // Color of the needle's tail
-            }
-        });
+        // Create a new gauge with the desired options
+        var opts = {
+            angle: 0, // The starting angle of the gauge
+            lineWidth: 0.3, // The line width of the gauge
+            radiusScale: 1, // Scale factor for the radius of the gauge
+            pointer: {
+                length: 0.6, // Length of the needle
+                strokeWidth: 0.035, // Width of the needle
+                color: '#000' // Color of the needle
+            },
+            limitMax: false,     // If true, the needle will stop at the max value
+            limitMin: false,     // If true, the needle will stop at the min value
+            generateGradient: true,
+            highDpiSupport: true
+        };
+        
+        var target = document.getElementById('gauge'); // Your target div element
+        var gauge = new Gauge(target).setOptions(opts); // Create the gauge
 
-        function updateGauge(newValue) {
-            gauge.refresh(newValue);
-        }
+        gauge.maxValue = 100; // Set the maximum value of the gauge
+        gauge.setMinValue(0); // Set the minimum value of the gauge
+        gauge.animationSpeed = 32; // Set the animation speed
 
-        // Example: Update the gauge value and move the needle to 75 after 3 seconds
+        // Example: Update the gauge value to 75 after 3 seconds
         setTimeout(function () {
-            updateGauge(75);
+            gauge.set(75); // Update the gauge value
         }, 3000);
     </script>
 </body>
