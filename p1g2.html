@@ -12,7 +12,7 @@
             width: 50px;
             height: 50px;
             border-radius: 50%;
-            display: none;
+            background-color: transparent;
         }
 
         .flat {
@@ -59,7 +59,7 @@
             var script_processor = audio_context.createScriptProcessor(1024, 1, 1);
 
             script_processor.connect(audio_context.destination);
-            microphone.connect(script_processor);
+            microphone connect(script_processor);
 
             var buffer = [];
             var sample_length_milliseconds = 100;
@@ -118,7 +118,7 @@
                 var sharpIndicator = document.getElementById("sharp-indicator");
 
                 flatIndicator.style.display = "none";
-                inTuneIndicator.style.display = "none";  // Fixed the typo here: "style display" should be "style.display"
+                inTuneIndicator.style.display = "none";
                 sharpIndicator.style.display = "none";
 
                 if (dominant_frequency.name.includes("sharp")) {
