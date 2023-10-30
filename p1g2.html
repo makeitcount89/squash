@@ -2,10 +2,11 @@
 <html>
 <head>
     <title>Guitar Tuner</title>
+    <script src="https://cdn.jsdelivr.net/npm/tone@14"></script>
 </head>
 <body>
-    <h1>Tuner</h1>
-    
+    <h1>G2uner</h1>
+
     <div id="tuner">
         <button id="start-btn">Start Tuning</button>
         <div id="tuner-display">Tune your guitar here.</div>
@@ -14,7 +15,7 @@
     <script>
         let audioContext = null;
         let analyser = null;
-        
+
         document.getElementById('start-btn').addEventListener('click', () => {
             if (!audioContext) {
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -26,14 +27,22 @@
                     console.error('Error accessing the microphone:', error);
                 });
             }
-            
+
+            const pitch = new Tone.PitchShift().toDestination();
+
             analyser.fftSize = 2048;
             const bufferLength = analyser.frequencyBinCount;
             const dataArray = new Uint8Array(bufferLength);
 
             function updatePitch() {
                 analyser.getByteTimeDomainData(dataArray);
-                // Your pitch detection algorithm can be implemented here.
+                const pitchValue = pitch.getPitch(audioContext.sampleRate, dataArray);
+
+                if (pitchValue) {
+                    document.getElementById('tuner-display').textContent = `Detected pitch: ${pitchValue.toFixed(2)} Hz`;
+                } else {
+                    document.getElementById('tuner-display').textContent = 'No pitch detected.';
+                }
 
                 requestAnimationFrame(updatePitch);
             }
