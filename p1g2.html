@@ -2,6 +2,14 @@
 <html>
 <head>
     <style>
+       body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
         .indicator-container {
             display: flex;
             justify-content: space-between;
@@ -63,7 +71,7 @@
             var script_processor = audio_context.createScriptProcessor(1024, 1, 1);
 
             script_processor.connect(audio_context.destination);
-            microphone connect(script_processor);
+            microphone.connect(script_processor);
 
             var buffer = [];
             var sample_length_milliseconds = 100;
@@ -94,7 +102,7 @@
 
         function interpret_correlation_result(event) {
             var timeseries = event.data.timeseries;
-            var frequency_amplitudes = event.data frequency_amplitudes;
+            var frequency_amplitudes = event.data.frequency_amplitudes;
 
             var magnitudes = frequency_amplitudes.map(function(z) { return z[0] * z[0] + z[1] * z[1]; });
 
@@ -112,24 +120,23 @@
             var confidence = maximum_magnitude / average;
             var confidence_threshold = 10;
 
-            // Display all indicators
-            var flatIndicator = document.getElementById("flat-indicator");
-            var inTuneIndicator = document.getElementById("in-tune-indicator");
-            var sharpIndicator = document.getElementById("sharp-indicator");
-
-            flatIndicator.style.display = "none";
-            inTuneIndicator.style.display = "none";
-            sharpIndicator.style.display = "none";
-
             if (confidence > confidence_threshold) {
                 var dominant_frequency = test_frequencies[maximum_index];
                 document.getElementById("note-name").textContent = dominant_frequency.name;
                 document.getElementById("frequency").textContent = dominant_frequency.frequency;
 
+                var flatIndicator = document.getElementById("flat-indicator");
+                var inTuneIndicator = document.getElementById("in-tune-indicator");
+                var sharpIndicator = document.getElementById("sharp-indicator");
+
+                flatIndicator.style.display = "none";
+                inTuneIndicator.style.display = "none";
+                sharpIndicator.style.display = "none";
+
                 if (dominant_frequency.name.includes("sharp")) {
                     sharpIndicator.style.display = "block";
                 } else if (dominant_frequency.name.includes("flat")) {
-                    flatIndicator.style display = "block";
+                    flatIndicator.style.display = "block";
                 } else {
                     inTuneIndicator.style.display = "block";
                 }
@@ -157,7 +164,7 @@
 </head>
 <body>
 
-<h1 id="note-name" style="font-size: 4em;"></h1>
+<h1 id="note-name" style="font-size: 6em;"></h1>
 <p>
     <span style="font-size: 2em;">frequency (Hz):</span>
     <span id="frequency" style="font-size: 2em;"></span>
