@@ -2,7 +2,7 @@
 <html>
 <head>
     <style>
-       body {
+        body {
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -10,39 +10,19 @@
             height: 100vh;
             margin: 0;
         }
-        .indicator-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
 
-        .indicator {
-            width: 100px; /* Doubled the width */
-            height: 100px; /* Doubled the height */
-            border-radius: 50%;
-            display: none;
-        }
-
-        .flat, .in-tune, .sharp {
-            font-size: 2em; /* Doubled the font size */
-        }
-
-        .flat {
-            background-color: red;
-        }
-
-        .in-tune {
-            background-color: green;
-        }
-
-        .sharp {
-            background-color: red;
+        #gauge-container {
+            width: 200px;
+            height: 200px;
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/gh/toorshia/justgage/raphael-2.3.0/raphael.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/toorshia/justgage/justgage.js"></script>
     <script>
         var C2 = 65.41; // C2 note, in Hz
         var notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
         var test_frequencies = [];
+
         for (var i = 0; i < 30; i++) {
             var note_frequency = C2 * Math.pow(2, i / 12);
             var note_name = notes[i % 12];
@@ -125,6 +105,9 @@
                 document.getElementById("note-name").textContent = dominant_frequency.name;
                 document.getElementById("frequency").textContent = dominant_frequency.frequency;
 
+                // Update the gauge with the detected frequency
+                updateGauge(dominant_frequency.frequency);
+
                 var flatIndicator = document.getElementById("flat-indicator");
                 var inTuneIndicator = document.getElementById("in-tune-indicator");
                 var sharpIndicator = document.getElementById("sharp-indicator");
@@ -134,7 +117,7 @@
                 sharpIndicator.style.display = "none";
 
                 if (dominant_frequency.name.includes("sharp")) {
-                    sharpIndicator.style.display = "block";
+                    sharpIndicator.style display = "block";
                 } else if (dominant_frequency.name.includes("flat")) {
                     flatIndicator.style.display = "block";
                 } else {
@@ -143,36 +126,49 @@
             }
         }
 
-        var note_context = new AudioContext();
-        var note_node = note_context.createOscillator();
-        var gain_node = note_context.createGain();
-        note_node.frequency.value = C2 * Math.pow(2, 4 / 12);
-        gain_node.gain.value = 0;
-        note_node.connect(gain_node);
-        gain_node.connect(note_context.destination);
-        note_node.start();
+        var C2 = 65.41; // C2 note, in Hz
 
-        var playing = false;
-        function toggle_playing_note() {
-            playing = !playing;
-            if (playing)
-                gain_node.gain.value = 0.1;
-            else
-                gain_node.gain.value = 0;
+        // Initialize the gauge with default settings
+        var gauge = new JustGage({
+            id: "gauge-container", // ID of the HTML container
+            value: 0, // Initial value (Hz)
+            min: 0,    // Minimum value
+            max: 440,  // Maximum value (adjust as needed)
+            title: "Frequency (Hz)",
+        });
+
+        window.addEventListener("load", initialize);
+
+        // ... (rest of your existing code)
+
+        function interpret_correlation_result(event) {
+            // Your existing code for frequency detection
+
+            // Assuming 'dominant_frequency.frequency' contains the detected frequency
+            var detectedFrequency = dominant_frequency.frequency;
+
+            // Update the gauge with the detected frequency
+            updateGauge(detectedFrequency);
         }
+
+        function updateGauge(frequency) {
+            gauge.refresh(frequency);
+        }
+
+        // ... (rest of your existing code)
     </script>
 </head>
 <body>
-
-<h1 id="note-name" style="font-size: 6em;"></h1>
-<p>
-    <span style="font-size: 2em;">frequency (Hz):</span>
-    <span id="frequency" style="font-size: 2em;"></span>
-</p>
-<div class="indicator-container">
-    <div id="flat-indicator" class="indicator flat"></div>
-    <div id="in-tune-indicator" class="indicator in-tune"></div>
-    <div id="sharp-indicator" class="indicator sharp"></div>
-</div>
+    <h1 id="note-name" style="font-size: 6em;"></h1>
+    <p>
+        <span style="font-size: 2em;">Frequency (Hz):</span>
+        <span id="frequency" style="font-size: 2em;"></span>
+    </p>
+    <div class="indicator-container">
+        <div id="flat-indicator" class="indicator flat"></div>
+        <div id="in-tune-indicator" class="indicator in-tune"></div>
+        <div id="sharp-indicator" class="indicator sharp"></div>
+    </div>
+    <div id="gauge-container"></div>
 </body>
 </html>
