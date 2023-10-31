@@ -8,9 +8,6 @@
   <!-- Gauge Chart -->
   <canvas id="gauge"></canvas>
 
-  <!-- Gauge Needle -->
-  <div id="needle"></div>
-
   <script>
     var opts = {
       angle: 0,
@@ -23,11 +20,13 @@
       },
       staticLabels: {
         font: '10px sans-serif',
-        labels: [0, 50, 100],
+        labels: [-50, 0, 50, 100, 150], // Updated labels to include -50 and 150 for the full range
         fractionDigits: 0
       },
-      limitMax: false,
-      limitMin: false,
+      limitMax: true, // Limit the maximum value
+      maxValue: 150, // Set the maximum value of the gauge
+      limitMin: true, // Limit the minimum value
+      minValue: -50, // Set the minimum value of the gauge
       colorStart: '#6F6EA0',
       colorStop: '#C0C0DB',
       strokeColor: '#E0E0F0',
@@ -36,12 +35,18 @@
     var target = document.getElementById('gauge');
     var gauge = new Gauge(target).setOptions(opts);
 
-    gauge.maxValue = 100;
-    gauge.setMinValue(0);
     gauge.animationSpeed = 32;
 
     // Set the value of the gauge (change this value as needed)
-    gauge.set(75);
+    gauge.set(0); // Set the initial value to 0 to point vertically
+
+    // Function to update the gauge value based on tuning result
+    function updateGauge(value) {
+      gauge.set(value);
+    }
+
+    // Call updateGauge with the appropriate value when you detect tuning
+    // For example, if in tune, call updateGauge(0); if slightly flat, call updateGauge(-10); if slightly sharp, call updateGauge(10); and so on.
   </script>
 
   <!-- Guitar Tuner -->
@@ -77,20 +82,10 @@
     .sharp {
       background-color: red;
     }
-    #needle {
-      width: 2px;
-      height: 40%;
-      background-color: black;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translateX(-50%) translateY(-50%) rotate(0deg); /* Initial rotation angle */
-      transform-origin: top center;
-      transition: transform 0.5s; /* Add smooth transition for the needle */
-    }
   </style>
 
   <script>
+    // Your existing guitar tuner JavaScript code here
     var C2 = 65.41; // C2 note, in Hz
     var notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
     var test_frequencies = [];
@@ -120,7 +115,7 @@
       var script_processor = audio_context.createScriptProcessor(1024, 1, 1);
 
       script_processor.connect(audio_context.destination);
-      microphone connect(script_processor);
+      microphone.connect(script_processor);
 
       var buffer = [];
       var sample_length_milliseconds = 100;
@@ -151,7 +146,7 @@
 
     function interpret_correlation_result(event) {
       var timeseries = event.data.timeseries;
-      var frequency_amplitudes = event.data frequency_amplitudes;
+      var frequency_amplitudes = event.data.frequency_amplitudes;
 
       var magnitudes = frequency_amplitudes.map(function(z) { return z[0] * z[0] + z[1] * z[1]; });
 
@@ -179,21 +174,15 @@
         var sharpIndicator = document.getElementById("sharp-indicator");
 
         flatIndicator.style.display = "none";
-        inTuneIndicator.style display = "none";
+        inTuneIndicator.style.display = "none";
         sharpIndicator.style.display = "none";
 
         if (dominant_frequency.name.includes("sharp")) {
           sharpIndicator.style.display = "block";
-          // Rotate the needle to point to the right (90 degrees) for sharp notes
-          document.getElementById("needle").style.transform = "translateX(-50%) translateY(-50%) rotate(90deg)";
         } else if (dominant_frequency.name.includes("flat")) {
-          flatIndicator.style.display = "block";
-          // Rotate the needle to point to the left (-90 degrees) for flat notes
-          document.getElementById("needle").style.transform = "translateX(-50%) translateY(-50%) rotate(-90deg)";
+          flatIndicator.style display = "block";
         } else {
           inTuneIndicator.style.display = "block";
-          // Rotate the needle to point vertically (0 degrees) for in-tune notes
-          document.getElementById("needle").style.transform = "translateX(-50%) translateY(-50%) rotate(0deg)";
         }
       }
     }
@@ -213,7 +202,7 @@
       if (playing)
         gain_node.gain.value = 0.1;
       else
-        gain_node.gain value = 0;
+        gain_node.gain.value = 0;
     }
   </script>
 
@@ -224,7 +213,7 @@
   </p>
   <div class="indicator-container">
     <div id="flat-indicator" class="indicator flat"></div>
-    <div id="in-tune-indicator" class="indicator in-tune"></div>
+    <div id="in-tune-indicator" class "indicator in-tune"></div>
     <div id="sharp-indicator" class="indicator sharp"></div>
   </div>
 </body>
