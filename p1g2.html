@@ -2,7 +2,7 @@
 <html>
 <head>
     <style>
-       body {
+        body {
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -10,6 +10,7 @@
             height: 100vh;
             margin: 0;
         }
+
         .indicator-container {
             display: flex;
             justify-content: space-between;
@@ -17,14 +18,14 @@
         }
 
         .indicator {
-            width: 100px; /* Doubled the width */
-            height: 100px; /* Doubled the height */
+            width: 100px;
+            height: 100px;
             border-radius: 50%;
             display: none;
         }
 
         .flat, .in-tune, .sharp {
-            font-size: 2em; /* Doubled the font size */
+            font-size: 2em;
         }
 
         .flat {
@@ -39,11 +40,27 @@
             background-color: red;
         }
 
+        .meter-container {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            bottom: 0;
+        }
+
         .meter {
-            width: 200px;
+            width: 80%;
             height: 20px;
-            background-color: blue;
-            margin-top: 20px;
+            background-color: black;
+            position: relative;
+        }
+
+        .indicator-line {
+            width: 2px;
+            height: 20px;
+            background-color: white;
+            position: absolute;
         }
     </style>
     <script>
@@ -64,11 +81,12 @@
         var correlation_worker = new Worker("correlation_worker.js");
         correlation_worker.addEventListener("message", interpret_correlation_result);
 
+        var targetNote = document.getElementById("target-note");
+        var currentFrequencyDisplay = document.getElementById("frequency");
+
         function initialize() {
             var get_user_media = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
             get_user_media.call(navigator, { "audio": true }, use_stream, function() {});
-
-            // The play-note button has been removed.
         }
 
         function use_stream(stream) {
@@ -78,7 +96,7 @@
             var script_processor = audio_context.createScriptProcessor(1024, 1, 1);
 
             script_processor.connect(audio_context.destination);
-            microphone connect(script_processor);
+            microphone.connect(script_processor);
 
             var buffer = [];
             var sample_length_milliseconds = 100;
@@ -109,7 +127,7 @@
 
         function interpret_correlation_result(event) {
             var timeseries = event.data.timeseries;
-            var frequency_amplitudes = event.data frequency_amplitudes;
+            var frequency_amplitudes = event.data.frequency_amplitudes;
 
             var magnitudes = frequency_amplitudes.map(function(z) { return z[0] * z[0] + z[1] * z[1]; });
 
@@ -129,8 +147,11 @@
 
             if (confidence > confidence_threshold) {
                 var dominant_frequency = test_frequencies[maximum_index];
-                document.getElementById("note-name").textContent = dominant_frequency.name;
-                document.getElementById("frequency").textContent = dominant_frequency.frequency;
+                currentFrequencyDisplay.textContent = dominant_frequency.frequency;
+
+                // Find the closest in-tune note
+                var closestNote = findClosestInTuneNote(dominant_frequency.frequency);
+                targetNote.textContent = closestNote;
 
                 var flatIndicator = document.getElementById("flat-indicator");
                 var inTuneIndicator = document.getElementById("in-tune-indicator");
@@ -140,25 +161,32 @@
                 inTuneIndicator.style.display = "none";
                 sharpIndicator.style.display = "none";
 
-                // Dynamically set the target note based on the closest detected note
-                var targetIndex = maximum_index;
-
-                // Compare the current frequency to the dynamically set target frequency
-                var currentFrequency = dominant_frequency.frequency;
-                var targetFrequency = test_frequencies[targetIndex].frequency;
-                var meter = document.getElementById("meter");
-                var difference = currentFrequency - targetFrequency;
-                meter.style.width = (50 + difference) + "px";
-
-                // Determine whether it's flat, in-tune, or sharp
                 if (dominant_frequency.name.includes("sharp")) {
                     sharpIndicator.style.display = "block";
                 } else if (dominant_frequency.name.includes("flat")) {
-                    flatIndicator.style.display = "block";
+                    flatIndicator.style display = "block";
                 } else {
                     inTuneIndicator.style.display = "block";
                 }
             }
+        }
+
+        function findClosestInTuneNote(frequency) {
+            var closestNote = null;
+            var closestDifference = Number.MAX_VALUE;
+
+            for (var i = 0; i < test_frequencies.length; i++) {
+                var testFrequency = test_frequencies[i];
+                if (!testFrequency.name.includes("flat") && !testFrequency.name.includes("sharp")) {
+                    var difference = Math.abs(frequency - testFrequency.frequency);
+                    if (difference < closestDifference) {
+                        closestNote = testFrequency.name;
+                        closestDifference = difference;
+                    }
+                }
+            }
+
+            return closestNote;
         }
     </script>
 </head>
@@ -169,11 +197,19 @@
     <span style="font-size: 2em;">frequency (Hz):</span>
     <span id="frequency" style="font-size: 2em;"></span>
 </p>
+<p>
+    <span style="font-size: 2em;">Target Note:</span>
+    <span id="target-note" style="font-size: 2em;"></span>
+</p>
 <div class="indicator-container">
     <div id="flat-indicator" class="indicator flat"></div>
-    <div id="in-tune-indicator" class="indicator in-tune"></div>
+    <div id="in-tune-indicator" class "indicator in-tune"></div>
     <div id="sharp-indicator" class="indicator sharp"></div>
 </div>
-<div id="meter" class="meter"></div>
+<div class="meter-container">
+    <div class="meter">
+        <div id="indicator-line" class="indicator-line"></div>
+    </div>
+</div>
 </body>
 </html>
