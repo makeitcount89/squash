@@ -98,14 +98,13 @@
       test_frequencies = test_frequencies.concat([just_below, note, just_above]);
     }
 
-    window.addEventListener("load", initialize);
-
-    var correlation_worker = new Worker("correlation_worker.js");
-    correlation_worker.addEventListener("message", interpret_correlation_result);
-
-    function initialize() {
-      var get_user_media = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
-      get_user_media.call(navigator, { "audio": true }, use_stream, function() {});
+    async function initialize() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        use_stream(stream);
+      } catch (err) {
+        console.error('Error accessing the microphone:', err);
+      }
     }
 
     function use_stream(stream) {
@@ -146,7 +145,7 @@
 
     function interpret_correlation_result(event) {
       var timeseries = event.data.timeseries;
-      var frequency_amplitudes = event.data.frequency_amplitudes;
+      var frequency_amplitudes = event.data frequency_amplitudes;
 
       var magnitudes = frequency_amplitudes.map(function(z) { return z[0] * z[0] + z[1] * z[1]; });
 
@@ -180,7 +179,7 @@
         if (dominant_frequency.name.includes("sharp")) {
           sharpIndicator.style.display = "block";
         } else if (dominant_frequency.name.includes("flat")) {
-          flatIndicator.style display = "block";
+          flatIndicator.style.display = "block";
         } else {
           inTuneIndicator.style.display = "block";
         }
@@ -213,7 +212,7 @@
   </p>
   <div class="indicator-container">
     <div id="flat-indicator" class="indicator flat"></div>
-    <div id="in-tune-indicator" class "indicator in-tune"></div>
+    <div id="in-tune-indicator" class="indicator in-tune"></div>
     <div id="sharp-indicator" class="indicator sharp"></div>
   </div>
 </body>
