@@ -8,9 +8,12 @@
   <!-- Gauge Chart -->
   <canvas id="gauge"></canvas>
 
+  <!-- Gauge Needle -->
+  <div id="needle"></div>
+
   <script>
     var opts = {
-      angle: -90, // Start angle at -90 degrees (vertical)
+      angle: 0,
       lineWidth: 0.2,
       radiusScale: 1,
       pointer: {
@@ -20,7 +23,7 @@
       },
       staticLabels: {
         font: '10px sans-serif',
-        labels: [-50, 0, 50], // Adjust the labels to indicate how flat or sharp
+        labels: [0, 50, 100],
         fractionDigits: 0
       },
       limitMax: false,
@@ -33,25 +36,12 @@
     var target = document.getElementById('gauge');
     var gauge = new Gauge(target).setOptions(opts);
 
-    gauge.maxValue = 50; // Maximum pitch difference value
-    gauge.setMinValue(-50); // Minimum pitch difference value
+    gauge.maxValue = 100;
+    gauge.setMinValue(0);
     gauge.animationSpeed = 32;
 
-    // Calculate pitch difference (adjust this calculation as needed)
-    function calculatePitchDifference(detectedFrequency, targetFrequency) {
-      return 1200 * Math.log2(detectedFrequency / targetFrequency);
-    }
-
-    // Function to update the gauge based on pitch difference
-    function updateGauge(pitchDifference) {
-      gauge.set(pitchDifference);
-    }
-
-    // Example usage:
-    var inTuneFrequency = 65.41; // Adjust as needed
-    var detectedFrequency = 66.0; // Replace with the actual detected frequency
-    var pitchDifference = calculatePitchDifference(detectedFrequency, inTuneFrequency);
-    updateGauge(pitchDifference);
+    // Set the value of the gauge (change this value as needed)
+    gauge.set(75);
   </script>
 
   <!-- Guitar Tuner -->
@@ -66,7 +56,7 @@
     }
     .indicator-container {
       display: flex;
-      justify-content: space between;
+      justify-content: space-between;
       align-items: center;
     }
     .indicator {
@@ -87,10 +77,20 @@
     .sharp {
       background-color: red;
     }
+    #needle {
+      width: 2px;
+      height: 40%;
+      background-color: black;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translateX(-50%) translateY(-50%) rotate(0deg); /* Initial rotation angle */
+      transform-origin: top center;
+      transition: transform 0.5s; /* Add smooth transition for the needle */
+    }
   </style>
 
   <script>
-    // Your existing code for the guitar tuner
     var C2 = 65.41; // C2 note, in Hz
     var notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
     var test_frequencies = [];
@@ -151,7 +151,7 @@
 
     function interpret_correlation_result(event) {
       var timeseries = event.data.timeseries;
-      var frequency_amplitudes = event.data.frequency_amplitudes;
+      var frequency_amplitudes = event.data frequency_amplitudes;
 
       var magnitudes = frequency_amplitudes.map(function(z) { return z[0] * z[0] + z[1] * z[1]; });
 
@@ -179,17 +179,41 @@
         var sharpIndicator = document.getElementById("sharp-indicator");
 
         flatIndicator.style.display = "none";
-        inTuneIndicator.style.display = "none";
+        inTuneIndicator.style display = "none";
         sharpIndicator.style.display = "none";
 
         if (dominant_frequency.name.includes("sharp")) {
           sharpIndicator.style.display = "block";
+          // Rotate the needle to point to the right (90 degrees) for sharp notes
+          document.getElementById("needle").style.transform = "translateX(-50%) translateY(-50%) rotate(90deg)";
         } else if (dominant_frequency.name.includes("flat")) {
           flatIndicator.style.display = "block";
+          // Rotate the needle to point to the left (-90 degrees) for flat notes
+          document.getElementById("needle").style.transform = "translateX(-50%) translateY(-50%) rotate(-90deg)";
         } else {
           inTuneIndicator.style.display = "block";
+          // Rotate the needle to point vertically (0 degrees) for in-tune notes
+          document.getElementById("needle").style.transform = "translateX(-50%) translateY(-50%) rotate(0deg)";
         }
       }
+    }
+
+    var note_context = new AudioContext();
+    var note_node = note_context.createOscillator();
+    var gain_node = note_context.createGain();
+    note_node.frequency.value = C2 * Math.pow(2, 4 / 12);
+    gain_node.gain.value = 0;
+    note_node.connect(gain_node);
+    gain_node.connect(note_context.destination);
+    note_node.start();
+
+    var playing = false;
+    function toggle_playing_note() {
+      playing = !playing;
+      if (playing)
+        gain_node.gain.value = 0.1;
+      else
+        gain_node.gain value = 0;
     }
   </script>
 
