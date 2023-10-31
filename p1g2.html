@@ -66,7 +66,7 @@
     }
     .indicator-container {
       display: flex;
-      justify-content: space-between;
+      justify-content: space between;
       align-items: center;
     }
     .indicator {
@@ -90,6 +90,7 @@
   </style>
 
   <script>
+    // Your existing code for the guitar tuner
     var C2 = 65.41; // C2 note, in Hz
     var notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
     var test_frequencies = [];
@@ -189,24 +190,6 @@
           inTuneIndicator.style.display = "block";
         }
       }
-    }
-
-    var note_context = new AudioContext();
-    var note_node = note_context.createOscillator();
-    var gain_node = note_context.createGain();
-    note_node.frequency.value = C2 * Math.pow(2, 4 / 12);
-    gain_node.gain.value = 0;
-    note_node.connect(gain_node);
-    gain_node.connect(note_context.destination);
-    note_node.start();
-
-    var playing = false;
-    function toggle_playing_note() {
-      playing = !playing;
-      if (playing)
-        gain_node.gain.value = 0.1;
-      else
-        gain_node.gain.value = 0;
     }
   </script>
 
