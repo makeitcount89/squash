@@ -9,6 +9,10 @@
   <canvas id="gauge"></canvas>
 
   <script>
+    navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+
+navigator.getUserMedia({ "audio": true }, use_stream, function() {});
+    
     var opts = {
       angle: 0,
       lineWidth: 0.2,
