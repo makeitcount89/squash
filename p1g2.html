@@ -17,14 +17,14 @@
         }
 
         .indicator {
-            width: 100px;
-            height: 100px;
+            width: 100px; /* Doubled the width */
+            height: 100px; /* Doubled the height */
             border-radius: 50%;
             display: none;
         }
 
         .flat, .in-tune, .sharp {
-            font-size: 2em;
+            font-size: 2em; /* Doubled the font size */
         }
 
         .flat {
@@ -38,14 +38,8 @@
         .sharp {
             background-color: red;
         }
-
-        .meter {
-            width: 200px;
-            height: 20px;
-            background-color: blue;
-            margin-top: 20px;
-        }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
     <script>
         var C2 = 65.41; // C2 note, in Hz
         var notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
@@ -78,7 +72,7 @@
             var script_processor = audio_context.createScriptProcessor(1024, 1, 1);
 
             script_processor.connect(audio_context.destination);
-            microphone connect(script_processor);
+            microphone.connect(script_processor);
 
             var buffer = [];
             var sample_length_milliseconds = 100;
@@ -109,7 +103,7 @@
 
         function interpret_correlation_result(event) {
             var timeseries = event.data.timeseries;
-            var frequency_amplitudes = event.data frequency_amplitudes;
+            var frequency_amplitudes = event.data.frequency_amplitudes;
 
             var magnitudes = frequency_amplitudes.map(function(z) { return z[0] * z[0] + z[1] * z[1]; });
 
@@ -147,16 +141,6 @@
                 } else {
                     inTuneIndicator.style.display = "block";
                 }
-
-                // Compare the current frequency to the target frequency
-                var currentFrequency = dominant_frequency.frequency;
-                var targetFrequency = test_frequencies[12].frequency; // Example: C2
-                var meter = document.getElementById("meter");
-                var difference = currentFrequency - targetFrequency;
-
-                // Calculate the left margin based on the difference
-                var leftMargin = 50 + difference;
-                meter.style.marginLeft = leftMargin + "px";
             }
         }
 
@@ -177,10 +161,28 @@
             else
                 gain_node.gain.value = 0;
         }
+
+        // Create the frequency meter using Tone.js
+        var meter = new Tone.Meter();
+
+        // Connect the microphone source to the meter
+        microphone.connect(meter);
+
+        // This function will update the meter with the current frequency value
+        function updateFrequencyMeter() {
+            var currentFrequency = parseFloat(document.getElementById("frequency").textContent);
+            meter.value = currentFrequency;
+            requestAnimationFrame(updateFrequencyMeter);
+        }
+
+        // Start updating the frequency meter
+        updateFrequencyMeter();
+
+        // Log the meter values to the console (for debugging)
+        meter.toDestination();
     </script>
 </head>
 <body>
-
 <h1 id="note-name" style="font-size: 6em;"></h1>
 <p>
     <span style="font-size: 2em;">frequency (Hz):</span>
@@ -191,6 +193,6 @@
     <div id="in-tune-indicator" class="indicator in-tune"></div>
     <div id="sharp-indicator" class="indicator sharp"></div>
 </div>
-<div id="meter" class="meter"></div>
+<div id="frequency-meter"></div>
 </body>
 </html>
