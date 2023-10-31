@@ -2,7 +2,7 @@
 <html>
 <head>
     <style>
-        body {
+       body {
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -10,7 +10,6 @@
             height: 100vh;
             margin: 0;
         }
-
         .indicator-container {
             display: flex;
             justify-content: space-between;
@@ -40,27 +39,11 @@
             background-color: red;
         }
 
-        .meter-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-top: 20px;
-        }
-
         .meter {
             width: 200px;
             height: 20px;
-            background-color: black;
-            position: relative;
-        }
-
-        .indicator-line {
-            width: 2px;
-            height: 20px;
-            background-color: white;
-            position: absolute;
-            top: 0;
-            left: 0;
+            background-color: blue;
+            margin-top: 20px;
         }
     </style>
     <script>
@@ -82,20 +65,10 @@
         correlation_worker.addEventListener("message", interpret_correlation_result);
 
         function initialize() {
-            // Check for getUserMedia support
-            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                // Request access to the microphone
-                navigator.mediaDevices.getUserMedia({ audio: true })
-                    .then(function (stream) {
-                        // Microphone access granted
-                        use_stream(stream);
-                    })
-                    .catch(function (err) {
-                        console.error("Error accessing the microphone:", err);
-                    });
-            } else {
-                console.error("getUserMedia is not supported in this browser");
-            }
+            var get_user_media = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+            get_user_media.call(navigator, { "audio": true }, use_stream, function() {});
+
+            // The play-note button has been removed.
         }
 
         function use_stream(stream) {
@@ -136,7 +109,7 @@
 
         function interpret_correlation_result(event) {
             var timeseries = event.data.timeseries;
-            var frequency_amplitudes = event.data.frequency_amplitudes;
+            var frequency_amplitudes = event.data frequency_amplitudes;
 
             var magnitudes = frequency_amplitudes.map(function(z) { return z[0] * z[0] + z[1] * z[1]; });
 
@@ -164,22 +137,26 @@
                 var sharpIndicator = document.getElementById("sharp-indicator");
 
                 flatIndicator.style.display = "none";
-                inTuneIndicator.style display = "none";
+                inTuneIndicator.style.display = "none";
                 sharpIndicator.style.display = "none";
 
                 if (dominant_frequency.name.includes("sharp")) {
                     sharpIndicator.style.display = "block";
                 } else if (dominant_frequency.name.includes("flat")) {
-                    flatIndicator.style.display = "block";
+                    flatIndicator.style display = "block";
                 } else {
                     inTuneIndicator.style.display = "block";
                 }
 
-                // Update the meter's indicator line position
-                var indicatorLine = document.getElementById("indicator-line");
-                var meterWidth = document.querySelector(".meter").offsetWidth;
-                var linePosition = (dominant_frequency.frequency - C2) / (test_frequencies[test_frequencies.length - 1].frequency - C2);
-                indicatorLine.style.left = meterWidth * linePosition + "px";
+                // Compare the current frequency to the target frequency
+                var currentFrequency = dominant_frequency.frequency;
+                var targetFrequency = test_frequencies[12].frequency; // Example: C2
+                var meter = document.getElementById("meter");
+                var difference = currentFrequency - targetFrequency;
+
+                // Calculate the left margin based on the difference
+                var leftMargin = 50 + difference;
+                meter.style.marginLeft = leftMargin + "px";
             }
         }
 
@@ -203,22 +180,17 @@
     </script>
 </head>
 <body>
-    <h1 id="note-name" style="font-size: 6em;"></h1>
-    <p>
-        <span style="font-size: 2em;">frequency (Hz):</span>
-        <span id="frequency" style="font-size: 2em;"></span>
-    </p>
-    <div class="indicator-container">
-        <div id="flat-indicator" class="indicator flat"></div>
-        <div id="in-tune-indicator" class="indicator in-tune"></div>
-        <div id="sharp-indicator" class="indicator sharp"></div>
-    </div>
 
-    <!-- Meter Container -->
-    <div class="meter-container">
-        <div class="meter">
-            <div id="indicator-line" class="indicator-line"></div>
-        </div>
-    </div>
+<h1 id="note-name" style="font-size: 6em;"></h1>
+<p>
+    <span style="font-size: 2em;">frequency (Hz):</span>
+    <span id="frequency" style="font-size: 2em;"></span>
+</p>
+<div class="indicator-container">
+    <div id="flat-indicator" class="indicator flat"></div>
+    <div id="in-tune-indicator" class="indicator in-tune"></div>
+    <div id="sharp-indicator" class="indicator sharp"></div>
+</div>
+<div id="meter" class="meter"></div>
 </body>
 </html>
