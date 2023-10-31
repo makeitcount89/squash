@@ -6,6 +6,52 @@
 </head>
 <body>
   <!-- Gauge Chart -->
+  <script>
+  var opts = {
+    angle: 0,
+    lineWidth: 0.2,
+    radiusScale: 1,
+    pointer: {
+      length: 0.6,
+      strokeWidth: 0.035,
+      color: '#000000'
+    },
+    staticLabels: {
+      font: '10px sans-serif',
+      labels: [-50, 0, 50], // Adjust the labels to indicate how flat or sharp
+      fractionDigits: 0
+    },
+    limitMax: false,
+    limitMin: false,
+    colorStart: '#6F6EA0',
+    colorStop: '#C0C0DB',
+    strokeColor: '#E0E0F0',
+    generateGradient: true
+  };
+  var target = document.getElementById('gauge');
+  var gauge = new Gauge(target).setOptions(opts);
+
+  gauge.maxValue = 50; // Maximum pitch difference value
+  gauge.setMinValue(-50); // Minimum pitch difference value
+  gauge.animationSpeed = 32;
+
+  // Calculate pitch difference (adjust this calculation as needed)
+  function calculatePitchDifference(detectedFrequency, targetFrequency) {
+    return 1200 * Math.log2(detectedFrequency / targetFrequency);
+  }
+
+  // Function to update the gauge based on pitch difference
+  function updateGauge(pitchDifference) {
+    gauge.set(pitchDifference);
+  }
+
+  // Example usage:
+  var inTuneFrequency = C2 * Math.pow(2, 4 / 12); // Adjust as needed
+  var detectedFrequency = 66.0; // Replace with the actual detected frequency
+  var pitchDifference = calculatePitchDifference(detectedFrequency, inTuneFrequency);
+  updateGauge(pitchDifference);
+  </script>
+  
   <canvas id="gauge"></canvas>
 
   <script>
