@@ -20,13 +20,11 @@
       },
       staticLabels: {
         font: '10px sans-serif',
-        labels: [-50, 0, 50, 100, 150], // Updated labels to include -50 and 150 for the full range
+        labels: [0, 50, 100],
         fractionDigits: 0
       },
-      limitMax: true, // Limit the maximum value
-      maxValue: 150, // Set the maximum value of the gauge
-      limitMin: true, // Limit the minimum value
-      minValue: -50, // Set the minimum value of the gauge
+      limitMax: false,
+      limitMin: false,
       colorStart: '#6F6EA0',
       colorStop: '#C0C0DB',
       strokeColor: '#E0E0F0',
@@ -35,18 +33,26 @@
     var target = document.getElementById('gauge');
     var gauge = new Gauge(target).setOptions(opts);
 
+    gauge.maxValue = 100;
+    gauge.setMinValue(0);
     gauge.animationSpeed = 32;
 
     // Set the value of the gauge (change this value as needed)
-    gauge.set(0); // Set the initial value to 0 to point vertically
+    gauge.set(75);
 
-    // Function to update the gauge value based on tuning result
-    function updateGauge(value) {
-      gauge.set(value);
+    // Function to set the gauge needle angle based on the note being in tune, flat, or sharp
+    function setGaugeNeedleAngle(noteName) {
+      if (noteName.includes("in-tune")) {
+        gauge.set(50); // Point vertically (in tune)
+      } else if (noteName.includes("flat")) {
+        gauge.set(25); // Point 45 degrees left (a bit flat)
+      } else if (noteName.includes("sharp")) {
+        gauge.set(75); // Point 45 degrees right (a bit sharp)
+      }
     }
 
-    // Call updateGauge with the appropriate value when you detect tuning
-    // For example, if in tune, call updateGauge(0); if slightly flat, call updateGauge(-10); if slightly sharp, call updateGauge(10); and so on.
+    // Call the function to set the initial gauge needle angle
+    setGaugeNeedleAngle("in-tune"); // You can change this to reflect the actual note status
   </script>
 
   <!-- Guitar Tuner -->
@@ -85,7 +91,6 @@
   </style>
 
   <script>
-    // Your existing guitar tuner JavaScript code here
     var C2 = 65.41; // C2 note, in Hz
     var notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
     var test_frequencies = [];
@@ -98,13 +103,14 @@
       test_frequencies = test_frequencies.concat([just_below, note, just_above]);
     }
 
-    async function initialize() {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        use_stream(stream);
-      } catch (err) {
-        console.error('Error accessing the microphone:', err);
-      }
+    window.addEventListener("load", initialize);
+
+    var correlation_worker = new Worker("correlation_worker.js");
+    correlation_worker.addEventListener("message", interpret_correlation_result);
+
+    function initialize() {
+      var get_user_media = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+      get_user_media.call(navigator, { "audio": true }, use_stream, function() {});
     }
 
     function use_stream(stream) {
@@ -145,7 +151,7 @@
 
     function interpret_correlation_result(event) {
       var timeseries = event.data.timeseries;
-      var frequency_amplitudes = event.data frequency_amplitudes;
+      var frequency_amplitudes = event.data.frequency_amplitudes;
 
       var magnitudes = frequency_amplitudes.map(function(z) { return z[0] * z[0] + z[1] * z[1]; });
 
@@ -183,6 +189,9 @@
         } else {
           inTuneIndicator.style.display = "block";
         }
+        
+        // Call the function to set the gauge needle angle based on the note
+        setGaugeNeedleAngle(dominant_frequency.name);
       }
     }
 
