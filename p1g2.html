@@ -78,7 +78,7 @@
             var script_processor = audio_context.createScriptProcessor(1024, 1, 1);
 
             script_processor.connect(audio_context.destination);
-            microphone connect(script_processor);
+            microphone.connect(script_processor);
 
             var buffer = [];
             var sample_length_milliseconds = 100;
@@ -109,7 +109,7 @@
 
         function interpret_correlation_result(event) {
             var timeseries = event.data.timeseries;
-            var frequency_amplitudes = event.data.frequency_amplitudes;
+            var frequency_amplitudes = event.data frequency_amplitudes;
 
             var magnitudes = frequency_amplitudes.map(function(z) { return z[0] * z[0] + z[1] * z[1]; });
 
@@ -137,7 +137,7 @@
                 var sharpIndicator = document.getElementById("sharp-indicator");
 
                 flatIndicator.style.display = "none";
-                inTuneIndicator.style.display = "none";
+                inTuneIndicator.style display = "none";
                 sharpIndicator.style.display = "none";
 
                 if (dominant_frequency.name.includes("sharp")) {
@@ -148,31 +148,36 @@
                     inTuneIndicator.style.display = "block";
                 }
 
-                // Here, you can dynamically set the target frequency based on the detected frequency
-                var detectedFrequency = dominant_frequency.frequency;
-                var closestNote = findClosestNote(detectedFrequency);
+                // Compare the current frequency to the closest guitar string note
+                var currentFrequency = dominant_frequency.frequency;
+                var guitarNotes = [82.41, 110, 146.83, 196, 246.94, 329.63]; // E, A, D, G, B, high E
+
+                var closestNote = guitarNotes.reduce(function(prev, curr) {
+                    return Math.abs(curr - currentFrequency) < Math.abs(prev - currentFrequency) ? curr : prev;
+                });
 
                 var meter = document.getElementById("meter");
-                var currentFrequency = test_frequencies[12].frequency; // Example: C2
-                var difference = detectedFrequency - currentFrequency;
-                meter.style.width = (50 + difference) + "px";
+                var difference = currentFrequency - closestNote;
+                meter.style.width = (100 + difference) + "px";
             }
         }
 
-        function findClosestNote(detectedFrequency) {
-            // Calculate the closest note dynamically
-            var closestNoteIndex = 0;
-            var minDifference = Math.abs(detectedFrequency - test_frequencies[0].frequency);
+        var note_context = new AudioContext();
+        var note_node = note_context.createOscillator();
+        var gain_node = note_context.createGain();
+        note_node.frequency.value = C2 * Math.pow(2, 4 / 12);
+        gain_node.gain.value = 0;
+        note_node.connect(gain_node);
+        gain_node.connect(note_context.destination);
+        note_node.start();
 
-            for (var i = 1; i < test_frequencies.length; i++) {
-                var difference = Math.abs(detectedFrequency - test_frequencies[i].frequency);
-                if (difference < minDifference) {
-                    minDifference = difference;
-                    closestNoteIndex = i;
-                }
-            }
-
-            return test_frequencies[closestNoteIndex].name;
+        var playing = false;
+        function toggle_playing_note() {
+            playing = !playing;
+            if (playing)
+                gain_node.gain.value = 0.1;
+            else
+                gain_node.gain.value = 0;
         }
     </script>
 </head>
