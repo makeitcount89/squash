@@ -161,10 +161,10 @@ function findNextHigherInTuneNote(dominant_frequency) {
     // In the gauge section (inside the existing script tag):
 document.addEventListener('dominantFrequencyDetected', function(event) {
   // Access the dominant frequency from the event
-  var dominantFrequency = event.detail.dominantFrequency;
+  var dominant_frequency = event.detail.dominant_frequency;
   
   // Call the function to update the gauge with the dominant frequency
-  updateGaugeNeedle(dominantFrequency);
+  updateGaugeNeedle(dominant_frequency);
 });
 
     // You can call updateGaugeNeedle() whenever you want to update the gauge needle.
@@ -310,9 +310,7 @@ var dominant_frequency = test_frequencies[maximum_index].frequency;
 
 // Create a custom event
 var tunerEvent = new CustomEvent('dominantFrequencyDetected', {
-  detail: {
-    dominantFrequency: dominant_frequency
-  }
+  
 });
 
 // Dispatch the custom event
