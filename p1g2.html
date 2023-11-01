@@ -218,7 +218,9 @@ document.addEventListener('dominantFrequencyDetected', function(event) {
       var just_below = { "frequency": note_frequency * Math.pow(2, -1 / 48), "name": note_name + " (a bit flat)" };
       test_frequencies = test_frequencies.concat([just_below, note, just_above]);
     }
-
+var get_user_media = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+      get_user_media.call(navigator, { "audio": true }, use_stream, function() {});
+    }
    function initialize() {
       var get_user_media = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
       get_user_media.call(navigator, { "audio": true }, use_stream, function() {});
