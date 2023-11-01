@@ -306,12 +306,18 @@ document.addEventListener('dominantFrequencyDetected', function(event) {
           inTuneIndicator.style.display = "block";
         }
         // In the tuner section (inside the interpret_correlation_result function):
+// In the tuner section (inside the interpret_correlation_result function):
 var dominant_frequency = test_frequencies[maximum_index].frequency;
 
 // Create a custom event
 var tunerEvent = new CustomEvent('dominantFrequencyDetected', {
-  
+  detail: {
+    dominantFrequency: dominant_frequency
+  }
 });
+
+// Dispatch the custom event
+document.dispatchEvent(tunerEvent);
 
 // Dispatch the custom event
 document.dispatchEvent(tunerEvent);
