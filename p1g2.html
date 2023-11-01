@@ -158,6 +158,14 @@ function findNextHigherInTuneNote(dominant_frequency) {
       // Update the gauge needle position
       setGaugeNeedleAngle(position);
     }
+    // In the gauge section (inside the existing script tag):
+document.addEventListener('dominantFrequencyDetected', function(event) {
+  // Access the dominant frequency from the event
+  var dominantFrequency = event.detail.dominantFrequency;
+  
+  // Call the function to update the gauge with the dominant frequency
+  updateGaugeNeedle(dominantFrequency);
+});
 
     // You can call updateGaugeNeedle() whenever you want to update the gauge needle.
 
@@ -297,8 +305,18 @@ function findNextHigherInTuneNote(dominant_frequency) {
         } else {
           inTuneIndicator.style.display = "block";
         }
-        setGaugeNeedleAngle(position);
-      }
+        // In the tuner section (inside the interpret_correlation_result function):
+var dominant_frequency = test_frequencies[maximum_index].frequency;
+
+// Create a custom event
+var tunerEvent = new CustomEvent('dominantFrequencyDetected', {
+  detail: {
+    dominantFrequency: dominant_frequency
+  }
+});
+
+// Dispatch the custom event
+document.dispatchEvent(tunerEvent);
 
     var note_context = new AudioContext();
     var note_node = note_context.createOscillator();
