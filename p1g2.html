@@ -37,53 +37,24 @@
     gauge.setMinValue(0);
     gauge.animationSpeed = 32;
 
-    var C2 = 65.41; // C2 note, in Hz
-    var notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
-    var test_frequencies = [];
-    for (var i = 0; i < 30; i++) {
-      var note_frequency = C2 * Math.pow(2, i / 12);
-      var note_name = notes[i % 12];
-      var note = { "frequency": note_frequency, "name": note_name };
-      test_frequencies.push(note);
-    }
-
-    var dominant_frequency;
-
-    function setGaugeNeedleAngle(frequency) {
-      var closestNote = findClosestNote();
-      var tolerance = closestNote.frequency * 0.02;
-      var difference = frequency - closestNote.frequency;
-      var angle = 50; // Default to in-tune position
-
-      if (Math.abs(difference) > tolerance) {
-        // Calculate the angle based on the degree of sharpness or flatness
-        angle = 50 + (difference > 0 ? 25 : -25);
-      }
-
-      gauge.set(angle); // Set the calculated angle
-    }
-
-    function findClosestNote() {
-      var closestNote = test_frequencies[0];
-      var closestDifference = Math.abs(dominant_frequency.frequency - closestNote.frequency);
-
-      for (var i = 1; i < test_frequencies.length; i++) {
-        var difference = Math.abs(dominant_frequency.frequency - test_frequencies[i].frequency);
-        if (difference < closestDifference) {
-          closestNote = test_frequencies[i];
-          closestDifference = difference;
-        }
-      }
-
-      return closestNote;
-    }
+    // Set the value of the gauge (change this value as needed)
+    gauge.set(75);
 
     // Function to set the gauge needle angle based on the note being in tune, flat, or sharp
-
-    function handleFrequencyUpdate(newFrequency) {
-      dominant_frequency = newFrequency;
-      setGaugeNeedleAngle(dominant_frequency.frequency);
+    function setGaugeNeedleAngle(noteName) {
+      if (noteName.includes("in-tune")) {
+        gauge.set(50); // Point vertically (in tune)
+      } else if (noteName.includes("flat")) {
+        gauge.set(25); // Point 45 degrees left (a bit flat)
+      } else if (noteName.includes("sharp")) {
+        gauge.set(75); // Point 45 degrees right (a bit sharp)
+      } else {
+        gauge.set(50); 
+      }
     }
+
+    // Call the function to set the initial gauge needle angle
+    setGaugeNeedleAngle("in-tune"); // You can change this to reflect the actual note status
   </script>
 
   <!-- Guitar Tuner -->
@@ -122,12 +93,27 @@
   </style>
 
   <script>
-    
+    var C2 = 65.41; // C2 note, in Hz
+    var notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+    var test_frequencies = [];
+    for (var i = 0; i < 30; i++) {
+      var note_frequency = C2 * Math.pow(2, i / 12);
+      var note_name = notes[i % 12];
+      var note = { "frequency": note_frequency, "name": note_name };
+      var just_above = { "frequency": note_frequency * Math.pow(2, 1 / 48), "name": note_name + " (a bit sharp)" };
+      var just_below = { "frequency": note_frequency * Math.pow(2, -1 / 48), "name": note_name + " (a bit flat)" };
+      test_frequencies = test_frequencies.concat([just_below, note, just_above]);
+    }
+
+    window.addEventListener("load", initialize);
+
+    var correlation_worker = new Worker("correlation_worker.js");
+    correlation_worker.addEventListener("message", interpret_correlation_result);
+
     function initialize() {
       var get_user_media = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
       get_user_media.call(navigator, { "audio": true }, use_stream, function() {});
     }
-    window.addEventListener("load", initialize);
 
     function use_stream(stream) {
       var audio_context = new AudioContext();
@@ -173,7 +159,7 @@
 
       var maximum_index = -1;
       var maximum_magnitude = 0;
-      for (var i = 0; magnitudes.length; i++) {
+      for (var i = 0; i < magnitudes.length; i++) {
         if (magnitudes[i] <= maximum_magnitude)
           continue;
 
@@ -186,7 +172,7 @@
       var confidence_threshold = 10;
 
       if (confidence > confidence_threshold) {
-        dominant_frequency = test_frequencies[maximum_index];
+        var dominant_frequency = test_frequencies[maximum_index];
         document.getElementById("note-name").textContent = dominant_frequency.name;
         document.getElementById("frequency").textContent = dominant_frequency.frequency;
 
@@ -205,8 +191,9 @@
         } else {
           inTuneIndicator.style.display = "block";
         }
-
-        handleFrequencyUpdate(dominant_frequency);
+        
+        // Call the function to set the gauge needle angle based on the note
+        setGaugeNeedleAngle(dominant_frequency.name);
       }
     }
 
@@ -227,10 +214,6 @@
       else
         gain_node.gain.value = 0;
     }
-
-    var correlation_worker = new Worker("correlation_worker.js");
-    correlation_worker.addEventListener("message", interpret_correlation_result);
-
   </script>
 
   <h1 id="note-name" style="font-size: 6em;"></h1>
