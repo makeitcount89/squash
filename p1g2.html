@@ -48,7 +48,7 @@
         gauge.set(25); // Point 45 degrees left (a bit flat)
       } else if (noteName.includes("sharp")) {
         gauge.set(75); // Point 45 degrees right (a bit sharp)
-      }
+      } else {gauge.set(50); /}
     }
 
     // Call the function to set the initial gauge needle angle
