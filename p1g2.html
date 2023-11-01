@@ -127,6 +127,7 @@
       var get_user_media = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
       get_user_media.call(navigator, { "audio": true }, use_stream, function() {});
     }
+    window.addEventListener("load", initialize);
 
     function use_stream(stream) {
       var audio_context = new AudioContext();
@@ -195,7 +196,7 @@
 
         flatIndicator.style.display = "none";
         inTuneIndicator.style.display = "none";
-        sharpIndicator.style display = "none";
+        sharpIndicator.style.display = "none";
 
         if (dominant_frequency.name.includes("sharp")) {
           sharpIndicator.style.display = "block";
