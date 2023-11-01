@@ -46,7 +46,7 @@
     setGaugeNeedleAngle(50); // Default to the center position
 
     // Function to find the closest in-tune note
-    function findClosestNote(dominantFrequency) {
+    function findClosestNote(dominant_frequency) {
       var closestNote = null;
       var closestDifference = Number.MAX_VALUE;
 
@@ -66,7 +66,7 @@
       ];
 
       for (var i = 0; i < notes.length; i++) {
-        var difference = Math.abs(dominantFrequency - notes[i].frequency);
+        var difference = Math.abs(dominant_frequency - notes[i].frequency);
         if (difference < closestDifference) {
           closestNote = notes[i];
           closestDifference = difference;
@@ -77,7 +77,7 @@
     }
 
     // Function to find the next lower in-tune note
-function findNextLowerInTuneNote(dominantFrequency) {
+function findNextLowerInTuneNote(dominant_frequency) {
   var notes = [
     { name: "C2", frequency: 65.41 },
     { name: "C#2", frequency: 69.30 },
@@ -97,8 +97,8 @@ function findNextLowerInTuneNote(dominantFrequency) {
   var closestLowerDifference = Number.MAX_VALUE;
 
   for (var i = 0; i < notes.length; i++) {
-    if (notes[i].frequency < dominantFrequency) {
-      var difference = dominantFrequency - notes[i].frequency;
+    if (notes[i].frequency < dominant_frequency) {
+      var difference = dominant_frequency - notes[i].frequency;
       if (difference < closestLowerDifference) {
         closestLowerNote = notes[i];
         closestLowerDifference = difference;
@@ -111,7 +111,7 @@ function findNextLowerInTuneNote(dominantFrequency) {
     
 
   // Function to find the next higher in-tune note
-function findNextHigherInTuneNote(dominantFrequency) {
+function findNextHigherInTuneNote(dominant_frequency) {
   var notes = [
     { name: "E2", frequency: 82.41 },
     { name: "A2", frequency: 110.00 },
@@ -129,7 +129,7 @@ function findNextHigherInTuneNote(dominantFrequency) {
 
   var nextHigherNote = null;
   for (var i = notes.length - 1; i >= 0; i--) {
-    if (notes[i].frequency > dominantFrequency) {
+    if (notes[i].frequency > dominant_frequency) {
       nextHigherNote = notes[i];
     } else {
       break;
@@ -141,13 +141,13 @@ function findNextHigherInTuneNote(dominantFrequency) {
     
 
     // Call the function to update the gauge needle when needed
-    function updateGaugeNeedle(dominantFrequency) {
-      var closestNote = findClosestNote(dominantFrequency);
-      var nextLowerNote = findNextLowerInTuneNote(dominantFrequency);
-      var nextHigherNote = findNextHigherInTuneNote(dominantFrequency);
+    function updateGaugeNeedle(dominant_frequency) {
+      var closestNote = findClosestNote(dominant_frequency);
+      var nextLowerNote = findNextLowerInTuneNote(dominant_frequency);
+      var nextHigherNote = findNextHigherInTuneNote(dominant_frequency);
 
-      var lowerDifference = dominantFrequency - nextLowerNote.frequency;
-      var higherDifference = nextHigherNote.frequency - dominantFrequency;
+      var lowerDifference = dominant_frequency - nextLowerNote.frequency;
+      var higherDifference = nextHigherNote.frequency - dominant_frequency;
 
       // Calculate the position based on the percentage difference to the next lower and higher notes
       var position = (lowerDifference / (closestNote.frequency - nextLowerNote.frequency)) * 50;
