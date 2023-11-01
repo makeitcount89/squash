@@ -37,24 +37,130 @@
     gauge.setMinValue(0);
     gauge.animationSpeed = 32;
 
-    // Set the value of the gauge (change this value as needed)
-    gauge.set(75);
-
-    // Function to set the gauge needle angle based on the note being in tune, flat, or sharp
-    function setGaugeNeedleAngle(noteName) {
-      if (noteName.includes("in-tune")) {
-        gauge.set(50); // Point vertically (in tune)
-      } else if (noteName.includes("flat")) {
-        gauge.set(25); // Point 45 degrees left (a bit flat)
-      } else if (noteName.includes("sharp")) {
-        gauge.set(75); // Point 45 degrees right (a bit sharp)
-      } else {
-        gauge.set(50); 
-      }
+    // Function to set the gauge needle angle based on the note's position
+    function setGaugeNeedleAngle(position) {
+      gauge.set(position);
     }
 
     // Call the function to set the initial gauge needle angle
-    setGaugeNeedleAngle("in-tune"); // You can change this to reflect the actual note status
+    setGaugeNeedleAngle(50); // Default to the center position
+
+    // Function to find the closest in-tune note
+    function findClosestNote(dominantFrequency) {
+      var closestNote = null;
+      var closestDifference = Number.MAX_VALUE;
+
+      var notes = [
+        { name: "C2", frequency: 65.41 },
+        { name: "C#2", frequency: 69.30 },
+        { name: "D2", frequency: 73.42 },
+        { name: "D#2", frequency: 77.78 },
+        { name: "E2", frequency: 82.41 },
+        { name: "F2", frequency: 87.31 },
+        { name: "F#2", frequency: 92.50 },
+        { name: "G2", frequency: 98.00 },
+        { name: "G#2", frequency: 103.83 },
+        { name: "A2", frequency: 110.00 },
+        { name: "A#2", frequency: 116.54 },
+        { name: "B2", frequency: 123.47 }
+      ];
+
+      for (var i = 0; i < notes.length; i++) {
+        var difference = Math.abs(dominantFrequency - notes[i].frequency);
+        if (difference < closestDifference) {
+          closestNote = notes[i];
+          closestDifference = difference;
+        }
+      }
+
+      return closestNote;
+    }
+
+    // Function to find the next lower in-tune note
+function findNextLowerInTuneNote(dominantFrequency) {
+  var notes = [
+    { name: "C2", frequency: 65.41 },
+    { name: "C#2", frequency: 69.30 },
+    { name: "D2", frequency: 73.42 },
+    { name: "D#2", frequency: 77.78 },
+    { name: "E2", frequency: 82.41 },
+    { name: "F2", frequency: 87.31 },
+    { name: "F#2", frequency: 92.50 },
+    { name: "G2", frequency: 98.00 },
+    { name: "G#2", frequency: 103.83 },
+    { name: "A2", frequency: 110.00 },
+    { name: "A#2", frequency: 116.54 },
+    { name: "B2", frequency: 123.47 }
+  ];
+
+  var closestLowerNote = null;
+  var closestLowerDifference = Number.MAX_VALUE;
+
+  for (var i = 0; i < notes.length; i++) {
+    if (notes[i].frequency < dominantFrequency) {
+      var difference = dominantFrequency - notes[i].frequency;
+      if (difference < closestLowerDifference) {
+        closestLowerNote = notes[i];
+        closestLowerDifference = difference;
+      }
+    }
+  }
+
+  return closestLowerNote;
+}
+    
+
+  // Function to find the next higher in-tune note
+function findNextHigherInTuneNote(dominantFrequency) {
+  var notes = [
+    { name: "E2", frequency: 82.41 },
+    { name: "A2", frequency: 110.00 },
+    { name: "D3", frequency: 146.83 },
+    { name: "G3", frequency: 195.99 },
+    { name: "B3", frequency: 246.94 },
+    { name: "E4", frequency: 329.63 },
+    { name: "A4", frequency: 440.00 },
+    { name: "D5", frequency: 587.33 },
+    { name: "G5", frequency: 783.99 },
+    { name: "B5", frequency: 987.77 },
+    { name: "E6", frequency: 1318.51 },
+    { name: "A6", frequency: 1760.00 }
+  ];
+
+  var nextHigherNote = null;
+  for (var i = notes.length - 1; i >= 0; i--) {
+    if (notes[i].frequency > dominantFrequency) {
+      nextHigherNote = notes[i];
+    } else {
+      break;
+    }
+  }
+
+  return nextHigherNote;
+}
+    
+
+    // Call the function to update the gauge needle when needed
+    function updateGaugeNeedle(dominantFrequency) {
+      var closestNote = findClosestNote(dominantFrequency);
+      var nextLowerNote = findNextLowerInTuneNote(dominantFrequency);
+      var nextHigherNote = findNextHigherInTuneNote(dominantFrequency);
+
+      var lowerDifference = dominantFrequency - nextLowerNote.frequency;
+      var higherDifference = nextHigherNote.frequency - dominantFrequency;
+
+      // Calculate the position based on the percentage difference to the next lower and higher notes
+      var position = (lowerDifference / (closestNote.frequency - nextLowerNote.frequency)) * 50;
+
+      // Ensure the position is within the gauge's limits (0 to 100)
+      position = Math.max(0, Math.min(100, position));
+
+      // Update the gauge needle position
+      setGaugeNeedleAngle(position);
+    }
+
+    // You can call updateGaugeNeedle() whenever you want to update the gauge needle.
+
   </script>
 
   <!-- Guitar Tuner -->
