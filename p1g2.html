@@ -48,11 +48,11 @@
     }
 
     var dominant_frequency;
-    
-    function setGaugeNeedleAngle(noteName) {
+
+    function setGaugeNeedleAngle(frequency) {
       var closestNote = findClosestNote();
       var tolerance = closestNote.frequency * 0.02;
-      var difference = dominant_frequency.frequency - closestNote.frequency;
+      var difference = frequency - closestNote.frequency;
       var angle = 50; // Default to in-tune position
 
       if (Math.abs(difference) > tolerance) {
@@ -82,7 +82,7 @@
 
     function handleFrequencyUpdate(newFrequency) {
       dominant_frequency = newFrequency;
-      setGaugeNeedleAngle(dominant_frequency.name);
+      setGaugeNeedleAngle(dominant_frequency.frequency);
     }
   </script>
 
@@ -172,7 +172,7 @@
 
       var maximum_index = -1;
       var maximum_magnitude = 0;
-      for (var i = 0; i < magnitudes.length; i++) {
+      for (var i = 0; magnitudes.length; i++) {
         if (magnitudes[i] <= maximum_magnitude)
           continue;
 
@@ -195,7 +195,7 @@
 
         flatIndicator.style.display = "none";
         inTuneIndicator.style.display = "none";
-        sharpIndicator.style.display = "none";
+        sharpIndicator.style display = "none";
 
         if (dominant_frequency.name.includes("sharp")) {
           sharpIndicator.style.display = "block";
