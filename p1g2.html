@@ -297,7 +297,8 @@ function findNextHigherInTuneNote(dominantFrequency) {
         } else {
           inTuneIndicator.style.display = "block";
         }
-        
+        setGaugeNeedleAngle(position);
+      }
 
     var note_context = new AudioContext();
     var note_node = note_context.createOscillator();
