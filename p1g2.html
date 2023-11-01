@@ -219,6 +219,10 @@ document.addEventListener('dominantFrequencyDetected', function(event) {
       test_frequencies = test_frequencies.concat([just_below, note, just_above]);
     }
 
+   function initialize() {
+      var get_user_media = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+      get_user_media.call(navigator, { "audio": true }, use_stream, function() {});
+   }
     window.addEventListener("load", initialize);
 
     var correlation_worker = new Worker("correlation_worker.js");
