@@ -37,20 +37,10 @@
     gauge.setMinValue(0);
     gauge.animationSpeed = 32;
 
-    function setGaugeNeedleAngle(noteName, closestNote, frequency) {
-      var tolerance = closestNote.frequency * 0.02; // Define your tolerance here
-      var difference = frequency - closestNote.frequency;
-      var angle = 50; // Default to in-tune position
-
-      if (Math.abs(difference) > tolerance) {
-        // Calculate the angle based on the degree of sharpness or flatness
-        angle = 50 + (difference > 0 ? 25 : -25); // Adjust the 25 based on your preference
-      }
-
+    function setGaugeNeedleAngle(angle) {
       gauge.set(angle); // Set the calculated angle
     }
-    setGaugeNeedleAngle(dominant_frequency.name);
-    }
+
     // Function to set the gauge needle angle based on the note being in tune, flat, or sharp
   </script>
 
@@ -122,7 +112,7 @@
       var script_processor = audio_context.createScriptProcessor(1024, 1, 1);
 
       script_processor.connect(audio_context.destination);
-      microphone.connect(script_processor);
+      microphone connect(script_processor);
 
       var buffer = [];
       var sample_length_milliseconds = 100;
@@ -153,7 +143,7 @@
 
     function interpret_correlation_result(event) {
       var timeseries = event.data.timeseries;
-      var frequency_amplitudes = event.data.frequency_amplitudes;
+      var frequency_amplitudes = event.data frequency_amplitudes;
 
       var magnitudes = frequency_amplitudes.map(function(z) { return z[0] * z[0] + z[1] * z[1]; });
 
