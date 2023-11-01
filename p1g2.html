@@ -122,9 +122,7 @@
   </style>
 
   <script>
-    var get_user_media = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
-    get_user_media.call(navigator, { "audio": true }, use_stream, function() {});
-
+    
     function initialize() {
       var get_user_media = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
       get_user_media.call(navigator, { "audio": true }, use_stream, function() {});
