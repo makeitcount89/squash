@@ -116,14 +116,14 @@
     var prevSemitoneFrequency = C2 / Math.pow(2, 1 / 12); // Frequency of the previous semitone
 
     // Define the percentage thresholds for sharp notes
-    var bitSharpThreshold = 0.1; // 10% of the distance to the next semitone
+    var bitSharpThreshold = 0.15; // 10% of the distance to the next semitone
     var sharpThreshold = 0.3; // 30% of the distance to the next semitone
-    var verySharpThreshold = 0.5; // 50% of the distance to the next semitone
+    var verySharpThreshold = 0.4; // 50% of the distance to the next semitone
 
     // Define the percentage thresholds for flat notes
-    var bitFlatThreshold = 0.1; // 10% of the distance to the previous semitone
+    var bitFlatThreshold = 0.15; // 10% of the distance to the previous semitone
     var flatThreshold = 0.3; // 30% of the distance to the previous semitone
-    var veryFlatThreshold = 0.5; // 50% of the distance to the previous semitone
+    var veryFlatThreshold = 0.4; // 50% of the distance to the previous semitone
 
     for (var i = 0; i < 30; i++) {
       var note_name = notes[i % 12];
