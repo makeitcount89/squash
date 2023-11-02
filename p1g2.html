@@ -1,31 +1,28 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Guitar Chord Variations</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/chordjs/1.0.4/chord.js"></script>
+    <title>Chord Book</title>
 </head>
 <body>
-    <h1>Select a Chord</h1>
+    <h1>Chord Book</h1>
+    <label for="chordSelect">Select a chord:</label>
     <select id="chordSelect">
-        <option value="C">C</option>
-        <option value="D">D</option>
-        <option value="E">E</option>
+        <option value="C">C Major</option>
+        <option value="D">D Major</option>
+        <option value="G">G Major</option>
         <!-- Add more chord options here -->
     </select>
-    <button onclick="displayChordVariations()">Show Chord Diagram</button>
-    <div id="chordDiagram"></div>
 
+    <div id="chordChart"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chordbook@1.0.0/dist/chordbook.js"></script>
     <script>
-        function displayChordVariations() {
-            var chordSelect = document.getElementById('chordSelect');
-            var selectedChord = chordSelect.value;
-            var chordDiagram = document.getElementById('chordDiagram');
-            chordDiagram.innerHTML = '';
-
-            var chord = new Chord(selectedChord);
-            chord.setContainer('chordDiagram');
-            chord.draw();
-        }
+        // Function to update the chord chart when a chord is selected
+        document.getElementById('chordSelect').addEventListener('change', function() {
+            var selectedChord = this.value;
+            var chordChart = ChordBook.create(selectedChord);
+            document.getElementById('chordChart').innerHTML = chordChart.render();
+        });
     </script>
 </body>
 </html>
