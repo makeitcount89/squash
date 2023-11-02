@@ -35,7 +35,7 @@
 
     gauge.maxValue = 100;
     gauge.setMinValue(0);
-    gauge.animationSpeed = 15;
+    gauge.animationSpeed = 20;
 
     // Function to set the gauge needle angle based on the note being in tune, flat, or sharp
     function setGaugeNeedleAngle(noteName) {
@@ -101,14 +101,14 @@
   </style>
 
   <script>
-   /* var noteTranslations = {
-      "a bit sharp": "too high",
-      "a bit flat": "too high",
+    var noteTranslations = {
+      "a bit sharp": "tune down",
+      "a bit flat": "tune up",
       "sharp": "sharp",
       "flat": "flat",
       "very sharp": "very sharp",
       "very flat": "very flat",
-      "in-tune": "in tune"*/
+      "in-tune": "in tune"
     };
     var C2 = 65.41; // C2 note, in Hz
     var notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
@@ -116,14 +116,14 @@
     var prevSemitoneFrequency = C2 / Math.pow(2, 1 / 12); // Frequency of the previous semitone
 
     // Define the percentage thresholds for sharp notes
-    var bitSharpThreshold = 0.17; // 10% of the distance to the next semitone
-    var sharpThreshold = 0.34; // 30% of the distance to the next semitone
-    var verySharpThreshold = 0.44; // 50% of the distance to the next semitone
+    var bitSharpThreshold = 0.1; // 10% of the distance to the next semitone
+    var sharpThreshold = 0.3; // 30% of the distance to the next semitone
+    var verySharpThreshold = 0.5; // 50% of the distance to the next semitone
 
     // Define the percentage thresholds for flat notes
-    var bitFlatThreshold = 0.17; // 10% of the distance to the previous semitone
-    var flatThreshold = 0.34; // 30% of the distance to the previous semitone
-    var veryFlatThreshold = 0.44; // 50% of the distance to the previous semitone
+    var bitFlatThreshold = 0.1; // 10% of the distance to the previous semitone
+    var flatThreshold = 0.3; // 30% of the distance to the previous semitone
+    var veryFlatThreshold = 0.5; // 50% of the distance to the previous semitone
 
     for (var i = 0; i < 30; i++) {
       var note_name = notes[i % 12];
@@ -251,7 +251,8 @@
         }
       }
       // Call the function to set the gauge needle angle based on the note
-      
+      setGaugeNeedleAngle(dominant_frequency.name);
+    }
 
     var note_context = new AudioContext();
     var note_node = note_context.createOscillator();
@@ -269,8 +270,6 @@
         gain_node.gain.value = 0.1;
       else
         gain_node.gain.value = 0;
-    }
-      setGaugeNeedleAngle(dominant_frequency.name);
     }
   </script>
 
