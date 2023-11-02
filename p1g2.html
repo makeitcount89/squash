@@ -180,7 +180,7 @@
       var script_processor = audio_context.createScriptProcessor(1024, 1, 1);
 
       script_processor.connect(audio_context.destination);
-      microphone connect(script_processor);
+      microphone.connect(script_processor);
 
       var buffer = [];
       var sample_length_milliseconds = 100;
@@ -211,7 +211,7 @@
 
     function interpret_correlation_result(event) {
       var timeseries = event.data.timeseries;
-      var frequency_amplitudes = event.data frequency_amplitudes;
+      var frequency_amplitudes = event.data.frequency_amplitudes;
 
       var magnitudes = frequency_amplitudes.map(function(z) { return z[0] * z[0] + z[1] * z[1]; });
 
@@ -239,7 +239,7 @@
         var sharpIndicator = document.getElementById("sharp-indicator");
 
         flatIndicator.style.display = "none";
-        inTuneIndicator.style display = "none";
+        inTuneIndicator.style.display = "none";
         sharpIndicator.style.display = "none";
 
         if (dominant_frequency.name.includes("sharp")) {
