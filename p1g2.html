@@ -1,55 +1,45 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Guitar Chord Lookup</title>
-    <script src="chord.js"></script>
-    <style>
-        body {
-            text-align: center;
-            font-family: Arial, sans-serif;
-        }
-
-        h1 {
-            font-size: 24px;
-        }
-
-        #chordInput {
-            padding: 5px;
-            font-size: 16px;
-        }
-
-        button {
-            padding: 5px 10px;
-            font-size: 16px;
-        }
-
-        #chordDisplay {
-            font-size: 18px;
-            margin-top: 20px;
-        }
-    </style>
+    <title>Guitar Chord Variations</title>
 </head>
 <body>
-    <h1>Guitar Chord Lookup</h1>
-    <input type="text" id="chordInput" placeholder="Enter chord name">
-    <button onclick="lookupChord()">Lookup</button>
-    <div id="chordDisplay"></div>
+    <h1>Select a Chord</h1>
+    <select id="chordSelect">
+        <option value="C">C</option>
+        <option value="D">D</option>
+        <option value="E">E</option>
+        <!-- Add more chord options here -->
+    </select>
+    <button onclick="displayChordVariations()">Show Variations</button>
+    <div id="chordVariations"></div>
 
     <script>
-        function lookupChord() {
-            var chordInput = document.getElementById('chordInput').value;
-            var chordDisplay = document.getElementById('chordDisplay');
-            
-            // Use Chord.js to render the chord chart
-            chordDisplay.innerHTML = '';
-            try {
-                var chord = new Chord(chordInput);
-                chord.setContainer('chordDisplay');
-                chord.draw();
-            } catch (error) {
-                chordDisplay.textContent = 'Chord not found';
+        function displayChordVariations() {
+            var chordSelect = document.getElementById('chordSelect');
+            var selectedChord = chordSelect.value;
+            var chordVariations = document.getElementById('chordVariations');
+            chordVariations.innerHTML = '';
+
+            if (chordLibrary[selectedChord]) {
+                chordVariations.innerHTML = '<h2>' + selectedChord + ' Chord Variations:</h2>';
+                chordLibrary[selectedChord].forEach(function(variation) {
+                    chordVariations.innerHTML += '<p>' + variation + '</p>';
+                });
+            } else {
+                chordVariations.textContent = 'Chord not found in the library';
             }
         }
+    </script>
+
+    <script>
+        // Define chord variations for the main guitar chords
+        var chordLibrary = {
+            'C': ['C Major', 'C Major 7', 'C Minor', 'C7'],
+            'D': ['D Major', 'D Major 7', 'D Minor', 'D7'],
+            'E': ['E Major', 'E Major 7', 'E Minor', 'E7'],
+            // Add more chords and variations as needed
+        };
     </script>
 </body>
 </html>
