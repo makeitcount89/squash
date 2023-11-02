@@ -35,26 +35,30 @@
 
     gauge.maxValue = 100;
     gauge.setMinValue(0);
-    gauge.animationSpeed = 32;
-
-    // Set the value of the gauge (change this value as needed)
-    gauge.set(75);
+    gauge.animationSpeed = 20;
 
     // Function to set the gauge needle angle based on the note being in tune, flat, or sharp
     function setGaugeNeedleAngle(noteName) {
+      var displayText = noteTranslations[noteName] || noteName;
       if (noteName.includes("in-tune")) {
         gauge.set(50); // Point vertically (in tune)
       } else if (noteName.includes("very flat")) {
-        gauge.set(10); // Point 80 degrees left (very flat)
+        gauge.set(0); // Point 80 degrees left (very flat)
       } else if (noteName.includes("flat")) {
-        gauge.set(25); // Point 45 degrees left (a bit flat)
-      } else if (noteName.includes("sharp")) {
-        gauge.set(75); // Point 45 degrees right (a bit sharp)
+        gauge.set(16.6); // Point 45 degrees left (a bit flat)
+      } else if (noteName.includes("a bit flat")) {
+        gauge.set(33); // Point 45 degrees left (a bit flat)
       } else if (noteName.includes("a bit sharp")) {
-        gauge.set(90); // Point 80 degrees right (a bit sharp)
+        gauge.set(66); // Point 45 degrees right (a bit sharp)
+      } else if (noteName.includes("sharp")) {
+        gauge.set(82); // Point 80 degrees right (sharp)
+      } else if (noteName.includes("very sharp")) {
+        gauge.set(100); // Point 80 degrees right (very sharp)
       } else {
         gauge.set(50);
       }
+      // Display the user-friendly text
+      document.getElementById("note-name").textContent = displayText;
     }
 
     // Call the function to set the initial gauge needle angle
@@ -97,23 +101,69 @@
   </style>
 
   <script>
+    var noteTranslations = {
+      "a bit sharp": "tune down",
+      "a bit flat": "tune up",
+      "sharp": "sharp",
+      "flat": "flat",
+      "very sharp": "very sharp",
+      "very flat": "very flat",
+      "in-tune": "in tune"
+    };
     var C2 = 65.41; // C2 note, in Hz
     var notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
     var test_frequencies = [];
+    var prevSemitoneFrequency = C2 / Math.pow(2, 1 / 12); // Frequency of the previous semitone
+
+    // Define the percentage thresholds for sharp notes
+    var bitSharpThreshold = 0.1; // 10% of the distance to the next semitone
+    var sharpThreshold = 0.3; // 30% of the distance to the next semitone
+    var verySharpThreshold = 0.5; // 50% of the distance to the next semitone
+
+    // Define the percentage thresholds for flat notes
+    var bitFlatThreshold = 0.1; // 10% of the distance to the previous semitone
+    var flatThreshold = 0.3; // 30% of the distance to the previous semitone
+    var veryFlatThreshold = 0.5; // 50% of the distance to the previous semitone
+
     for (var i = 0; i < 30; i++) {
-      var note_frequency = C2 * Math.pow(2, i / 12);
       var note_name = notes[i % 12];
+      var note_frequency = C2 * Math.pow(2, i / 12);
+      var semitoneDistance = note_frequency - prevSemitoneFrequency;
+
       var note = { "frequency": note_frequency, "name": note_name };
-      var just_above = { "frequency": note_frequency * Math.pow(2, 1 / 48), "name": note_name + " (a bit sharp)" };
-      var very_flat = { "frequency": note_frequency * Math.pow(2, -1 / 36), "name": note_name + " (very flat)" };
-      var flat = { "frequency": note_frequency * Math.pow(2, -1 / 24), "name": note_name + " (flat)" };
-      var just_below = { "frequency": note_frequency * Math.pow(2, -1 / 48), "name": note_name + " (a bit flat)" };
-      test_frequencies = test_frequencies.concat([very_flat, flat, just_below, note, just_above]);
+      var just_above = {
+        "frequency": note_frequency + semitoneDistance * bitSharpThreshold,
+        "name": note_name + " (a bit sharp)"
+      };
+      var sharp = {
+        "frequency": note_frequency + semitoneDistance * sharpThreshold,
+        "name": note_name + " (sharp)"
+      };
+      var very_sharp = {
+        "frequency": note_frequency + semitoneDistance * verySharpThreshold,
+        "name": note_name + " (very sharp)"
+      };
+      var just_below = {
+        "frequency": note_frequency - semitoneDistance * bitFlatThreshold,
+        "name": note_name + " (a bit flat)"
+      };
+      var flat = {
+        "frequency": note_frequency - semitoneDistance * flatThreshold,
+        "name": note_name + " (flat)"
+      };
+      var very_flat = {
+        "frequency": note_frequency - semitoneDistance * veryFlatThreshold,
+        "name": note_name + " (very flat)"
+      };
+
+      test_frequencies = test_frequencies.concat([very_sharp, sharp, very_flat, flat, just_below, note, just_above]);
+
+      prevSemitoneFrequency = note_frequency;
     }
 
-    // Rest of your code remains the sam
+    // Rest of your code remains the same
 
-    window.addEventListener("load", initialize);
+     window.addEventListener("load", initialize);
 
     var correlation_worker = new Worker("correlation_worker.js");
     correlation_worker.addEventListener("message", interpret_correlation_result);
@@ -199,10 +249,9 @@
         } else {
           inTuneIndicator.style.display = "block";
         }
-        
-        // Call the function to set the gauge needle angle based on the note
-        setGaugeNeedleAngle(dominant_frequency.name);
       }
+      // Call the function to set the gauge needle angle based on the note
+      setGaugeNeedleAngle(dominant_frequency.name);
     }
 
     var note_context = new AudioContext();
