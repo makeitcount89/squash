@@ -169,7 +169,7 @@
     correlation_worker.addEventListener("message", interpret_correlation_result);
 
     function initialize() {
-      var get_user_media = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+      var get_user_media = navigator.mediaDevices.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
       get_user_media.call(navigator, { "audio": true }, use_stream, function() {});
     }
 
