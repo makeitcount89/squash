@@ -219,6 +219,7 @@ document.addEventListener('dominantFrequencyDetected', function(event) {
       test_frequencies = test_frequencies.concat([just_below, note, just_above]);
     }
 
+     function initialize() {
     navigator.mediaDevices.getUserMedia({ audio: true })
       .then(function(stream) {
         // Stream from the microphone is available in the `stream` variable
@@ -228,9 +229,7 @@ document.addEventListener('dominantFrequencyDetected', function(event) {
         console.error('Error accessing microphone:', error);
       });
 
-   }
-    window.addEventListener("load", initialize);
-
+   function setupAudioComponents() {
     function use_stream(stream) {
       var audio_context = new AudioContext();
       var microphone = audio_context.createMediaStreamSource(stream);
@@ -266,6 +265,15 @@ document.addEventListener('dominantFrequencyDetected', function(event) {
 
       script_processor.onaudioprocess = window.capture_audio;
     }
+}
+   
+  // ... your other initialization code ...
+
+  // Call the function to set up audio components
+  setupAudioComponents();
+}
+    window.addEventListener("load", initialize);
+
 
     function interpret_correlation_result(event) {
       var timeseries = event.data.timeseries;
@@ -320,7 +328,7 @@ var tunerEvent = new CustomEvent('dominantFrequencyDetected', {
 
 // Dispatch the custom event
 document.dispatchEvent(tunerEvent);
-
+function setupAudioComponents() {
     var note_context = new AudioContext();
     var note_node = note_context.createOscillator();
     var gain_node = note_context.createGain();
@@ -338,6 +346,7 @@ document.dispatchEvent(tunerEvent);
       else
         gain_node.gain.value = 0;
     }
+}
   </script>
 
   <h1 id="note-name" style="font-size: 6em;"></h1>
