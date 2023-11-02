@@ -113,12 +113,12 @@ for (var i = 0; i < 30; i++) {
     var note_frequency = C2 * Math.pow(2, i / 12);
     var note_name = notes[i % 12];
     var note = { "frequency": note_frequency, "name": note_name };
-    var just_above = { "frequency": note_frequency * Math.pow(2, 1 / 36), "name": note_name + " (a bit sharp)" };
-    var sharp = { "frequency": note_frequency * Math.pow(2, 1 / 24), "name": note_name + " (sharp)" };
-    var very_sharp = { "frequency": note_frequency * Math.pow(2, 1 / 12), "name": note_name + " (very sharp)" };
-    var very_flat = { "frequency": note_frequency * Math.pow(2, -1 / 12), "name": note_name + " (very flat)" };
-    var flat = { "frequency": note_frequency * Math.pow(2, -1 / 24), "name": note_name + " (flat)" };
-    var just_below = { "frequency": note_frequency * Math.pow(2, -1 / 36), "name": note_name + " (a bit flat)" };
+    var just_above = { "frequency": note_frequency * Math.pow(2, 1 / 50), "name": note_name + " (a bit sharp)" };
+    var sharp = { "frequency": note_frequency * Math.pow(2, 1 / 40), "name": note_name + " (sharp)" };
+    var very_sharp = { "frequency": note_frequency * Math.pow(2, 1 / 30), "name": note_name + " (very sharp)" };
+    var very_flat = { "frequency": note_frequency * Math.pow(2, -1 / 30), "name": note_name + " (very flat)" };
+    var flat = { "frequency": note_frequency * Math.pow(2, -1 / 40), "name": note_name + " (flat)" };
+    var just_below = { "frequency": note_frequency * Math.pow(2, -1 / 50), "name": note_name + " (a bit flat)" };
     test_frequencies = test_frequencies.concat([very_sharp, sharp, very_flat, flat, just_below, note, just_above]);
 }
     
