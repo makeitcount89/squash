@@ -321,9 +321,6 @@ var tunerEvent = new CustomEvent('dominantFrequencyDetected', {
 // Dispatch the custom event
 document.dispatchEvent(tunerEvent);
 
-// Dispatch the custom event
-document.dispatchEvent(tunerEvent);
-
     var note_context = new AudioContext();
     var note_node = note_context.createOscillator();
     var gain_node = note_context.createGain();
