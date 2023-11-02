@@ -45,13 +45,17 @@
       if (noteName.includes("in-tune")) {
         gauge.set(50); // Point vertically (in tune)
       } else if (noteName.includes("very flat")) {
-        gauge.set(10); // Point 80 degrees left (very flat)
+        gauge.set(12.5); // Point 80 degrees left (very flat)
       } else if (noteName.includes("flat")) {
         gauge.set(25); // Point 45 degrees left (a bit flat)
-      } else if (noteName.includes("sharp")) {
-        gauge.set(75); // Point 45 degrees right (a bit sharp)
+      } else if (noteName.includes("a bit flat")) {
+        gauge.set(37.5); // Point 45 degrees right (a bit sharp)
       } else if (noteName.includes("a bit sharp")) {
-        gauge.set(90); // Point 80 degrees right (a bit sharp)
+        gauge.set(62.5); // Point 45 degrees right (a bit sharp)
+      } else if (noteName.includes("sharp")) {
+        gauge.set(75); // Point 80 degrees right (a bit sharp)
+      } else if (noteName.includes("very sharp")) {
+        gauge.set(87.5); // Point 45 degrees right (a bit sharp)
       } else {
         gauge.set(50);
       }
