@@ -189,6 +189,10 @@ for (var i = 0; i < 30; i++) {
         document.getElementById("note-name").textContent = dominant_frequency.name;
         document.getElementById("frequency").textContent = dominant_frequency.frequency;
 
+        // Call the function to set the gauge needle angle based on the note
+        setGaugeNeedleAngle(dominant_frequency.name);
+      }
+
         var flatIndicator = document.getElementById("flat-indicator");
         var inTuneIndicator = document.getElementById("in-tune-indicator");
         var sharpIndicator = document.getElementById("sharp-indicator");
@@ -205,9 +209,6 @@ for (var i = 0; i < 30; i++) {
           inTuneIndicator.style.display = "block";
         }
         
-        // Call the function to set the gauge needle angle based on the note
-        setGaugeNeedleAngle(dominant_frequency.name);
-      }
     }
 
     var note_context = new AudioContext();
