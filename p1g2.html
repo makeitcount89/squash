@@ -172,61 +172,51 @@ for (var i = 0; i < 30; i++) {
     }
 
     function interpret_correlation_result(event) {
-  var timeseries = event.data.timeseries;
-  var frequency_amplitudes = event.data.frequency_amplitudes;
+      var timeseries = event.data.timeseries;
+      var frequency_amplitudes = event.data.frequency_amplitudes;
 
-  var magnitudes = frequency_amplitudes.map(function(z) { return z[0] * z[0] + z[1] * z[1]; });
+      var magnitudes = frequency_amplitudes.map(function(z) { return z[0] * z[0] + z[1] * z[1]; });
 
-  var maximum_index = -1;
-  var maximum_magnitude = 0;
-  for (var i = 0; i < magnitudes.length; i++) {
-    if (magnitudes[i] <= maximum_magnitude)
-      continue;
+      var maximum_index = -1;
+      var maximum_magnitude = 0;
+      for (var i = 0; i < magnitudes.length; i++) {
+        if (magnitudes[i] <= maximum_magnitude)
+          continue;
 
-    maximum_index = i;
-    maximum_magnitude = magnitudes[i];
-  }
+        maximum_index = i;
+        maximum_magnitude = magnitudes[i];
+      }
 
-  var average = magnitudes.reduce(function(a, b) { return a + b; }, 0) / magnitudes.length;
-  var confidence = maximum_magnitude / average;
-  var confidence_threshold = 10;
+      var average = magnitudes.reduce(function(a, b) { return a + b; }, 0) / magnitudes.length;
+      var confidence = maximum_magnitude / average;
+      var confidence_threshold = 10;
 
-  if (confidence > confidence_threshold) {
-    var dominant_frequency = test_frequencies[maximum_index];
-    var noteName = dominant_frequency.name;
-    
-    // Extract the note description (e.g., "a bit sharp")
-    var noteDescription = noteName.substring(noteName.indexOf("(") + 1, noteName.indexOf(")"));
+      if (confidence > confidence_threshold) {
+        var dominant_frequency = test_frequencies[maximum_index];
+        document.getElementById("note-name").textContent = dominant_frequency.name;
+        document.getElementById("frequency").textContent = dominant_frequency.frequency;
 
-    // Translate the note description
-    var translatedNoteDescription = noteTranslations[noteDescription] || noteDescription;
 
-    // Replace the translated note description back into the note name
-    var translatedNoteName = noteName.replace(noteDescription, translatedNoteDescription);
-    
-    document.getElementById("note-name").textContent = translatedNoteName;
-    document.getElementById("frequency").textContent = dominant_frequency.frequency;
+        var flatIndicator = document.getElementById("flat-indicator");
+        var inTuneIndicator = document.getElementById("in-tune-indicator");
+        var sharpIndicator = document.getElementById("sharp-indicator");
 
-    var flatIndicator = document.getElementById("flat-indicator");
-    var inTuneIndicator = document.getElementById("in-tune-indicator");
-    var sharpIndicator = document.getElementById("sharp-indicator");
+        flatIndicator.style.display = "none";
+        inTuneIndicator.style.display = "none";
+        sharpIndicator.style.display = "none";
 
-    flatIndicator.style.display = "none";
-    inTuneIndicator.style.display = "none";
-    sharpIndicator.style.display = "none";
-
-    if (translatedNoteDescription.includes("sharp")) {
-      sharpIndicator.style.display = "block";
-    } else if (translatedNoteDescription.includes("flat")) {
-      flatIndicator.style display = "block";
-    } else {
-      inTuneIndicator.style.display = "block";
+        if (dominant_frequency.name.includes("sharp")) {
+          sharpIndicator.style.display = "block";
+        } else if (dominant_frequency.name.includes("flat")) {
+          flatIndicator.style.display = "block";
+        } else {
+          inTuneIndicator.style.display = "block";
+        }
+        
     }
-  }
-  // Call the function to set the gauge needle angle based on the note
-  setGaugeNeedleAngle(dominant_frequency.name);
+      // Call the function to set the gauge needle angle based on the note
+        setGaugeNeedleAngle(dominant_frequency.name);
     }
-    
 
     var note_context = new AudioContext();
     var note_node = note_context.createOscillator();
