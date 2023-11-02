@@ -42,17 +42,17 @@
     function setGaugeNeedleAngle(noteName) {
       if (noteName.includes("in-tune")) {
         gauge.set(50); // Point vertically (in tune)
-      } else if (noteName.includes("very flat")) {
+      } else if (noteName.includes("ry at")) {
         gauge.set(0); // Point 80 degrees left (very flat)
-      } else if (noteName.includes("flat")) {
+      } else if (noteName.includes("la")) {
         gauge.set(16.6); // Point 45 degrees left (a bit flat)
       } else if (noteName.includes("a f")) {
         gauge.set(33); // Point 45 degrees right (a bit sharp)
       } else if (noteName.includes("bit s")) {
         gauge.set(66); // Point 45 degrees right (a bit sharp)
-      } else if (noteName.includes("sharp")) {
+      } else if (noteName.includes("arp")) {
         gauge.set(82); // Point 80 degrees right (a bit sharp)
-      } else if (noteName.includes("very sharp")) {
+      } else if (noteName.includes("ve sh")) {
         gauge.set(100); // Point 45 degrees right (a bit sharp)
       } else {
         gauge.set(50);
