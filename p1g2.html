@@ -219,14 +219,14 @@ document.addEventListener('dominantFrequencyDetected', function(event) {
       test_frequencies = test_frequencies.concat([just_below, note, just_above]);
     }
 
-   function initialize() {
-navigator.mediaDevices.getUserMedia({ audio: true })
-  .then(function(stream) {
-    use_stream(stream);
-  })
-  .catch(function(error) {
-    console.error('Error accessing microphone:', error);
-  });
+    navigator.mediaDevices.getUserMedia({ audio: true })
+      .then(function(stream) {
+        // Stream from the microphone is available in the `stream` variable
+        // You can set up audio listeners or analyzers here and update the gauge accordingly
+      })
+      .catch(function(error) {
+        console.error('Error accessing microphone:', error);
+      });
 
    }
     window.addEventListener("load", initialize);
