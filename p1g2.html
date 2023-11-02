@@ -40,6 +40,7 @@
   
     // Function to set the gauge needle angle based on the note being in tune, flat, or sharp
     function setGaugeNeedleAngle(noteName) {
+      var displayText = noteTranslations[noteName] || noteName;
       if (noteName.includes("in-tune")) {
         gauge.set(50); // Point vertically (in tune)
       } else if (noteName.includes("very flat")) {
@@ -57,6 +58,9 @@
       } else {
         gauge.set(50);
       }
+      // Display the user-friendly text
+  document.getElementById("note-name").textContent = displayText;
+    }
     }
 
     // Call the function to set the initial gauge needle angle
@@ -99,6 +103,10 @@
   </style>
 
   <script>
+    var noteTranslations = {
+  "a bit sharp": "tune down",
+  // Add more translations as needed for other cases
+};
     var C2 = 65.41; // C2 note, in Hz
     var notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
     var test_frequencies = [];
