@@ -218,22 +218,18 @@ document.addEventListener('dominantFrequencyDetected', function(event) {
       var just_below = { "frequency": note_frequency * Math.pow(2, -1 / 48), "name": note_name + " (a bit flat)" };
       test_frequencies = test_frequencies.concat([just_below, note, just_above]);
     }
-var get_user_media = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
-      get_user_media.call(navigator, { "audio": true }, use_stream, function() {});
-    }
+
    function initialize() {
-      var get_user_media = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
-      get_user_media.call(navigator, { "audio": true }, use_stream, function() {});
+navigator.mediaDevices.getUserMedia({ audio: true })
+  .then(function(stream) {
+    use_stream(stream);
+  })
+  .catch(function(error) {
+    console.error('Error accessing microphone:', error);
+  });
+
    }
     window.addEventListener("load", initialize);
-
-    var correlation_worker = new Worker("correlation_worker.js");
-    correlation_worker.addEventListener("message", interpret_correlation_result);
-
-    function initialize() {
-      var get_user_media = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
-      get_user_media.call(navigator, { "audio": true }, use_stream, function() {});
-    }
 
     function use_stream(stream) {
       var audio_context = new AudioContext();
