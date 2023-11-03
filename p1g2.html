@@ -1,190 +1,41 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Metronome</title>
-    <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #4CAF50; /* Green background color */
-            margin: 0;
-        }
-
-        #metronome {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background-color: transparent;
-            border-radius: 50%;
-            width: 300px;
-            height: 300px;
-            animation: none;
-        }
-
-        h1 {
-            color: #fff; /* White font color */
-            font-size: 36px; /* Larger font size */
-        }
-
-        #metronome-controls {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-        }
-
-        label {
-            color: #fff; /* White font color */
-            font-size: 20px; /* Larger font size */
-        }
-
-        input, select, button, #tempoSlider, #volumeSlider {
-            font-size: 18px; /* Larger font size */
-        }
-
-        button {
-            background-color: #008CBA; /* Blue button background color */
-            color: #fff; /* White button font color */
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-
-        button:hover {
-            background-color: #45a049; /* Darker blue on hover */
-        }
-        
-        #sound-options {
-            display: flex;
-            justify-content: center;
-            margin-top: 10px;
-        }
-
-        audio {
-            display: none;
-        }
-
-        @keyframes pulse {
-            0%, 100% {
-                background-color: yellow;
-            }
-            50% {
-                background-color: red;
-            }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Facebook Ad Test</title>
 </head>
 <body>
-    <div id="metronome">
-        <h1>Metronome</h1>
+  <script async src="https://connect.facebook.net/en_US/fbadnw.js"></script>
+  <script>
+    window.fbAsyncInit = function() {
+      FB.init({
+        appId: '1434500273796000', // Replace with your App ID
+        autoLogAppEvents: true,
+        xfbml: true,
+        version: 'v16.0'
+      });
 
-        <div id="metronome-controls">
-            <label for="bpm">BPM:</label>
-            <input type="number" id="bpm" value="120" min="20" max="300">
-            <button id="playStop">Play</button>
-            <label for="timeSignature">Time Signature:</label>
-            <select id="timeSignature">
-                <option value="4/4">4/4</option>
-                <option value="3/4">3/4</option>
-                <option value="6/8">6/8</option>
-            </select>
-            <label for="tempoSlider">Tempo:</label>
-            <input type="range" id="tempoSlider" min="20" max="300" value="120">
-            <label for="volumeSlider">Volume:</label>
-            <input type="range" id="volumeSlider" min="0" max="1" step="0.1" value="0.5">
-        </div>
+      // Load the ad after initialization
+      FB.Event.subscribe('xfbml.render', function() {
+        FB.XFBML.parse(document.getElementById('ad-container'));
+      });
+    };
+  </script>
+  <script async defer src="https://connect.facebook.net/en_US/sdk.js"></script>
 
-        <div id="sound-options">
-            <label for="soundSelect">Sound:</label>
-            <select id="soundSelect">
-                <option value="beep">Beep (Default System Sound)</option>
-            </select>
-        </div>
+  <!-- Create a container for the ad -->
+  <div id="ad-container">
+    <fb:ad
+      placementid="YOUR_PLACEMENT_ID" <!-- Replace with your Placement ID -->
+      format="auto"
+    ></fb:ad>
+  </div>
 
-        <audio id="beep"></audio>
-    </div>
-
-    <script>
-        const bpmInput = document.getElementById('bpm');
-        const playStopButton = document.getElementById('playStop');
-        const timeSignatureSelect = document.getElementById('timeSignature');
-        const tempoSlider = document.getElementById('tempoSlider');
-        const volumeSlider = document.getElementById('volumeSlider');
-        const soundSelect = document.getElementById('soundSelect');
-        const metronome = document.getElementById('metronome');
-
-        let isPlaying = false;
-        let interval;
-        let currentBpm = parseFloat(bpmInput.value);
-        let timeSignature = timeSignatureSelect.value;
-        let selectedSound = document.getElementById(soundSelect.value);
-
-        function playMetronome() {
-            const noteDuration = 60 / currentBpm;
-            const timeSignatureParts = timeSignature.split('/');
-            const totalNotes = timeSignatureParts.reduce((acc, part) => acc * part, 1);
-            let noteCount = 0;
-
-            interval = setInterval(() => {
-                if (isPlaying) {
-                    selectedSound.pause();
-                    selectedSound.currentTime = 0;
-                    selectedSound.volume = volumeSlider.value;
-                    selectedSound.play();
-                }
-                if (noteCount === 0) {
-                    metronome.style.animation = 'pulse ' + (noteDuration * 2) + 's steps(1) 1';
-                } else {
-                    metronome.style.animation = 'pulse ' + noteDuration + 's steps(1) 1';
-                }
-                noteCount++;
-                if (noteCount >= totalNotes) {
-                    noteCount = 0;
-                }
-            }, noteDuration * 1000);
-        }
-
-        function stopMetronome() {
-            clearInterval(interval);
-            metronome.style.animation = 'none';
-        }
-
-        function updateSettings() {
-            currentBpm = parseFloat(bpmInput.value);
-            timeSignature = timeSignatureSelect.value;
-            selectedSound = document.getElementById(soundSelect.value);
-
-            if (isPlaying) {
-                stopMetronome();
-                playMetronome();
-            }
-        }
-
-        playStopButton.addEventListener('click', () => {
-            isPlaying = !isPlaying;
-            if (isPlaying) {
-                playStopButton.textContent = 'Stop';
-                playMetronome();
-            } else {
-                playStopButton.textContent = 'Play';
-                stopMetronome();
-            }
-        });
-
-        bpmInput.addEventListener('input', updateSettings);
-        timeSignatureSelect.addEventListener('change', updateSettings);
-        tempoSlider.addEventListener('input', () => {
-            bpmInput.value = tempoSlider.value;
-            updateSettings();
-        });
-        soundSelect.addEventListener('change', updateSettings);
-        volumeSlider.addEventListener('input', () => {
-            updateSettings();
-        });
-    </script>
+  <!-- Use the test ad ID provided by Facebook for testing -->
+  <script>
+    FB.Event.subscribe('xfbml.render', function() {
+      FB.XFBML.parse(document.getElementById('ad-container'));
+    });
+  </script>
 </body>
 </html>
