@@ -75,39 +75,31 @@
     <div id="sound-options">
         <label for="soundSelect">Sound:</label>
         <select id="soundSelect">
-            <option value="metronomeClick">Metronome Click</option>
-            <option value="hihat">Hi-Hat</option>
-            <option value="woodenBlock">Wooden Block</option>
+            <option value="beep">Beep (Default System Sound)</option>
         </select>
     </div>
-
-    <audio id="metronomeClick" src="https://schristiancollins.com/soundfonts/FluidR3_GM/generaluser/1Melo_cl1.wav"></audio>
-    <audio id="hihat" src="https://schristiancollins.com/soundfonts/FluidR3_GM/Percussion/33%20Hi-Hat%20(2).wav"></audio>
-    <audio id="woodenBlock" src="https://schristiancollins.com/soundfonts/FluidR3_GM/Percussion/75%20Wooden%20Block%20(Low).wav"></audio>
 
     <script>
         const bpmInput = document.getElementById('bpm');
         const playStopButton = document.getElementById('playStop');
         const timeSignatureSelect = document.getElementById('timeSignature');
         const tempoSlider = document.getElementById('tempoSlider');
-        const soundSelect = document.getElementById('soundSelect');
 
         let isPlaying = false;
         let interval;
         let currentBpm = parseFloat(bpmInput.value);
-        let timeSignature = timeSignatureSelect.value;
-        let selectedSound = document.getElementById(soundSelect.value);
 
         function playMetronome() {
             const noteDuration = 60 / currentBpm;
+            const timeSignature = timeSignatureSelect.value;
             const timeSignatureParts = timeSignature.split('/');
             const totalNotes = timeSignatureParts.reduce((acc, part) => acc * part, 1);
             let noteCount = 0;
 
             interval = setInterval(() => {
                 if (isPlaying) {
-                    selectedSound.currentTime = 0;
-                    selectedSound.play();
+                    // Beep sound (default system sound)
+                    new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEAESsAAIA...').play();
                 }
                 noteCount++;
                 if (noteCount >= totalNotes) {
@@ -122,8 +114,6 @@
 
         function updateSettings() {
             currentBpm = parseFloat(bpmInput.value);
-            timeSignature = timeSignatureSelect.value;
-            selectedSound = document.getElementById(soundSelect.value);
 
             if (isPlaying) {
                 stopMetronome();
@@ -148,7 +138,6 @@
             bpmInput.value = tempoSlider.value;
             updateSettings();
         });
-        soundSelect.addEventListener('change', updateSettings);
     </script>
 </body>
 </html>
