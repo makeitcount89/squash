@@ -20,7 +20,7 @@
             border-radius: 50%;
             width: 300px;
             height: 300px;
-            animation: pulse 1s steps(1) infinite;
+            animation: none;
         }
 
         h1 {
@@ -69,10 +69,10 @@
         }
 
         @keyframes pulse {
-            50% {
+            0%, 100% {
                 background-color: yellow;
             }
-            100% {
+            50% {
                 background-color: red;
             }
         }
@@ -105,10 +105,7 @@
             </select>
         </div>
 
-        <audio id="beep">
-            <source src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEAESsAAIA..."
-                    type="audio/wav">
-        </audio>
+        <audio id="beep"></audio>
     </div>
 
     <script>
@@ -134,16 +131,19 @@
 
             interval = setInterval(() => {
                 if (isPlaying) {
+                    selectedSound.pause();
                     selectedSound.currentTime = 0;
                     selectedSound.volume = volumeSlider.value;
                     selectedSound.play();
                 }
+                if (noteCount === 0) {
+                    metronome.style.animation = 'pulse ' + (noteDuration * 2) + 's steps(1) 1';
+                } else {
+                    metronome.style.animation = 'pulse ' + noteDuration + 's steps(1) 1';
+                }
                 noteCount++;
                 if (noteCount >= totalNotes) {
                     noteCount = 0;
-                    metronome.style.animation = 'pulse 1s steps(1) 1';
-                } else {
-                    metronome.style.animation = 'none';
                 }
             }, noteDuration * 1000);
         }
