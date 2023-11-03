@@ -4,13 +4,27 @@
     <title>Metronome</title>
     <style>
         body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
             background-color: #4CAF50; /* Green background color */
-            font-family: Arial, sans-serif;
+            margin: 0;
+        }
+
+        #metronome {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: transparent;
+            border-radius: 50%;
+            width: 300px;
+            height: 300px;
+            animation: pulse 1s steps(1) infinite;
         }
 
         h1 {
             color: #fff; /* White font color */
-            text-align: center;
             font-size: 36px; /* Larger font size */
         }
 
@@ -26,7 +40,7 @@
             font-size: 20px; /* Larger font size */
         }
 
-        input, select, button, #tempoSlider {
+        input, select, button, #tempoSlider, #volumeSlider {
             font-size: 18px; /* Larger font size */
         }
 
@@ -53,30 +67,48 @@
         audio {
             display: none;
         }
+
+        @keyframes pulse {
+            50% {
+                background-color: yellow;
+            }
+            100% {
+                background-color: red;
+            }
+        }
     </style>
 </head>
 <body>
-    <h1>Metronome</h1>
+    <div id="metronome">
+        <h1>Metronome</h1>
 
-    <div id="metronome-controls">
-        <label for="bpm">BPM:</label>
-        <input type="number" id="bpm" value="120" min="20" max="300">
-        <button id="playStop">Play</button>
-        <label for="timeSignature">Time Signature:</label>
-        <select id="timeSignature">
-            <option value="4/4">4/4</option>
-            <option value="3/4">3/4</option>
-            <option value="6/8">6/8</option>
-        </select>
-        <label for="tempoSlider">Tempo:</label>
-        <input type="range" id="tempoSlider" min="20" max="300" value="120">
-    </div>
+        <div id="metronome-controls">
+            <label for="bpm">BPM:</label>
+            <input type="number" id="bpm" value="120" min="20" max="300">
+            <button id="playStop">Play</button>
+            <label for="timeSignature">Time Signature:</label>
+            <select id="timeSignature">
+                <option value="4/4">4/4</option>
+                <option value="3/4">3/4</option>
+                <option value="6/8">6/8</option>
+            </select>
+            <label for="tempoSlider">Tempo:</label>
+            <input type="range" id="tempoSlider" min="20" max="300" value="120">
+            <label for="volumeSlider">Volume:</label>
+            <input type="range" id="volumeSlider" min="0" max="1" step="0.1" value="0.5">
+        </div>
 
-    <div id="sound-options">
-        <label for="soundSelect">Sound:</label>
-        <select id="soundSelect">
-            <option value="beep">Beep (Default System Sound)</option>
-        </select>
+        <div id="sound-options">
+            <label for="soundSelect">Sound:</label>
+            <select id="soundSelect">
+                <option value="beep">Beep (Default System Sound)</option>
+            </select>
+        </div>
+
+        <audio id="beep">
+            <source src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEAESsAAIA..."
+                    type="audio/wav">
+        </audio>
     </div>
 
     <script>
@@ -84,36 +116,47 @@
         const playStopButton = document.getElementById('playStop');
         const timeSignatureSelect = document.getElementById('timeSignature');
         const tempoSlider = document.getElementById('tempoSlider');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const soundSelect = document.getElementById('soundSelect');
+        const metronome = document.getElementById('metronome');
 
         let isPlaying = false;
         let interval;
         let currentBpm = parseFloat(bpmInput.value);
+        let timeSignature = timeSignatureSelect.value;
+        let selectedSound = document.getElementById(soundSelect.value);
 
         function playMetronome() {
             const noteDuration = 60 / currentBpm;
-            const timeSignature = timeSignatureSelect.value;
             const timeSignatureParts = timeSignature.split('/');
             const totalNotes = timeSignatureParts.reduce((acc, part) => acc * part, 1);
             let noteCount = 0;
 
             interval = setInterval(() => {
                 if (isPlaying) {
-                    // Beep sound (default system sound)
-                    new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEAESsAAIA...').play();
+                    selectedSound.currentTime = 0;
+                    selectedSound.volume = volumeSlider.value;
+                    selectedSound.play();
                 }
                 noteCount++;
                 if (noteCount >= totalNotes) {
                     noteCount = 0;
+                    metronome.style.animation = 'pulse 1s steps(1) 1';
+                } else {
+                    metronome.style.animation = 'none';
                 }
             }, noteDuration * 1000);
         }
 
         function stopMetronome() {
             clearInterval(interval);
+            metronome.style.animation = 'none';
         }
 
         function updateSettings() {
             currentBpm = parseFloat(bpmInput.value);
+            timeSignature = timeSignatureSelect.value;
+            selectedSound = document.getElementById(soundSelect.value);
 
             if (isPlaying) {
                 stopMetronome();
@@ -136,6 +179,10 @@
         timeSignatureSelect.addEventListener('change', updateSettings);
         tempoSlider.addEventListener('input', () => {
             bpmInput.value = tempoSlider.value;
+            updateSettings();
+        });
+        soundSelect.addEventListener('change', updateSettings);
+        volumeSlider.addEventListener('input', () => {
             updateSettings();
         });
     </script>
