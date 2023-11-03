@@ -1,41 +1,47 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>Facebook Ad Test</title>
+    <title>Unity Test Banner Ad Example</title>
+    <script src="https://webplayer.unityads.unity3d.com/webview/3.0/UnityAds.js"></script>
+    <style>
+        #banner-container {
+            width: 320px; /* Adjust the width as needed */
+            height: 50px; /* Adjust the height as needed */
+        }
+    </style>
 </head>
 <body>
-  <script async src="https://connect.facebook.net/en_US/fbadnw.js"></script>
-  <script>
-    window.fbAsyncInit = function() {
-      FB.init({
-        appId: '1434500273796000', // Replace with your App ID
-        autoLogAppEvents: true,
-        xfbml: true,
-        version: 'v16.0'
-      });
+    <h1>Unity Test Banner Ad Example</h1>
+    <div id="banner-container"></div>
 
-      // Load the ad after initialization
-      FB.Event.subscribe('xfbml.render', function() {
-        FB.XFBML.parse(document.getElementById('ad-container'));
-      });
-    };
-  </script>
-  <script async defer src="https://connect.facebook.net/en_US/sdk.js"></script>
+    <script>
+        // Initialize Unity Ads with your Game ID
+        UnityAds.init("YOUR_GAME_ID", function (error, response) {
+            if (error) {
+                console.error("Unity Ads initialization error: " + error);
+            } else {
+                console.log("Unity Ads initialized successfully");
 
-  <!-- Create a container for the ad -->
-  <div id="ad-container">
-    <fb:ad
-      placementid="TEST_AD_TYPE#1434500273796000_1434501783795849" <!-- Replace with your Placement ID -->
-      format="auto"
-    ></fb:ad>
-  </div>
+                // Enable test mode to receive test ads
+                UnityAds.setTestMode(true);
 
-  <!-- Use the test ad ID provided by Facebook for testing -->
-  <script>
-    FB.Event.subscribe('xfbml.render', function() {
-      FB.XFBML.parse(document.getElementById('ad-container'));
-    });
-  </script>
+                // Load and display the test banner ad
+                UnityAds.loadBanner("TEST_PLACEMENT_ID", {
+                    width: 320, // Adjust the width as needed
+                    height: 50, // Adjust the height as needed
+                    onBannerLoaded: function (placementId) {
+                        console.log("Test banner ad loaded successfully.");
+                        UnityAds.showBanner(placementId);
+                    },
+                    onBannerClick: function (placementId) {
+                        console.log("Test banner ad clicked.");
+                    },
+                    onBannerFailedToLoad: function (placementId) {
+                        console.error("Failed to load test banner ad.");
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 </html>
