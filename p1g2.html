@@ -1,22 +1,53 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Advanced Metronome</title>
+    <title>Metronome</title>
     <style>
         body {
-            text-align: center;
+            background-color: #4CAF50; /* Green background color */
             font-family: Arial, sans-serif;
+        }
+
+        h1 {
+            color: #fff; /* White font color */
+            text-align: center;
+            font-size: 36px; /* Larger font size */
         }
 
         #metronome-controls {
             display: flex;
             flex-direction: column;
             align-items: center;
+            padding: 20px;
         }
 
+        label {
+            color: #fff; /* White font color */
+            font-size: 20px; /* Larger font size */
+        }
+
+        input, select, button, #tempoSlider {
+            font-size: 18px; /* Larger font size */
+        }
+
+        button {
+            background-color: #008CBA; /* Blue button background color */
+            color: #fff; /* White button font color */
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #45a049; /* Darker blue on hover */
+        }
+        
         #sound-options {
             display: flex;
             justify-content: center;
+            margin-top: 10px;
         }
 
         audio {
@@ -25,7 +56,7 @@
     </style>
 </head>
 <body>
-    <h1>Advanced Metronome</h1>
+    <h1>Metronome</h1>
 
     <div id="metronome-controls">
         <label for="bpm">BPM:</label>
@@ -44,15 +75,15 @@
     <div id="sound-options">
         <label for="soundSelect">Sound:</label>
         <select id="soundSelect">
-            <option value="click1">Sound 1</option>
-            <option value="click2">Sound 2</option>
-            <option value="click3">Sound 3</option>
+            <option value="metronomeClick">Metronome Click</option>
+            <option value="hihat">Hi-Hat</option>
+            <option value="woodenBlock">Wooden Block</option>
         </select>
     </div>
 
-    <audio id="click1" src="sound1.mp3"></audio>
-    <audio id="click2" src="sound2.mp3"></audio>
-    <audio id="click3" src="sound3.mp3"></audio>
+    <audio id="metronomeClick" src="https://schristiancollins.com/soundfonts/FluidR3_GM/generaluser/1Melo_cl1.wav"></audio>
+    <audio id="hihat" src="https://schristiancollins.com/soundfonts/FluidR3_GM/Percussion/33%20Hi-Hat%20(2).wav"></audio>
+    <audio id="woodenBlock" src="https://schristiancollins.com/soundfonts/FluidR3_GM/Percussion/75%20Wooden%20Block%20(Low).wav"></audio>
 
     <script>
         const bpmInput = document.getElementById('bpm');
