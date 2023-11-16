@@ -82,9 +82,6 @@
       return;
     }
 
-    // For simplicity, use the first bounding box in this example
-    const boundingBox = boundingBoxes[0];
-
     // Create Babylon.js scene and camera
     const canvas = document.getElementById('renderCanvas');
     const engine = new BABYLON.Engine(canvas, true);
@@ -92,19 +89,21 @@
     const camera = new BABYLON.ArcRotateCamera("Camera", 0, 0, 10, BABYLON.Vector3.Zero(), scene);
     camera.attachControl(canvas, true);
 
-    // Create a box using bounding box coordinates
-    const box = BABYLON.MeshBuilder.CreateBox("box", {
-      width: boundingBox.width,
-      height: boundingBox.height,
-      depth: 1
-    }, scene);
+    // Create a box for each bounding box
+    boundingBoxes.forEach((boundingBox, index) => {
+      const box = BABYLON.MeshBuilder.CreateBox(`box_${index}`, {
+        width: boundingBox.width,
+        height: boundingBox.height,
+        depth: 1
+      }, scene);
 
-    // Move the box to the position based on bounding box coordinates
-    box.position.x = boundingBox.x + boundingBox.width / 2;
-    box.position.y = -boundingBox.y - boundingBox.height / 2; // Invert y-axis to match Babylon.js coordinate system
+      // Move the box to the position based on bounding box coordinates
+      box.position.x = boundingBox.x + boundingBox.width / 2;
+      box.position.y = -boundingBox.y - boundingBox.height / 2; // Invert y-axis to match Babylon.js coordinate system
+    });
 
     // Run the Babylon.js engine
-    engine.runRenderLoop(function () {
+    engine.runRenderLoop(() => {
       scene.render();
     });
   }
