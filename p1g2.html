@@ -6,93 +6,38 @@
   <title>3D Rectangle</title>
   <style>
     body { margin: 0; }
-    canvas { display: block; }
   </style>
 </head>
 <body>
-  <h1 style="text-align: center;">3D Rectangle Render</h1>
-  <script src="https://threejs.org/build/three.js"></script>
+  <div id="root"></div>
+  <script type="module">
+    import * as React from 'https://unpkg.com/react@17/umd/react.development.js';
+    import * as ReactDOM from 'https://unpkg.com/react-dom@17/umd/react-dom.development.js';
+    import { Canvas, useFrame } from 'https://cdn.skypack.dev/react-three-fiber';
 
-  <script>
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(renderer.domElement);
+    const Box = () => {
+      const boxRef = React.useRef();
 
-    const geometry = new THREE.BoxGeometry(12, 6, 2);
-    const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-    const cube = new THREE.Mesh(geometry, material);
+      useFrame(() => {
+        boxRef.current.rotation.x += 0.01;
+        boxRef.current.rotation.y += 0.01;
+      });
 
-    scene.add(cube);
-
-    // Adjust the camera's initial position to be above the cube
-    camera.position.set(0, 0, 20);
-    camera.lookAt(0, 0, 0);
-
-    let previousX = 0;
-    let previousY = 0;
-    let isDragging = false;
-
-    document.addEventListener('mousedown', (event) => {
-      isDragging = true;
-      previousX = event.clientX;
-      previousY = event.clientY;
-    });
-
-    document.addEventListener('mouseup', () => {
-      isDragging = false;
-    });
-
-    document.addEventListener('mousemove', (event) => {
-      if (isDragging) {
-        const sensitivity = 0.005;
-        const deltaX = (event.clientX - previousX) * sensitivity;
-        const deltaY = (event.clientY - previousY) * sensitivity;
-
-        cube.rotation.y += deltaX;
-        cube.rotation.x += deltaY;
-
-        previousX = event.clientX;
-        previousY = event.clientY;
-      }
-    });
-
-    let initialZoomDistance = 0;
-
-    document.addEventListener('touchstart', (event) => {
-      if (event.touches.length === 2) {
-        const touch1 = event.touches[0];
-        const touch2 = event.touches[1];
-
-        initialZoomDistance = Math.hypot(touch1.clientX - touch2.clientX, touch1.clientY - touch2.clientY);
-      }
-    });
-
-    document.addEventListener('touchmove', (event) => {
-      if (event.touches.length === 2) {
-        const touch1 = event.touches[0];
-        const touch2 = event.touches[1];
-
-        const currentZoomDistance = Math.hypot(touch1.clientX - touch2.clientX, touch1.clientY - touch2.clientY);
-        const zoomFactor = currentZoomDistance / initialZoomDistance;
-
-        const zoomSensitivity = 0.1;
-        camera.position.z /= zoomFactor;
-
-        if (camera.position.z < 10) camera.position.z = 10;
-        if (camera.position.z > 50) camera.position.z = 50;
-
-        initialZoomDistance = currentZoomDistance;
-      }
-    });
-
-    const animate = () => {
-      requestAnimationFrame(animate);
-      renderer.render(scene, camera);
+      return (
+        <mesh ref={boxRef}>
+          <boxBufferGeometry args={[12, 6, 2]} />
+          <meshBasicMaterial color={0x00ff00} />
+        </mesh>
+      );
     };
 
-    animate();
+    ReactDOM.createRoot(document.getElementById('root')).render(
+      <Canvas>
+        <ambientLight />
+        <pointLight position={[10, 10, 10]} />
+        <Box />
+      </Canvas>
+    );
   </script>
 </body>
 </html>
