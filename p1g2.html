@@ -9,12 +9,13 @@
 <body>
 
 <input type="file" id="fileInput" accept="image/*">
+<button id="convertButton">Convert to 3D</button>
 <canvas id="renderCanvas"></canvas>
 
 <script>
-    // File input
     var fileInput = document.getElementById('fileInput');
-    fileInput.addEventListener('change', handleFileSelect);
+    var convertButton = document.getElementById('convertButton');
+    convertButton.addEventListener('click', convertTo3D);
 
     // Babylon.js scene creation function
     function createBabylonScene(pixelArray) {
@@ -91,6 +92,11 @@
             };
             reader.readAsDataURL(file);
         }
+    }
+
+    // Convert to 3D button click handler
+    function convertTo3D() {
+        handleFileSelect({ target: { files: [fileInput.files[0]] } });
     }
 </script>
 
