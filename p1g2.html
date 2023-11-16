@@ -105,8 +105,12 @@
         var titleDiv = document.getElementById('titleDiv');
         titleDiv.textContent = '3D Rendering Title'; // Change this to your desired title text
 
-        // Assuming Babylon.js scene and engine are globally accessible
-        var engine = new BABYLON.Engine(canvas, true);
+        var babylonCanvas = document.createElement('canvas');
+        babylonCanvas.width = boundingBox.width * 2; // Adjust the size as needed
+        babylonCanvas.height = boundingBox.height * 2; // Adjust the size as needed
+        document.body.appendChild(babylonCanvas);
+
+        var engine = new BABYLON.Engine(babylonCanvas, true);
         var scene = new BABYLON.Scene(engine);
 
         var material = new BABYLON.StandardMaterial('material', scene);
@@ -118,7 +122,7 @@
         box.material = material;
 
         var camera = new BABYLON.ArcRotateCamera('Camera', 0, 0, 10, BABYLON.Vector3.Zero(), scene);
-        camera.attachControl(canvas, true);
+        camera.attachControl(babylonCanvas, true);
         var light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(0, 1, 0), scene);
 
         engine.runRenderLoop(function () {
