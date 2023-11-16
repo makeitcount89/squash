@@ -6,7 +6,7 @@
     <title>3D Plan</title>
     <script defer src="https://cdn.babylonjs.com/babylon.js"></script>
     <style>
-        body { margin: 0; }
+        body { margin: 0; overflow: hidden; }
         canvas { display: block; }
     </style>
 </head>
@@ -27,12 +27,12 @@
             base.material = new BABYLON.StandardMaterial("baseMaterial", scene);
             base.material.wireframe = true;
 
-            // Create 3D walls (2m height)
+            // Create 3D walls (20cm thick)
             var walls = [
-                BABYLON.MeshBuilder.CreateBox("topWall", { width: 12, height: 2, depth: 2 }, scene),
-                BABYLON.MeshBuilder.CreateBox("bottomWall", { width: 12, height: 2, depth: 2 }, scene),
-                BABYLON.MeshBuilder.CreateBox("leftWall", { width: 2, height: 6, depth: 2 }, scene),
-                BABYLON.MeshBuilder.CreateBox("rightWall", { width: 2, height: 6, depth: 2 }, scene),
+                BABYLON.MeshBuilder.CreateBox("topWall", { width: 12, height: 2, depth: 0.2 }, scene),
+                BABYLON.MeshBuilder.CreateBox("bottomWall", { width: 12, height: 2, depth: 0.2 }, scene),
+                BABYLON.MeshBuilder.CreateBox("leftWall", { width: 0.2, height: 6, depth: 2 }, scene),
+                BABYLON.MeshBuilder.CreateBox("rightWall", { width: 0.2, height: 6, depth: 2 }, scene),
             ];
 
             // Position the walls
