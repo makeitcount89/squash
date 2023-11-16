@@ -54,8 +54,11 @@
                     var row = [];
                     for (var x = 0; x < width; x++) {
                         var index = (y * width + x) * 4;
-                        var pixelValue = pixelData[index];
-                        row.push(pixelValue);
+                        // Use the red channel for intensity
+                        var intensity = pixelData[index];
+                        // Threshold example: if intensity > 128, set to 1; otherwise, set to 0
+                        var value = intensity > 128 ? 1 : 0;
+                        row.push(value);
                     }
                     pixelArray.push(row);
                 }
@@ -76,18 +79,8 @@
         var arrayDisplay = document.getElementById('arrayDisplay');
         arrayDisplay.innerHTML = ''; // Clear previous content
 
-        var table = document.createElement('table');
-        array.forEach(function (row) {
-            var tr = document.createElement('tr');
-            row.forEach(function (value) {
-                var td = document.createElement('td');
-                td.textContent = value;
-                tr.appendChild(td);
-            });
-            table.appendChild(tr);
-        });
-
-        arrayDisplay.appendChild(table);
+        // Display the array as JavaScript code
+        arrayDisplay.textContent = 'var floorPlan = ' + JSON.stringify(array) + ';';
     }
 </script>
 
