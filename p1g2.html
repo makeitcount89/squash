@@ -1,47 +1,55 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Unity Test Banner Ad Example</title>
-    <script src="https://webplayer.unityads.unity3d.com/webview/3.0/UnityAds.js"></script>
-    <style>
-        #banner-container {
-            width: 320px; /* Adjust the width as needed */
-            height: 50px; /* Adjust the height as needed */
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2D to 3D Conversion</title>
+  <script src="https://threejs.org/build/three.js"></script>
 </head>
 <body>
-    <h1>Unity Test Banner Ad Example</h1>
-    <div id="banner-container"></div>
+  <script>
+    // Assuming you have a 2D floor plan represented as an array of coordinates
+    const floorPlan2D = [
+      { x: 0, y: 0 },
+      { x: 0, y: 10 },
+      { x: 10, y: 10 },
+      { x: 10, y: 0 },
+    ];
 
-    <script>
-        // Initialize Unity Ads with your Game ID
-        UnityAds.init("YOUR_GAME_ID", function (error, response) {
-            if (error) {
-                console.error("Unity Ads initialization error: " + error);
-            } else {
-                console.log("Unity Ads initialized successfully");
+    // Initialize scene, camera, and renderer
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
 
-                // Enable test mode to receive test ads
-                UnityAds.setTestMode(true);
+    // Convert 2D coordinates to 3D vertices
+    const floorPlan3D = floorPlan2D.map(({ x, y }) => new THREE.Vector3(x, y, 0));
 
-                // Load and display the test banner ad
-                UnityAds.loadBanner("TEST_PLACEMENT_ID", {
-                    width: 320, // Adjust the width as needed
-                    height: 50, // Adjust the height as needed
-                    onBannerLoaded: function (placementId) {
-                        console.log("Test banner ad loaded successfully.");
-                        UnityAds.showBanner(placementId);
-                    },
-                    onBannerClick: function (placementId) {
-                        console.log("Test banner ad clicked.");
-                    },
-                    onBannerFailedToLoad: function (placementId) {
-                        console.error("Failed to load test banner ad.");
-                    }
-                });
-            }
-        });
-    </script>
+    // Create geometry and mesh
+    const geometry = new THREE.ShapeGeometry(new THREE.Shape(floorPlan3D));
+    const material = new THREE.MeshBasicMaterial({ color: 0x00ff00, side: THREE.DoubleSide });
+    const floorPlanMesh = new THREE.Mesh(geometry, material);
+
+    // Add floor plan mesh to the scene
+    scene.add(floorPlanMesh);
+
+    // Set camera position
+    camera.position.z = 5;
+
+    // Create animation loop
+    const animate = function () {
+      requestAnimationFrame(animate);
+
+      // Rotate the floor plan mesh
+      floorPlanMesh.rotation.x += 0.01;
+      floorPlanMesh.rotation.y += 0.01;
+
+      renderer.render(scene, camera);
+    };
+
+    // Run the animation loop
+    animate();
+  </script>
 </body>
 </html>
