@@ -44,6 +44,31 @@
             // Set up camera position
             camera.setPosition(new BABYLON.Vector3(0, 0, 10));
 
+            // Enable pinch zoom
+            var pinchDistanceStart = 0;
+            var pinchZoomSpeed = 0.1; // Adjust this value to control the zoom speed
+
+            scene.onPointerObservable.add(function (pointerInfo) {
+                switch (pointerInfo.type) {
+                    case BABYLON.PointerEventTypes.POINTERDOWN:
+                        if (pointerInfo.event.pointerType === "touch" && pointerInfo.pickInfo.pickedMesh === canvas) {
+                            pinchDistanceStart = BABYLON.Tools.GetPointerCoordinates(pointerInfo.event)[0].distanceTo(BABYLON.Tools.GetPointerCoordinates(pointerInfo.event)[1]);
+                        }
+                        break;
+                    case BABYLON.PointerEventTypes.POINTERUP:
+                        pinchDistanceStart = 0;
+                        break;
+                    case BABYLON.PointerEventTypes.POINTERMOVE:
+                        if (pinchDistanceStart > 0 && pointerInfo.event.pointerType === "touch" && pointerInfo.pickInfo.pickedMesh === canvas) {
+                            var pinchDistance = BABYLON.Tools.GetPointerCoordinates(pointerInfo.event)[0].distanceTo(BABYLON.Tools.GetPointerCoordinates(pointerInfo.event)[1]);
+                            var pinchDelta = pinchDistance - pinchDistanceStart;
+                            camera.radius -= pinchDelta * pinchZoomSpeed;
+                            pinchDistanceStart = pinchDistance;
+                        }
+                        break;
+                }
+            });
+
             // Render the scene
             engine.runRenderLoop(function () {
                 scene.render();
