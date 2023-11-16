@@ -91,6 +91,13 @@
             return;
         }
 
+        if (boundingBoxes.length === 0) {
+            alert('Please find bounding box coordinates first.');
+            return;
+        }
+
+        alert('Rendering 3D...'); // Display a message
+
         // Create Babylon.js scene and camera
         var canvas = document.getElementById('canvas');
         var engine = new BABYLON.Engine(canvas, true);
