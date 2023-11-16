@@ -27,7 +27,7 @@
             base.material = new BABYLON.StandardMaterial("baseMaterial", scene);
             base.material.wireframe = true;
 
-            // Create 3D walls (20cm thick)
+            // Create 3D walls (20cm thick and 2m high)
             var walls = [
                 BABYLON.MeshBuilder.CreateBox("topWall", { width: 12, height: 2, depth: 0.2 }, scene),
                 BABYLON.MeshBuilder.CreateBox("bottomWall", { width: 12, height: 2, depth: 0.2 }, scene),
@@ -35,11 +35,16 @@
                 BABYLON.MeshBuilder.CreateBox("rightWall", { width: 0.2, height: 6, depth: 2 }, scene),
             ];
 
-            // Position the walls
+            // Position and adjust the walls
             walls[0].position.y = 3;
             walls[1].position.y = -3;
             walls[2].position.x = -6;
             walls[3].position.x = 6;
+
+            walls.forEach(wall => {
+                wall.material = new BABYLON.StandardMaterial("wallMaterial", scene);
+                wall.material.wireframe = true;
+            });
 
             // Set up camera position
             camera.setPosition(new BABYLON.Vector3(0, 0, 10));
