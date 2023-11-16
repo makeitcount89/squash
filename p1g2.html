@@ -98,11 +98,11 @@
             return;
         }
 
-        // Open a new tab for 3D rendering
-        var newTab = window.open();
+        // Open a new web page window for 3D rendering
+        var newWindow = window.open();
 
         // Babylon.js code for 3D rendering
-        newTab.document.write(`
+        newWindow.document.write(`
             <!DOCTYPE html>
             <html lang="en">
             <head>
@@ -122,7 +122,15 @@
 
                         // Your Babylon.js 3D rendering logic here
                         // Use the 'floorPlan' array for mesh generation
-                        
+
+                        // Example: Create a box based on the floorPlan dimensions
+                        var width = floorPlan[0].length;
+                        var length = floorPlan.length;
+                        var height = 2;
+
+                        var box = BABYLON.MeshBuilder.CreateBox("box", { width: width, height: height, depth: length }, scene);
+                        box.position.y = height / 2;
+
                         return scene;
                     }
 
