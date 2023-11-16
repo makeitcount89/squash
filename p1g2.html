@@ -14,14 +14,12 @@
 <button onclick="displayBoundingBox()">Bounding</button>
 <button onclick="render3D()">Render 3D</button>
 <div id="loadingMessage"></div>
-<h2>Generated Array:</h2>
-<div id="arrayDisplay"></div>
+<h2>Image:</h2>
 <canvas id="canvas" style="border:1px solid #000;"></canvas>
 <div id="titleDiv" style="position: absolute; top: 10px; left: 50%; transform: translateX(-50%); font-size: 20px; color: white;">3D Rendering Title</div>
 
 <script>
     var selectedFile;
-    var pixelArray;
 
     function handleFileSelect(event) {
         selectedFile = event.target.files[0];
@@ -50,42 +48,11 @@
                 canvas.height = image.height;
                 context.drawImage(image, 0, 0, image.width, image.height);
 
-                var imageData = context.getImageData(0, 0, image.width, image.height);
-                var pixelData = imageData.data;
-                var width = imageData.width;
-                var height = imageData.height;
-
-                pixelArray = [];
-
-                for (var y = 0; y < height; y++) {
-                    var row = [];
-                    for (var x = 0; x < width; x++) {
-                        var index = (y * width + x) * 4;
-                        var intensity = pixelData[index];
-                        var value = intensity > 128 ? 1 : 0;
-                        row.push(value);
-                    }
-
-                    pixelArray.push(row);
-                }
-
-                displayArray(pixelArray);
                 loadingMessage.textContent = '';
             };
         };
 
         reader.readAsDataURL(selectedFile);
-    }
-
-    function displayArray(array) {
-        var arrayDisplay = document.getElementById('arrayDisplay');
-        arrayDisplay.innerHTML = '';
-
-        var title = document.createElement('h3');
-        title.textContent = 'Generated Array:';
-        arrayDisplay.appendChild(title);
-
-        arrayDisplay.appendChild(document.createTextNode('var floorPlan = ' + JSON.stringify(array) + ';'));
     }
 
     function displayBoundingBox() {
@@ -94,7 +61,8 @@
             return;
         }
 
-        var boundingBox = findLargestConnectedComponent(pixelArray);
+        var boundingBox = findLargestConnectedComponent();
+
         var canvas = document.getElementById('canvas');
         var context = canvas.getContext('2d');
         context.clearRect(0, 0, canvas.width, canvas.height);
@@ -104,7 +72,7 @@
         context.drawImage(image, 0, 0);
 
         if (!boundingBox) {
-            alert('No shape found in the array.');
+            alert('No shape found in the image.');
             return;
         }
 
@@ -119,16 +87,19 @@
             return;
         }
 
-        var boundingBox = findLargestConnectedComponent(pixelArray);
+        var boundingBox = findLargestConnectedComponent();
 
         if (!boundingBox) {
-            alert('No shape found in the array.');
+            alert('No shape found in the image.');
             return;
         }
 
         var canvas = document.getElementById('canvas');
         var context = canvas.getContext('2d');
-        context.clearRect(0, 0, canvas.width, canvas.height);
+
+        context.strokeStyle = 'red';
+        context.lineWidth = 2;
+        context.strokeRect(boundingBox.minX, boundingBox.minY, boundingBox.width, boundingBox.height);
 
         var image = new Image();
         image.src = canvas.toDataURL();
@@ -162,12 +133,19 @@
         });
     }
 
-    function findLargestConnectedComponent(array) {
-        var visited = new Array(array.length).fill(0).map(() => new Array(array[0].length).fill(false));
+    function findLargestConnectedComponent() {
+        var canvas = document.getElementById('canvas');
+        var context = canvas.getContext('2d');
+        var imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+        var pixelData = imageData.data;
+        var width = imageData.width;
+        var height = imageData.height;
+
+        var visited = new Array(height).fill(0).map(() => new Array(width).fill(false));
         var largestBoundingBox = null;
 
         function dfs(y, x, currentBoundingBox) {
-            if (y < 0 || y >= array.length || x < 0 || x >= array[0].length || visited[y][x] || array[y][x] !== 0) {
+            if (y < 0 || y >= height || x < 0 || x >= width || visited[y][x] || pixelData[(y * width + x) * 4] <= 128) {
                 return;
             }
 
@@ -183,9 +161,9 @@
             dfs(y, x + 1, currentBoundingBox);
         }
 
-        for (var y = 0; y < array.length; y++) {
-            for (var x = 0; x < array[y].length; x++) {
-                if (array[y][x] === 0 && !visited[y][x]) {
+        for (var y = 0; y < height; y++) {
+            for (var x = 0; x < width; x++) {
+                if (pixelData[(y * width + x) * 4] > 128 && !visited[y][x]) {
                     var currentBoundingBox = { minX: x, minY: y, maxX: x, maxY: y };
                     dfs(y, x, currentBoundingBox);
 
