@@ -12,53 +12,23 @@
 <body>
   <script src="https://threejs.org/build/three.js"></script>
   <script>
-    // Set up the scene
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     const renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    // Create a 2D array for representing heights
-    const rectangleDimensions = { length: 12, width: 6, height: 2 };
-    const heights = [
-      [0, 0, 0, 0],
-      [0, 0, 0, 0],
-      [0, 0, 0, 0],
-      [0, 0, 0, 0],
-    ];
+    const geometry = new THREE.BoxGeometry(12, 6, 2);
+    const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+    const cube = new THREE.Mesh(geometry, material);
 
-    // Create the 3D rectangle
-    const cubeSize = 1;
-    const cubeGeometry = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
+    scene.add(cube);
+    camera.position.z = 15;
 
-    for (let i = 0; i < heights.length; i++) {
-      for (let j = 0; j < heights[i].length; j++) {
-        const cubeHeight = heights[i][j] * rectangleDimensions.height;
-        const cubeMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-        const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
-        cube.position.set(j * cubeSize, i * cubeSize, cubeHeight);
-        scene.add(cube);
-      }
-    }
-
-    // Set up the camera position
-    camera.position.z = 5;
-
-    // Add ambient light to the scene
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-    scene.add(ambientLight);
-
-    // Add directional light to the scene
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
-    scene.add(directionalLight);
-
-    // Animation loop
     const animate = () => {
       requestAnimationFrame(animate);
-
-      // Add any animations or updates here
-
+      cube.rotation.x += 0.01;
+      cube.rotation.y += 0.01;
       renderer.render(scene, camera);
     };
 
