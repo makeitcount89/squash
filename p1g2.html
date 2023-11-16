@@ -6,6 +6,31 @@
     <title>Image to 3D Rendering</title>
     <!-- Babylon.js library -->
     <script src="https://cdn.babylonjs.com/babylon.js"></script>
+    <style>
+        #canvas {
+            border: 1px solid #000;
+            display: block;
+            margin: 10px auto;
+        }
+
+        #boundingBoxInfo {
+            margin: 10px auto;
+            text-align: center;
+        }
+
+        #buttonsContainer {
+            text-align: center;
+        }
+
+        #titleDiv {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 20px;
+            color: white;
+        }
+    </style>
 </head>
 <body>
 
@@ -15,9 +40,13 @@
 <button onclick="render3D()">Render 3D</button>
 <div id="loadingMessage"></div>
 <h2>Image:</h2>
-<canvas id="canvas" style="border:1px solid #000;"></canvas>
+<canvas id="canvas"></canvas>
 <div id="boundingBoxInfo"></div>
-<div id="titleDiv" style="position: absolute; top: 10px; left: 50%; transform: translateX(-50%); font-size: 20px; color: white;"></div>
+<div id="buttonsContainer">
+    <button onclick="resetCanvas()">Reset Canvas</button>
+    <button onclick="clearBoundingBox()">Clear Bounding Box</button>
+</div>
+<div id="titleDiv"></div>
 
 <script>
     var selectedFile;
@@ -165,6 +194,23 @@
         }
 
         return largestBoundingBox;
+    }
+
+    function resetCanvas() {
+        var canvas = document.getElementById('canvas');
+        var context = canvas.getContext('2d');
+        context.clearRect(0, 0, canvas.width, canvas.height);
+
+        var boundingBoxInfo = document.getElementById('boundingBoxInfo');
+        boundingBoxInfo.textContent = '';
+
+        var titleDiv = document.getElementById('titleDiv');
+        titleDiv.textContent = '';
+    }
+
+    function clearBoundingBox() {
+        var boundingBoxInfo = document.getElementById('boundingBoxInfo');
+        boundingBoxInfo.textContent = '';
     }
 </script>
 
