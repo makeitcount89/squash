@@ -99,8 +99,8 @@
             return;
         }
 
-        // Find the bounding box coordinates of the shape in pixelArray
-        var boundingBox = findBoundingBox(pixelArray);
+        // Find the coordinates of the largest connected component
+        var boundingBox = findLargestConnectedComponent(pixelArray);
 
         if (!boundingBox) {
             alert('No shape found in the array.');
@@ -142,34 +142,42 @@
         });
     }
 
-    function findBoundingBox(array) {
-        var minX = array[0].length;
-        var minY = array.length;
-        var maxX = 0;
-        var maxY = 0;
+    function findLargestConnectedComponent(array) {
+        var visited = new Array(array.length).fill(0).map(() => new Array(array[0].length).fill(false));
+        var largestBoundingBox = null;
+
+        function dfs(y, x, currentBoundingBox) {
+            if (y < 0 || y >= array.length || x < 0 || x >= array[0].length || visited[y][x] || array[y][x] !== 0) {
+                return;
+            }
+
+            visited[y][x] = true;
+            currentBoundingBox.minX = Math.min(currentBoundingBox.minX, x);
+            currentBoundingBox.minY = Math.min(currentBoundingBox.minY, y);
+            currentBoundingBox.maxX = Math.max(currentBoundingBox.maxX, x);
+            currentBoundingBox.maxY = Math.max(currentBoundingBox.maxY, y);
+
+            dfs(y - 1, x, currentBoundingBox);
+            dfs(y + 1, x, currentBoundingBox);
+            dfs(y, x - 1, currentBoundingBox);
+            dfs(y, x + 1, currentBoundingBox);
+        }
 
         for (var y = 0; y < array.length; y++) {
             for (var x = 0; x < array[y].length; x++) {
-                if (array[y][x] === 0) {
-                    minX = Math.min(minX, x);
-                    minY = Math.min(minY, y);
-                    maxX = Math.max(maxX, x);
-                    maxY = Math.max(maxY, y);
+                if (array[y][x] === 0 && !visited[y][x]) {
+                    var currentBoundingBox = { minX: x, minY: y, maxX: x, maxY: y };
+                    dfs(y, x, currentBoundingBox);
+
+                    if (!largestBoundingBox || (currentBoundingBox.maxX - currentBoundingBox.minX + 1) * (currentBoundingBox.maxY - currentBoundingBox.minY + 1) >
+                        (largestBoundingBox.maxX - largestBoundingBox.minX + 1) * (largestBoundingBox.maxY - largestBoundingBox.minY + 1)) {
+                        largestBoundingBox = currentBoundingBox;
+                    }
                 }
             }
         }
 
-        // If no 0's found, return null
-        if (minX === array[0].length && minY === array.length && maxX === 0 && maxY === 0) {
-            return null;
-        }
-
-        return {
-            centerX: (minX + maxX) / 2,
-            centerY: (minY + maxY) / 2,
-            width: maxX - minX + 1,
-            height: maxY - minY + 1
-        };
+        return largestBoundingBox;
     }
 </script>
 
