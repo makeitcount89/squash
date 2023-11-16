@@ -22,6 +22,7 @@
 <script>
     var selectedFile;
     var cv;
+    var boundingBoxes = [];
 
     function onOpenCvReady() {
         cv = cv || cv;
@@ -68,7 +69,7 @@
             return;
         }
 
-        var boundingBoxes = findAllBoundingBoxes();
+        boundingBoxes = findAllBoundingBoxes();
 
         if (!boundingBoxes || boundingBoxes.length === 0) {
             alert('No shapes found in the image.');
@@ -97,8 +98,21 @@
         var camera = new BABYLON.ArcRotateCamera("Camera", 0, 0, 10, BABYLON.Vector3.Zero(), scene);
         camera.attachControl(canvas, true);
 
-        // Create a box for testing
-        var box = BABYLON.MeshBuilder.CreateBox("box", { size: 1 }, scene);
+        // Create a ground for layout
+        var ground = BABYLON.MeshBuilder.CreateGround("ground", { width: 10, height: 10 }, scene);
+
+        // Create boxes using bounding box coordinates
+        boundingBoxes.forEach(function (box, index) {
+            var boxMesh = BABYLON.MeshBuilder.CreateBox(`box${index + 1}`, {
+                width: box.width,
+                height: box.height,
+                depth: 1
+            }, scene);
+
+            // Move the box to the position based on bounding box coordinates
+            boxMesh.position.x = box.x + box.width / 2;
+            boxMesh.position.y = -box.y - box.height / 2; // Invert y-axis to match Babylon.js coordinate system
+        });
 
         // Run the Babylon.js engine
         engine.runRenderLoop(function () {
@@ -130,10 +144,10 @@
         cv.findContours(src, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
 
         // Get bounding boxes for all contours
-        var boundingBoxes = [];
+        var boxes = [];
         for (var i = 0; i < contours.size(); ++i) {
             var boundingBox = cv.boundingRect(contours.get(i));
-            boundingBoxes.push(boundingBox);
+            boxes.push(boundingBox);
         }
 
         // Release resources
@@ -142,7 +156,7 @@
         contours.delete();
         hierarchy.delete();
 
-        return boundingBoxes;
+        return boxes;
     }
 </script>
 
