@@ -1,149 +1,149 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-  <script async src="https://docs.opencv.org/master/opencv.js" onload="onOpenCvReady();" type="text/javascript"></script>
-  <script src="https://cdn.babylonjs.com/babylon.js"></script>
-  <style>
-    canvas {
-      display: block;
-      margin: 0 auto;
-    }
-  </style>
-  <title>Image to 3D</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- OpenCV.js -->
+    <script async src="https://docs.opencv.org/master/opencv.js" onload="onOpenCvReady();" type="text/javascript"></script>
+    <!-- Babylon.js library -->
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
 </head>
 <body>
 
-<input type="file" id="imageInput" />
+<input type="file" id="fileInput" accept=".png" onchange="handleFileSelect(event)">
 <button onclick="loadImage()">Load Image</button>
 <button onclick="displayAllBoundingBoxes()">All Bounding Boxes</button>
 <button onclick="render3D()">Render 3D</button>
-
-<div id="imageContainer"></div>
-<div id="renderCanvas"></div>
+<div id="loadingMessage"></div>
+<h2>Image:</h2>
+<canvas id="canvas" style="border:1px solid #000;"></canvas>
 <div id="coordinatesDiv" style="position: absolute; top: 50px; left: 50%; transform: translateX(-50%); font-size: 16px; color: red;"></div>
 
 <script>
-  let img;
-  let boundingBoxes = [];
+    var selectedFile;
+    var cv;
 
-  function onOpenCvReady() {
-    // OpenCV is ready
-    console.log('OpenCV.js is ready.');
-    document.getElementById('loadingMessage').textContent = 'OpenCV.js is ready.';
-  }
-
-  function loadImage() {
-    const input = document.getElementById('imageInput');
-    const container = document.getElementById('imageContainer');
-
-    const file = input.files[0];
-    const reader = new FileReader();
-
-    reader.onload = function (e) {
-      img = new Image();
-      img.src = e.target.result;
-
-      img.onload = function () {
-        container.innerHTML = `<img src="${img.src}" alt="Selected Image" width="300" height="300"/>`;
-      };
-    };
-
-    reader.readAsDataURL(file);
-  }
-
-  function displayAllBoundingBoxes() {
-    if (!img) {
-      alert('Please load an image first.');
-      return;
+    function onOpenCvReady() {
+        cv = cv || cv;
+        document.getElementById('loadingMessage').textContent = 'OpenCV.js is ready.';
     }
 
-    boundingBoxes = findAllBoundingBoxes();
-
-    if (!boundingBoxes || boundingBoxes.length === 0) {
-      alert('No shapes found in the image.');
-      return;
+    function handleFileSelect(event) {
+        selectedFile = event.target.files[0];
     }
 
-    const coordinatesDiv = document.getElementById('coordinatesDiv');
-    coordinatesDiv.innerHTML = 'Bounding Box Coordinates for all shapes: <br>';
+    function loadImage() {
+        if (!selectedFile) {
+            alert('Please select an image file first.');
+            return;
+        }
 
-    boundingBoxes.forEach(function (box, index) {
-      coordinatesDiv.innerHTML +=
-        `Shape ${index + 1}: minX: ${box.x}, minY: ${box.y}, maxX: ${box.x + box.width}, maxY: ${box.y + box.height} <br>`;
-    });
-  }
+        var loadingMessage = document.getElementById('loadingMessage');
+        loadingMessage.textContent = 'Loading...';
 
-  function render3D() {
-    if (!boundingBoxes || boundingBoxes.length === 0) {
-      alert('Please find bounding box coordinates first.');
-      return;
+        var reader = new FileReader();
+
+        reader.onload = function () {
+            var image = new Image();
+            image.src = reader.result;
+
+            image.onload = function () {
+                var canvas = document.getElementById('canvas');
+                var context = canvas.getContext('2d');
+
+                canvas.width = image.width;
+                canvas.height = image.height;
+                context.drawImage(image, 0, 0, image.width, image.height);
+
+                loadingMessage.textContent = '';
+            };
+        };
+
+        reader.readAsDataURL(selectedFile);
     }
 
-    // Create Babylon.js scene and camera
-    const canvas = document.getElementById('renderCanvas');
-    const engine = new BABYLON.Engine(canvas, true);
-    const scene = new BABYLON.Scene(engine);
-    const camera = new BABYLON.ArcRotateCamera("Camera", 0, 0, 10, BABYLON.Vector3.Zero(), scene);
-    camera.attachControl(canvas, true);
+    function displayAllBoundingBoxes() {
+        if (!selectedFile) {
+            alert('Please load an image first.');
+            return;
+        }
 
-    // Create a box for each bounding box
-    boundingBoxes.forEach((boundingBox, index) => {
-      const box = BABYLON.MeshBuilder.CreateBox(`box_${index}`, {
-        width: boundingBox.width,
-        height: boundingBox.height,
-        depth: 1
-      }, scene);
+        var boundingBoxes = findAllBoundingBoxes();
 
-      // Move the box to the position based on bounding box coordinates
-      box.position.x = boundingBox.x + boundingBox.width / 2;
-      box.position.y = -boundingBox.y - boundingBox.height / 2; // Invert y-axis to match Babylon.js coordinate system
-    });
+        if (!boundingBoxes || boundingBoxes.length === 0) {
+            alert('No shapes found in the image.');
+            return;
+        }
 
-    // Run the Babylon.js engine
-    engine.runRenderLoop(() => {
-      scene.render();
-    });
-  }
+        var coordinatesDiv = document.getElementById('coordinatesDiv');
+        coordinatesDiv.innerHTML = 'Bounding Box Coordinates for all shapes: <br>';
 
-  function findAllBoundingBoxes() {
-    if (!cv) {
-      alert('OpenCV.js is not ready. Please wait.');
-      return null;
+        boundingBoxes.forEach(function (box, index) {
+            coordinatesDiv.innerHTML +=
+                `Shape ${index + 1}: minX: ${box.x}, minY: ${box.y}, maxX: ${box.x + box.width}, maxY: ${box.y + box.height} <br>`;
+        });
     }
 
-    const canvas = document.getElementById('imageContainer');
-    const context = canvas.getContext('2d');
-    const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-    const src = cv.matFromImageData(imageData);
+    function render3D() {
+        if (!selectedFile) {
+            alert('Please load an image first.');
+            return;
+        }
 
-    // Convert to grayscale
-    cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY);
+        // Create Babylon.js scene and camera
+        var canvas = document.getElementById('canvas');
+        var engine = new BABYLON.Engine(canvas, true);
+        var scene = new BABYLON.Scene(engine);
+        var camera = new BABYLON.ArcRotateCamera("Camera", 0, 0, 10, BABYLON.Vector3.Zero(), scene);
+        camera.attachControl(canvas, true);
 
-    // Apply thresholding
-    cv.threshold(src, src, 128, 255, cv.THRESH_BINARY);
+        // Create a box for testing
+        var box = BABYLON.MeshBuilder.CreateBox("box", { size: 1 }, scene);
 
-    // Find contours
-    const contours = new cv.MatVector();
-    const hierarchy = new cv.Mat();
-    cv.findContours(src, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
-
-    // Get bounding boxes for all contours
-    const boxes = [];
-    for (let i = 0; i < contours.size(); ++i) {
-      const boundingBox = cv.boundingRect(contours.get(i));
-      boxes.push(boundingBox);
+        // Run the Babylon.js engine
+        engine.runRenderLoop(function () {
+            scene.render();
+        });
     }
 
-    // Release resources
-    src.delete();
-    contours.delete();
-    hierarchy.delete();
+    function findAllBoundingBoxes() {
+        if (!cv) {
+            alert('OpenCV.js is not ready. Please wait.');
+            return null;
+        }
 
-    return boxes;
-  }
+        var canvas = document.getElementById('canvas');
+        var context = canvas.getContext('2d');
+        var imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+        var src = cv.matFromImageData(imageData);
+        var dst = new cv.Mat();
+
+        // Convert to grayscale
+        cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY);
+
+        // Apply thresholding
+        cv.threshold(src, src, 128, 255, cv.THRESH_BINARY);
+
+        // Find contours
+        var contours = new cv.MatVector();
+        var hierarchy = new cv.Mat();
+        cv.findContours(src, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
+
+        // Get bounding boxes for all contours
+        var boundingBoxes = [];
+        for (var i = 0; i < contours.size(); ++i) {
+            var boundingBox = cv.boundingRect(contours.get(i));
+            boundingBoxes.push(boundingBox);
+        }
+
+        // Release resources
+        src.delete();
+        dst.delete();
+        contours.delete();
+        hierarchy.delete();
+
+        return boundingBoxes;
+    }
 </script>
 
 </body>
