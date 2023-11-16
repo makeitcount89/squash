@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>2D to 3D Conversion</title>
   <script src="https://threejs.org/build/three.js"></script>
+  <script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
 </head>
 <body>
   <script>
@@ -37,15 +38,18 @@
     // Set camera position
     camera.position.z = 5;
 
+    // Create OrbitControls
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+
     // Create animation loop
     const animate = function () {
       requestAnimationFrame(animate);
 
-      // Rotate the floor plan mesh
-      floorPlanMesh.rotation.x += 0.01;
-      floorPlanMesh.rotation.y += 0.01;
-
+      // Render the scene
       renderer.render(scene, camera);
+
+      // Update OrbitControls
+      controls.update();
     };
 
     // Run the animation loop
