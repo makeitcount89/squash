@@ -52,6 +52,11 @@
   }
 
   function findBoundingBox() {
+    if (!img) {
+      alert('Please load an image first.');
+      return;
+    }
+
     cv.imread(img, (mat) => {
       cv.cvtColor(mat, mat, cv.COLOR_RGBA2GRAY);
       cv.threshold(mat, mat, 128, 255, cv.THRESH_BINARY);
