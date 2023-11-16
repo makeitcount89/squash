@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-  <script src="https://docs.opencv.org/master/opencv.js" onload="onOpenCvReady();" type="text/javascript"></script>
+  <script async src="https://docs.opencv.org/master/opencv.js" onload="onOpenCvReady();" type="text/javascript"></script>
   <script src="https://cdn.babylonjs.com/babylon.js"></script>
   <style>
     canvas {
@@ -30,6 +30,8 @@
 
   function onOpenCvReady() {
     // OpenCV is ready
+    console.log('OpenCV.js is ready.');
+    document.getElementById('loadingMessage').textContent = 'OpenCV.js is ready.';
   }
 
   function loadImage() {
@@ -69,6 +71,7 @@
       boundingBox = cv.boundingRect(largestContour);
 
       console.log('Bounding Box Coordinates:', boundingBox);
+      alert(`Bounding Box Coordinates:\nX: ${boundingBox.x}, Y: ${boundingBox.y}, Width: ${boundingBox.width}, Height: ${boundingBox.height}`);
 
       contours.delete();
       hierarchy.delete();
