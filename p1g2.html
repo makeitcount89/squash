@@ -10,7 +10,7 @@
   </style>
 </head>
 <body>
-  <h1 style="text-align: center;">3D Rectangle Render :)</h1>
+  <h1 style="text-align: center;">3D Rectangle Render</h1>
   <script src="https://threejs.org/build/three.js"></script>
 
   <script>
@@ -26,6 +26,59 @@
 
     scene.add(cube);
     camera.position.z = 15;
+
+    let isMouseDown = false;
+    let startX = 0;
+    let startY = 0;
+
+    document.addEventListener('mousedown', (event) => {
+      isMouseDown = true;
+      startX = event.clientX;
+      startY = event.clientY;
+    });
+
+    document.addEventListener('mouseup', () => {
+      isMouseDown = false;
+    });
+
+    document.addEventListener('mousemove', (event) => {
+      if (isMouseDown) {
+        const sensitivity = 0.01;
+        const deltaX = (event.clientX - startX) * sensitivity;
+        const deltaY = (event.clientY - startY) * sensitivity;
+
+        camera.rotation.y -= deltaX;
+        camera.rotation.x -= deltaY;
+
+        camera.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, camera.rotation.x));
+
+        startX = event.clientX;
+        startY = event.clientY;
+      }
+    });
+
+    // Add touch controls
+    let touchStartX = 0;
+    let touchStartY = 0;
+
+    document.addEventListener('touchstart', (event) => {
+      touchStartX = event.touches[0].clientX;
+      touchStartY = event.touches[0].clientY;
+    });
+
+    document.addEventListener('touchmove', (event) => {
+      const touchDeltaX = event.touches[0].clientX - touchStartX;
+      const touchDeltaY = event.touches[0].clientY - touchStartY;
+
+      const touchSensitivity = 0.01;
+      camera.rotation.y -= touchDeltaX * touchSensitivity;
+      camera.rotation.x -= touchDeltaY * touchSensitivity;
+
+      camera.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, camera.rotation.x));
+
+      touchStartX = event.touches[0].clientX;
+      touchStartY = event.touches[0].clientY;
+    });
 
     const animate = () => {
       requestAnimationFrame(animate);
