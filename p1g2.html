@@ -10,6 +10,7 @@
 <input type="file" id="fileInput" accept=".png" onchange="handleFileSelect(event)">
 <button onclick="loadImage()">Load Image</button>
 <div id="loadingMessage"></div>
+<h2>Generated Array:</h2>
 <div id="arrayDisplay"></div>
 
 <script>
@@ -52,25 +53,13 @@
 
                 for (var y = 0; y < height; y++) {
                     var row = [];
-                    var lineValue = null; // Value for the entire line
                     for (var x = 0; x < width; x++) {
                         var index = (y * width + x) * 4;
                         // Use the red channel for intensity
                         var intensity = pixelData[index];
                         // Threshold example: if intensity > 128, set to 1; otherwise, set to 0
                         var value = intensity > 128 ? 1 : 0;
-
-                        // Assign line value if not set
-                        if (lineValue === null) {
-                            lineValue = value;
-                        }
-
                         row.push(value);
-                    }
-
-                    // Assign the entire line the determined value
-                    for (var i = 0; i < row.length; i++) {
-                        row[i] = lineValue;
                     }
 
                     pixelArray.push(row);
@@ -92,8 +81,13 @@
         var arrayDisplay = document.getElementById('arrayDisplay');
         arrayDisplay.innerHTML = ''; // Clear previous content
 
+        // Add a title
+        var title = document.createElement('h3');
+        title.textContent = 'Generated Array:';
+        arrayDisplay.appendChild(title);
+
         // Display the array as JavaScript code
-        arrayDisplay.textContent = 'var floorPlan = ' + JSON.stringify(array) + ';';
+        arrayDisplay.appendChild(document.createTextNode('var floorPlan = ' + JSON.stringify(array) + ';'));
     }
 </script>
 
