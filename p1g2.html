@@ -3,21 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Floor Plan to 3D Conversion</title>
+  <title>2D to 3D Conversion</title>
   <script src="https://threejs.org/build/three.js"></script>
-  <script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
 </head>
 <body>
   <h1 style="text-align: center;">Floor Plan to 3D Conversion</h1>
 
   <script>
-    // Assuming you have a 2D floor plan represented as an array of coordinates
-    const floorPlan2D = [
-      { x: 0, y: 0 },
-      { x: 0, y: 10 },
-      { x: 10, y: 10 },
-      { x: 10, y: 0 },
-    ];
+    // Assuming you have a 2D floor plan with two rectangular rooms
+    const room1 = { width: 5, height: 7 };
+    const room2 = { width: 8, height: 10 };
 
     // Initialize scene, camera, and renderer
     const scene = new THREE.Scene();
@@ -26,22 +21,23 @@
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    // Convert 2D coordinates to 3D vertices
-    const floorPlan3D = floorPlan2D.map(({ x, y }) => new THREE.Vector3(x, y, 0));
+    // Create 3D rectangles for each room
+    const geometry1 = new THREE.BoxGeometry(room1.width, room1.height, 1);
+    const material1 = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+    const roomMesh1 = new THREE.Mesh(geometry1, material1);
+    roomMesh1.position.set(-room1.width / 2, room1.height / 2, 0);
 
-    // Create geometry and mesh
-    const geometry = new THREE.ShapeGeometry(new THREE.Shape(floorPlan3D));
-    const material = new THREE.MeshBasicMaterial({ color: 0x00ff00, side: THREE.DoubleSide });
-    const floorPlanMesh = new THREE.Mesh(geometry, material);
+    const geometry2 = new THREE.BoxGeometry(room2.width, room2.height, 1);
+    const material2 = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+    const roomMesh2 = new THREE.Mesh(geometry2, material2);
+    roomMesh2.position.set(room2.width / 2, room2.height / 2, 0);
 
-    // Add floor plan mesh to the scene
-    scene.add(floorPlanMesh);
+    // Add rooms to the scene
+    scene.add(roomMesh1);
+    scene.add(roomMesh2);
 
     // Set camera position
-    camera.position.z = 5;
-
-    // Create OrbitControls
-    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    camera.position.z = 15;
 
     // Create animation loop
     const animate = function () {
@@ -49,9 +45,6 @@
 
       // Render the scene
       renderer.render(scene, camera);
-
-      // Update OrbitControls
-      controls.update();
     };
 
     // Run the animation loop
