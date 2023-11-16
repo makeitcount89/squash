@@ -10,7 +10,7 @@
   </style>
 </head>
 <body>
-  <h1 style="text-align: center;">3D Rectangle Render</h1>
+  <h1 style="text-align: center;">3D Rectangle Render!!!</h1>
   <script src="https://threejs.org/build/three.js"></script>
 
   <script>
@@ -25,7 +25,10 @@
     const cube = new THREE.Mesh(geometry, material);
 
     scene.add(cube);
-    camera.position.z = 15;
+    
+    // Adjust the camera's initial position to be above the cube
+    camera.position.set(0, 0, 20);
+    camera.lookAt(0, 0, 0);
 
     let isMouseDown = false;
     let startX = 0;
