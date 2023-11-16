@@ -10,7 +10,7 @@
   </style>
 </head>
 <body>
-  <h1 style="text-align: center;">3D Render</h1>
+  <h1 style="text-align: center;">3D Rectangle Render</h1>
   <script src="https://threejs.org/build/three.js"></script>
 
   <script>
@@ -30,31 +30,31 @@
     camera.position.set(0, 0, 20);
     camera.lookAt(0, 0, 0);
 
-    let isMouseDown = false;
-    let startX = 0;
-    let startY = 0;
+    let previousX = 0;
+    let previousY = 0;
+    let isDragging = false;
 
     document.addEventListener('mousedown', (event) => {
-      isMouseDown = true;
-      startX = event.clientX;
-      startY = event.clientY;
+      isDragging = true;
+      previousX = event.clientX;
+      previousY = event.clientY;
     });
 
     document.addEventListener('mouseup', () => {
-      isMouseDown = false;
+      isDragging = false;
     });
 
     document.addEventListener('mousemove', (event) => {
-      if (isMouseDown) {
-        const sensitivity = 0.01;
-        const deltaX = (event.clientX - startX) * sensitivity;
-        const deltaY = (event.clientY - startY) * sensitivity;
+      if (isDragging) {
+        const sensitivity = 0.005;
+        const deltaX = (event.clientX - previousX) * sensitivity;
+        const deltaY = (event.clientY - previousY) * sensitivity;
 
         cube.rotation.y += deltaX;
         cube.rotation.x += deltaY;
 
-        startY = event.clientY;
-        startX = event.clientX;
+        previousX = event.clientX;
+        previousY = event.clientY;
       }
     });
 
