@@ -3,20 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>2D to 3D Conversion</title>
+  <title>3D House Model</title>
   <script src="https://threejs.org/build/three.js"></script>
   <script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
 </head>
 <body>
   <script>
-    // Assuming you have a 2D floor plan represented as an array of coordinates
-    const floorPlan2D = [
-      { x: 0, y: 0 },
-      { x: 0, y: 10 },
-      { x: 10, y: 10 },
-      { x: 10, y: 0 },
-    ];
-
     // Initialize scene, camera, and renderer
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -24,19 +16,19 @@
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    // Convert 2D coordinates to 3D vertices
-    const floorPlan3D = floorPlan2D.map(({ x, y }) => new THREE.Vector3(x, y, 0));
+    // Create geometry and mesh for a basic house shape
+    const houseGeometry = new THREE.BoxGeometry(10, 8, 6);
+    const houseMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
+    const houseMesh = new THREE.Mesh(houseGeometry, houseMaterial);
 
-    // Create geometry and mesh
-    const geometry = new THREE.ShapeGeometry(new THREE.Shape(floorPlan3D));
-    const material = new THREE.MeshBasicMaterial({ color: 0x00ff00, side: THREE.DoubleSide });
-    const floorPlanMesh = new THREE.Mesh(geometry, material);
+    // Position the house
+    houseMesh.position.set(0, 4, 0);
 
-    // Add floor plan mesh to the scene
-    scene.add(floorPlanMesh);
+    // Add the house to the scene
+    scene.add(houseMesh);
 
     // Set camera position
-    camera.position.z = 5;
+    camera.position.z = 15;
 
     // Create OrbitControls
     const controls = new THREE.OrbitControls(camera, renderer.domElement);
