@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/opencv.js/4.5.3/opencv.js"></script>
+  <script src="https://docs.opencv.org/master/opencv.js" onload="onOpenCvReady();" type="text/javascript"></script>
   <script src="https://cdn.babylonjs.com/babylon.js"></script>
   <style>
     canvas {
@@ -27,6 +27,10 @@
 <script>
   let img;
   let boundingBox;
+
+  function onOpenCvReady() {
+    // OpenCV is ready
+  }
 
   function loadImage() {
     const input = document.getElementById('imageInput');
