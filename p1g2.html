@@ -46,7 +46,7 @@
 
     document.addEventListener('mousemove', (event) => {
       if (isMouseDown) {
-        const sensitivity = 0.005;
+        const sensitivity = 0.01;
         const deltaX = (event.clientX - startX) * sensitivity;
         const deltaY = (event.clientY - startY) * sensitivity;
 
