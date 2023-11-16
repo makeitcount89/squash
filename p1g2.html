@@ -4,69 +4,56 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>3D Plan</title>
-    <script src="https://threejs.org/build/three.js"></script>
+    <script defer src="https://cdn.babylonjs.com/babylon.js"></script>
     <style>
         body { margin: 0; }
+        canvas { display: block; }
     </style>
 </head>
 <body>
     <script>
-        // Set up scene
-        var scene = new THREE.Scene();
-        var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        var renderer = new THREE.WebGLRenderer();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(renderer.domElement);
+        document.addEventListener("DOMContentLoaded", function () {
+            // Set up Babylon.js scene
+            var canvas = document.createElement("canvas");
+            document.body.appendChild(canvas);
 
-        // Create 2D base (12m x 6m)
-        var baseGeometry = new THREE.BoxGeometry(12, 6, 0.1);
-        var baseMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
-        var base = new THREE.Mesh(baseGeometry, baseMaterial);
-        scene.add(base);
+            var engine = new BABYLON.Engine(canvas, true);
+            var scene = new BABYLON.Scene(engine);
+            var camera = new BABYLON.ArcRotateCamera("camera", 0, 0, 10, BABYLON.Vector3.Zero(), scene);
+            camera.attachControl(canvas, true);
 
-        // Create 3D walls (2m height)
-        var wallMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true });
-        var walls = [
-            new THREE.Mesh(new THREE.BoxGeometry(12, 2, 2), wallMaterial), // Top wall
-            new THREE.Mesh(new THREE.BoxGeometry(12, 2, 2), wallMaterial), // Bottom wall
-            new THREE.Mesh(new THREE.BoxGeometry(2, 6, 2), wallMaterial), // Left wall
-            new THREE.Mesh(new THREE.BoxGeometry(2, 6, 2), wallMaterial)  // Right wall
-        ];
+            // Create 2D base (12m x 6m)
+            var base = BABYLON.MeshBuilder.CreateBox("base", { width: 12, height: 6, depth: 0.1 }, scene);
+            base.material = new BABYLON.StandardMaterial("baseMaterial", scene);
+            base.material.wireframe = true;
 
-        // Position the walls
-        walls[0].position.set(0, 3, 1);
-        walls[1].position.set(0, -3, 1);
-        walls[2].position.set(-6, 0, 1);
-        walls[3].position.set(6, 0, 1);
+            // Create 3D walls (2m height)
+            var walls = [
+                BABYLON.MeshBuilder.CreateBox("topWall", { width: 12, height: 2, depth: 2 }, scene),
+                BABYLON.MeshBuilder.CreateBox("bottomWall", { width: 12, height: 2, depth: 2 }, scene),
+                BABYLON.MeshBuilder.CreateBox("leftWall", { width: 2, height: 6, depth: 2 }, scene),
+                BABYLON.MeshBuilder.CreateBox("rightWall", { width: 2, height: 6, depth: 2 }, scene),
+            ];
 
-        // Add walls to the scene
-        walls.forEach(wall => scene.add(wall));
+            // Position the walls
+            walls[0].position.y = 3;
+            walls[1].position.y = -3;
+            walls[2].position.x = -6;
+            walls[3].position.x = 6;
 
-        // Set up camera position
-        camera.position.z = 10;
+            // Set up camera position
+            camera.setPosition(new BABYLON.Vector3(0, 0, 10));
 
-        // Handle window resize
-        window.addEventListener('resize', function () {
-            var newWidth = window.innerWidth;
-            var newHeight = window.innerHeight;
+            // Render the scene
+            engine.runRenderLoop(function () {
+                scene.render();
+            });
 
-            camera.aspect = newWidth / newHeight;
-            camera.updateProjectionMatrix();
-
-            renderer.setSize(newWidth, newHeight);
+            // Handle window resize
+            window.addEventListener('resize', function () {
+                engine.resize();
+            });
         });
-
-        // Add touch control
-        var controls = new THREE.OrbitControls(camera, renderer.domElement);
-
-        // Render the scene
-        function animate() {
-            requestAnimationFrame(animate);
-            controls.update();
-            renderer.render(scene, camera);
-        }
-
-        animate();
     </script>
 </body>
 </html>
