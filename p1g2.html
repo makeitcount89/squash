@@ -17,6 +17,7 @@
 <h2>Image:</h2>
 <canvas id="canvas" style="border:1px solid #000;"></canvas>
 <div id="titleDiv" style="position: absolute; top: 10px; left: 50%; transform: translateX(-50%); font-size: 20px; color: white;">3D Rendering Title</div>
+<div id="coordinatesDiv" style="position: absolute; top: 50px; left: 50%; transform: translateX(-50%); font-size: 16px; color: red;"></div>
 
 <script>
     var selectedFile;
@@ -63,22 +64,17 @@
 
         var boundingBox = findLargestConnectedComponent();
 
-        var canvas = document.getElementById('canvas');
-        var context = canvas.getContext('2d');
-        context.clearRect(0, 0, canvas.width, canvas.height);
-
-        var image = new Image();
-        image.src = canvas.toDataURL();
-        context.drawImage(image, 0, 0);
-
         if (!boundingBox) {
             alert('No shape found in the image.');
             return;
         }
 
-        context.strokeStyle = 'red';
-        context.lineWidth = 2;
-        context.strokeRect(boundingBox.minX, boundingBox.minY, boundingBox.width, boundingBox.height);
+        var coordinatesDiv = document.getElementById('coordinatesDiv');
+        coordinatesDiv.textContent = 'Bounding Box Coordinates: ' +
+            'minX: ' + boundingBox.minX + ', ' +
+            'minY: ' + boundingBox.minY + ', ' +
+            'maxX: ' + boundingBox.maxX + ', ' +
+            'maxY: ' + boundingBox.maxY;
     }
 
     function render3D() {
@@ -96,7 +92,10 @@
 
         var canvas = document.getElementById('canvas');
         var context = canvas.getContext('2d');
-        context.clearRect(0, 0, canvas.width, canvas.height);
+
+        context.strokeStyle = 'red';
+        context.lineWidth = 2;
+        context.strokeRect(boundingBox.minX, boundingBox.minY, boundingBox.width, boundingBox.height);
 
         var image = new Image();
         image.src = canvas.toDataURL();
