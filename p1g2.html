@@ -10,7 +10,7 @@
   </style>
 </head>
 <body>
-  <h1 style="text-align: center;">3D Rectangle Render!!!</h1>
+  <h1 style="text-align: center;">3D Rectangle Render</h1>
   <script src="https://threejs.org/build/three.js"></script>
 
   <script>
@@ -25,7 +25,7 @@
     const cube = new THREE.Mesh(geometry, material);
 
     scene.add(cube);
-    
+
     // Adjust the camera's initial position to be above the cube
     camera.position.set(0, 0, 20);
     camera.lookAt(0, 0, 0);
@@ -65,22 +65,41 @@
     let touchStartY = 0;
 
     document.addEventListener('touchstart', (event) => {
-      touchStartX = event.touches[0].clientX;
-      touchStartY = event.touches[0].clientY;
+      if (event.touches.length === 1) {
+        touchStartX = event.touches[0].clientX;
+        touchStartY = event.touches[0].clientY;
+      }
     });
 
     document.addEventListener('touchmove', (event) => {
-      const touchDeltaX = event.touches[0].clientX - touchStartX;
-      const touchDeltaY = event.touches[0].clientY - touchStartY;
+      if (event.touches.length === 1) {
+        const touchDeltaX = event.touches[0].clientX - touchStartX;
+        const touchDeltaY = event.touches[0].clientY - touchStartY;
 
-      const touchSensitivity = 0.01;
-      camera.rotation.y -= touchDeltaX * touchSensitivity;
-      camera.rotation.x -= touchDeltaY * touchSensitivity;
+        const touchSensitivity = 0.01;
+        camera.rotation.y -= touchDeltaX * touchSensitivity;
+        camera.rotation.x -= touchDeltaY * touchSensitivity;
 
-      camera.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, camera.rotation.x));
+        camera.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, camera.rotation.x));
 
-      touchStartX = event.touches[0].clientX;
-      touchStartY = event.touches[0].clientY;
+        touchStartX = event.touches[0].clientX;
+        touchStartY = event.touches[0].clientY;
+      }
+      else if (event.touches.length === 2) {
+        const touch1 = event.touches[0];
+        const touch2 = event.touches[1];
+
+        const touchDeltaX = touch1.clientX - touch2.clientX;
+        const touchDeltaY = touch1.clientY - touch2.clientY;
+
+        const distance = Math.sqrt(touchDeltaX ** 2 + touchDeltaY ** 2);
+
+        const sensitivity = 0.1;
+        camera.position.z -= (distance - 100) * sensitivity;
+
+        if (camera.position.z < 10) camera.position.z = 10;
+        if (camera.position.z > 50) camera.position.z = 50;
+      }
     });
 
     const animate = () => {
