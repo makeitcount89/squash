@@ -1,64 +1,71 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>3D House Example</title>
-  <style>
-    body { margin: 0; overflow: hidden; }
-    canvas { display: block; }
-    h1 { position: absolute; top: 20px; left: 20px; color: white; z-index: 1; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://threejs.org/build/three.js"></script>
+    <style>
+        body { margin: 0; }
+    </style>
 </head>
 <body>
-  <h1>3D House Example</h1>
-  <script src="https://cdn.babylonjs.com/babylon.js"></script>
-  <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+    <script>
+        // Set up scene
+        var scene = new THREE.Scene();
+        var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        var renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
 
-  <canvas id="renderCanvas"></canvas>
+        // Create 2D base (12m x 6m)
+        var baseGeometry = new THREE.BoxGeometry(12, 6, 0.1);
+        var baseMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
+        var base = new THREE.Mesh(baseGeometry, baseMaterial);
+        scene.add(base);
 
-  <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      var canvas = document.getElementById('renderCanvas');
-      var engine = new BABYLON.Engine(canvas, true);
-
-      var createScene = function () {
-        var scene = new BABYLON.Scene(engine);
-        var camera = new BABYLON.ArcRotateCamera('camera', Math.PI / 2, Math.PI / 4, 20, new BABYLON.Vector3(0, 0, 0), scene);
-        camera.attachControl(canvas, true);
-
-        var floorPlan = [
-          [1, 1, 1, 1],
-          [1, 0, 0, 1],
-          [1, 0, 0, 1],
-          [1, 1, 1, 1],
+        // Create 3D walls (2m height)
+        var wallMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true });
+        var walls = [
+            new THREE.Mesh(new THREE.BoxGeometry(12, 2, 2), wallMaterial), // Top wall
+            new THREE.Mesh(new THREE.BoxGeometry(12, 2, 2), wallMaterial), // Bottom wall
+            new THREE.Mesh(new THREE.BoxGeometry(2, 6, 2), wallMaterial), // Left wall
+            new THREE.Mesh(new THREE.BoxGeometry(2, 6, 2), wallMaterial)  // Right wall
         ];
 
-        var extrudeSettings = {
-          amount: 5,
-          depth: 1,
-          bevelEnabled: false,
-        };
+        // Position the walls
+        walls[0].position.set(0, 3, 1);
+        walls[1].position.set(0, -3, 1);
+        walls[2].position.set(-6, 0, 1);
+        walls[3].position.set(6, 0, 1);
 
-        var shape = new BABYLON.PolygonMeshBuilder("shape", floorPlan, scene);
-        var extrudedHouse = shape.extrude("extrudedHouse", extrudeSettings);
+        // Add walls to the scene
+        walls.forEach(wall => scene.add(wall));
 
-        extrudedHouse.material = new BABYLON.StandardMaterial("extrudedHouseMaterial", scene);
-        extrudedHouse.material.diffuseColor = new BABYLON.Color3(0, 1, 0);
+        // Set up camera position
+        camera.position.z = 10;
 
-        return scene;
-      };
+        // Handle window resize
+        window.addEventListener('resize', function () {
+            var newWidth = window.innerWidth;
+            var newHeight = window.innerHeight;
 
-      var scene = createScene();
+            camera.aspect = newWidth / newHeight;
+            camera.updateProjectionMatrix();
 
-      engine.runRenderLoop(function () {
-        scene.render();
-      });
+            renderer.setSize(newWidth, newHeight);
+        });
 
-      window.addEventListener('resize', function () {
-        engine.resize();
-      });
-    });
-  </script>
+        // Add touch control
+        var controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+        // Render the scene
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        animate();
+    </script>
 </body>
 </html>
