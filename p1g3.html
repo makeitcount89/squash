@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Image to 2D Array</title>
+    <!-- OpenCV.js -->
+    <script async src="https://docs.opencv.org/master/opencv.js" onload="onOpenCvReady();" type="text/javascript"></script>
     <!-- Babylon.js library -->
     <script src="https://cdn.babylonjs.com/babylon.js"></script>
 </head>
@@ -17,9 +19,16 @@
 <h2>Image:</h2>
 <canvas id="canvas" style="border:1px solid #000;"></canvas>
 <div id="titleDiv" style="position: absolute; top: 10px; left: 50%; transform: translateX(-50%); font-size: 20px; color: white;">3D Rendering Title</div>
+<div id="coordinatesDiv" style="position: absolute; top: 50px; left: 50%; transform: translateX(-50%); font-size: 16px; color: red;"></div>
 
 <script>
     var selectedFile;
+    var cv;
+
+    function onOpenCvReady() {
+        cv = cv || cv;
+        document.getElementById('loadingMessage').textContent = 'OpenCV.js is ready.';
+    }
 
     function handleFileSelect(event) {
         selectedFile = event.target.files[0];
@@ -61,24 +70,19 @@
             return;
         }
 
-        var boundingBox = findLargestConnectedComponent();
-
-        var canvas = document.getElementById('canvas');
-        var context = canvas.getContext('2d');
-        context.clearRect(0, 0, canvas.width, canvas.height);
-
-        var image = new Image();
-        image.src = canvas.toDataURL();
-        context.drawImage(image, 0, 0);
+        var boundingBox = findBoundingBox();
 
         if (!boundingBox) {
             alert('No shape found in the image.');
             return;
         }
 
-        context.strokeStyle = 'red';
-        context.lineWidth = 2;
-        context.strokeRect(boundingBox.minX, boundingBox.minY, boundingBox.width, boundingBox.height);
+        var coordinatesDiv = document.getElementById('coordinatesDiv');
+        coordinatesDiv.textContent = 'Bounding Box Coordinates: ' +
+            'minX: ' + boundingBox.minX + ', ' +
+            'minY: ' + boundingBox.minY + ', ' +
+            'maxX: ' + boundingBox.maxX + ', ' +
+            'maxY: ' + boundingBox.maxY;
     }
 
     function render3D() {
@@ -87,7 +91,7 @@
             return;
         }
 
-        var boundingBox = findLargestConnectedComponent();
+        var boundingBox = findBoundingBox();
 
         if (!boundingBox) {
             alert('No shape found in the image.');
@@ -116,7 +120,7 @@
         material.diffuseColor = new BABYLON.Color3(1, 0, 0);
 
         var box = BABYLON.MeshBuilder.CreateBox('box', { size: 1 }, scene);
-        box.position = new BABYLON.Vector3(boundingBox.minX + boundingBox.width / 2, boundingBox.minY + boundingBox.height / 2, 0);
+        box.position = new BABYLON.Vector3(boundingBox.centerX, boundingBox.centerY, 0);
         box.scaling = new BABYLON.Vector3(boundingBox.width, boundingBox.height, 1);
         box.material = material;
 
@@ -133,49 +137,50 @@
         });
     }
 
-    function findLargestConnectedComponent() {
+    function findBoundingBox() {
+        if (!cv) {
+            alert('OpenCV.js is not ready. Please wait.');
+            return null;
+        }
+
         var canvas = document.getElementById('canvas');
         var context = canvas.getContext('2d');
         var imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-        var pixelData = imageData.data;
-        var width = imageData.width;
-        var height = imageData.height;
+        var src = cv.matFromImageData(imageData);
+        var dst = new cv.Mat();
 
-        var visited = new Array(height).fill(0).map(() => new Array(width).fill(false));
-        var largestBoundingBox = null;
+        // Convert to grayscale
+        cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY);
 
-        function dfs(y, x, currentBoundingBox) {
-            if (y < 0 || y >= height || x < 0 || x >= width || visited[y][x] || pixelData[(y * width + x) * 4] <= 128) {
-                return;
-            }
+        // Apply thresholding
+        cv.threshold(src, src, 128, 255, cv.THRESH_BINARY);
 
-            visited[y][x] = true;
-            currentBoundingBox.minX = Math.min(currentBoundingBox.minX, x);
-            currentBoundingBox.minY = Math.min(currentBoundingBox.minY, y);
-            currentBoundingBox.maxX = Math.max(currentBoundingBox.maxX, x);
-            currentBoundingBox.maxY = Math.max(currentBoundingBox.maxY, y);
+        // Find contours
+        var contours = new cv.MatVector();
+        var hierarchy = new cv.Mat();
+        cv.findContours(src, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
 
-            dfs(y - 1, x, currentBoundingBox);
-            dfs(y + 1, x, currentBoundingBox);
-            dfs(y, x - 1, currentBoundingBox);
-            dfs(y, x + 1, currentBoundingBox);
-        }
-
-        for (var y = 0; y < height; y++) {
-            for (var x = 0; x < width; x++) {
-                if (pixelData[(y * width + x) * 4] > 128 && !visited[y][x]) {
-                    var currentBoundingBox = { minX: x, minY: y, maxX: x, maxY: y };
-                    dfs(y, x, currentBoundingBox);
-
-                    if (!largestBoundingBox || (currentBoundingBox.maxX - currentBoundingBox.minX + 1) * (currentBoundingBox.maxY - currentBoundingBox.minY + 1) >
-                        (largestBoundingBox.maxX - largestBoundingBox.minX + 1) * (largestBoundingBox.maxY - largestBoundingBox.minY + 1)) {
-                        largestBoundingBox = currentBoundingBox;
-                    }
-                }
+        // Find the largest contour
+        var maxArea = -1;
+        var largestContour = null;
+        for (var i = 0; i < contours.size(); ++i) {
+            var area = cv.contourArea(contours.get(i));
+            if (area > maxArea) {
+                maxArea = area;
+                largestContour = contours.get(i);
             }
         }
 
-        return largestBoundingBox;
+        // Get the bounding box of the largest contour
+        var boundingBox = cv.boundingRect(largestContour);
+
+        // Release resources
+        src.delete();
+        dst.delete();
+        contours.delete();
+        hierarchy.delete();
+
+        return boundingBox;
     }
 </script>
 
