@@ -16,7 +16,6 @@
 <div id="loadingMessage"></div>
 <h2>Image:</h2>
 <canvas id="canvas" style="border:1px solid #000;"></canvas>
-<div id="titleDiv" style="position: absolute; top: 10px; left: 50%; transform: translateX(-50%); font-size: 20px; color: white;">3D Rendering Title</div>
 
 <script>
     var selectedFile;
@@ -101,9 +100,6 @@
         var image = new Image();
         image.src = canvas.toDataURL();
         context.drawImage(image, 0, 0);
-
-        var titleDiv = document.getElementById('titleDiv');
-        titleDiv.textContent = '3D Rendering Title'; // Change this to your desired title text
 
         var babylonCanvas = document.createElement('canvas');
         babylonCanvas.width = boundingBox.width * 2; // Adjust the size as needed
