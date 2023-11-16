@@ -96,10 +96,7 @@
 
         var canvas = document.getElementById('canvas');
         var context = canvas.getContext('2d');
-
-        context.strokeStyle = 'red';
-        context.lineWidth = 2;
-        context.strokeRect(boundingBox.minX, boundingBox.minY, boundingBox.width, boundingBox.height);
+        context.clearRect(0, 0, canvas.width, canvas.height);
 
         var image = new Image();
         image.src = canvas.toDataURL();
