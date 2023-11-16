@@ -109,12 +109,12 @@
     var camera = new BABYLON.ArcRotateCamera("Camera", 0, 0, 10, BABYLON.Vector3.Zero(), scene);
     camera.attachControl(canvas, true);
 
-    // Create boxes in 3D based on bounding box coordinates and dimensions
     boundingBoxes.forEach(function (box, index) {
         var babylonBox = BABYLON.MeshBuilder.CreateBox(`box${index + 1}`, {
             width: box.width,
             height: box.height,
-            depth: 1
+            depth: 1,
+            wireframe: true  // Add this option to render only the outlines
         }, scene);
 
         // Move the box to the position based on bounding box coordinates
