@@ -6,6 +6,12 @@
   <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/opencv.js/4.5.3/opencv.js"></script>
   <script src="https://cdn.babylonjs.com/babylon.js"></script>
+  <style>
+    canvas {
+      display: block;
+      margin: 0 auto;
+    }
+  </style>
   <title>Image to 3D</title>
 </head>
 <body>
@@ -77,6 +83,11 @@
   }
 
   function render3D() {
+    if (!boundingBox) {
+      alert('Please find bounding box coordinates first.');
+      return;
+    }
+
     // Create Babylon.js scene and camera
     const canvas = document.getElementById('renderCanvas');
     const engine = new BABYLON.Engine(canvas, true);
