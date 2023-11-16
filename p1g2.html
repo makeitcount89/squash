@@ -20,7 +20,7 @@
 <div id="coordinatesDiv" style="position: absolute; top: 50px; left: 50%; transform: translateX(-50%); font-size: 16px; color: red;"></div>
 
 <!-- Container for Babylon.js canvas -->
-<div id="babylonContainer" style="position: absolute; top: 400px; left: 50%; transform: translateX(-50%);"></div>
+<div id="babylonContainer" style="position: absolute; width: 100%; height: 100%;"></div>
 
 <script>
     var selectedFile;
@@ -89,56 +89,45 @@
     }
 
     function render3D() {
-        if (!selectedFile) {
-            alert('Please load an image first.');
-            return;
-        }
-
-        alert('Rendering 3D...'); // Display a message
-
-        // Create Babylon.js scene and camera
-        var babylonContainer = document.getElementById('babylonContainer');
-        babylonContainer.innerHTML = ''; // Clear previous Babylon canvas
-        var canvas = document.createElement('canvas');
-        canvas.id = 'renderCanvas';
-        babylonContainer.appendChild(canvas);
-
-        var engine = new BABYLON.Engine(canvas, true);
-        var scene = new BABYLON.Scene(engine);
-        var camera = new BABYLON.ArcRotateCamera("Camera", 0, 0, 10, BABYLON.Vector3.Zero(), scene);
-        camera.attachControl(canvas, true);
-
-        // Create boxes in 3D based on bounding box coordinates
-        boundingBoxes.forEach(function (box, index) {
-            // Create box for walls
-            var walls = BABYLON.MeshBuilder.CreateBox(`boxWalls${index + 1}`, {
-                width: box.width,
-                height: box.height,
-                depth: 1,
-                updatable: true,
-                sideOrientation: BABYLON.Mesh.DOUBLESIDE
-            }, scene);
-
-            // Move the box to the position based on bounding box coordinates
-            walls.position.x = box.x + box.width / 2;
-            walls.position.y = -box.y - box.height / 2; // Invert y-axis to match Babylon.js coordinate system
-
-            // Subtract the floor
-            var floor = BABYLON.MeshBuilder.CreateBox(`boxFloor${index + 1}`, {
-                width: box.width,
-                height: 0.01,  // Set a small height for the floor
-                depth: box.height,
-                updatable: true,
-                sideOrientation: BABYLON.Mesh.DOUBLESIDE
-            }, scene);
-
-            floor.position.x = box.x + box.width / 2;
-            floor.position.y = -box.y - box.height / 2; // Invert y-axis to match Babylon.js coordinate system
-        });
-
-        // ... (remaining code)
+    if (!selectedFile) {
+        alert('Please load an image first.');
+        return;
     }
 
+    alert('Rendering 3D...'); // Display a message
+
+    // Create Babylon.js scene and camera
+    var babylonContainer = document.getElementById('babylonContainer');
+    babylonContainer.innerHTML = ''; // Clear previous Babylon canvas
+    var canvas = document.createElement('canvas');
+    canvas.id = 'renderCanvas';
+    babylonContainer.appendChild(canvas);
+
+    var engine = new BABYLON.Engine(canvas, true);
+    var scene = new BABYLON.Scene(engine);
+    scene.clearColor = new BABYLON.Color4(1, 1, 1, 1); // Set background color to white
+    var camera = new BABYLON.ArcRotateCamera("Camera", 0, 0, 10, BABYLON.Vector3.Zero(), scene);
+    camera.attachControl(canvas, true);
+
+    boundingBoxes.forEach(function (box, index) {
+        var babylonBox = BABYLON.MeshBuilder.CreateBox(`box${index + 1}`, {
+            width: box.width,
+            height: box.height,
+            depth: 1,
+            wireframe: true  // Add this option to render only the outlines
+        }, scene);
+
+        // Move the box to the position based on bounding box coordinates
+        babylonBox.position.x = box.x + box.width / 2;
+        babylonBox.position.y = -box.y - box.height / 2; // Invert y-axis to match Babylon.js coordinate system
+    });
+
+    // Run the Babylon.js engine
+    engine.runRenderLoop(function () {
+        scene.render();
+    });
+    }
+    
     function findAllBoundingBoxes() {
         if (!cv) {
             alert('OpenCV.js is not ready. Please wait.');
