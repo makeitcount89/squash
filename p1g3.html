@@ -99,6 +99,8 @@
         babylonContainer.innerHTML = ''; // Clear previous Babylon canvas
         var canvas = document.createElement('canvas');
         canvas.id = 'renderCanvas';
+        canvas.width = window.innerWidth / 2; // Set canvas width to half of the screen
+        canvas.height = window.innerHeight;
         babylonContainer.appendChild(canvas);
 
         var engine = new BABYLON.Engine(canvas, true);
