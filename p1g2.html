@@ -3,111 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Planner</title>
+    <title>Image to 3D Scene</title>
     <script defer src="https://cdn.babylonjs.com/babylon.js"></script>
-    <style>
-        html, body { height: 100%; margin: 0; overflow: hidden; }
-        #mainCanvas { display: block; width: 80%; height: 100%; float: right; }
-        #previewCanvas { display: block; width: 20%; height: 20%; position: absolute; top: 0; left: 0; z-index: 1; }
-    </style>
 </head>
 <body>
-    <canvas id="mainCanvas"></canvas>
-    <canvas id="previewCanvas"></canvas>
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            // Set up Babylon.js scene
-            var mainCanvas = document.getElementById("mainCanvas");
-            var previewCanvas = document.getElementById("previewCanvas");
 
-            var engine = new BABYLON.Engine(mainCanvas, true);
-            var scene = new BABYLON.Scene(engine);
-            var camera = new BABYLON.ArcRotateCamera("camera", 0, 0, 10, BABYLON.Vector3.Zero(), scene);
-            camera.attachControl(mainCanvas, true);
+<img id="boxImage" src="path/to/box.png" alt="Box Image" style="display: none;">
 
-            // Create 2D base (12m x 6m)
-            var base = BABYLON.MeshBuilder.CreateBox("base", { width: 12, height: 6, depth: 0.1 }, scene);
-            base.material = new BABYLON.StandardMaterial("baseMaterial", scene);
-            base.material.wireframe = true;
+<canvas id="renderCanvas"></canvas>
 
-            // Create 3D walls (20cm thick and 2m high)
-            var walls = [
-                BABYLON.MeshBuilder.CreateBox("topWall", { width: 12, height: 2, depth: 0.2 }, scene),
-                BABYLON.MeshBuilder.CreateBox("bottomWall", { width: 12, height: 2, depth: 0.2 }, scene),
-                BABYLON.MeshBuilder.CreateBox("leftWall", { width: 0.2, height: 6, depth: 2 }, scene),
-                BABYLON.MeshBuilder.CreateBox("rightWall", { width: 0.2, height: 6, depth: 2 }, scene),
-            ];
+<script>
+    // Load the image
+    var image = document.getElementById('boxImage');
 
-            // Position and adjust the walls
-            walls[0].position.y = 3;
-            walls[1].position.y = -3;
-            walls[2].position.x = -6;
-            walls[3].position.x = 6;
+    // Create a canvas and draw the image on it
+    var canvas = document.createElement('canvas');
+    var context = canvas.getContext('2d');
 
-            walls.forEach(wall => {
-                wall.material = new BABYLON.StandardMaterial("wallMaterial", scene);
-                wall.material.wireframe = true;
-            });
+    // Ensure the image is loaded before getting its dimensions
+    image.onload = function () {
+        canvas.width = image.width;
+        canvas.height = image.height;
+        context.drawImage(image, 0, 0, image.width, image.height);
 
-            // Set up camera position
-            camera.setPosition(new BABYLON.Vector3(0, 0, 10));
+        // Get pixel data
+        var imageData = context.getImageData(0, 0, image.width, image.height);
+        var pixelData = imageData.data;
+        var width = imageData.width;
+        var height = imageData.height;
 
-            // Enable pinch zoom
-            var pinchDistanceStart = 0;
-            var pinchZoomSpeed = 0.1; // Adjust this value to control the zoom speed
+        // Convert to 2D array
+        var pixelArray = [];
 
-            scene.onPointerObservable.add(function (pointerInfo) {
-                switch (pointerInfo.type) {
-                    case BABYLON.PointerEventTypes.POINTERDOWN:
-                        if (pointerInfo.event.pointerType === "touch" && pointerInfo.pickInfo.pickedMesh === mainCanvas) {
-                            pinchDistanceStart = BABYLON.Tools.GetPointerCoordinates(pointerInfo.event)[0].distanceTo(BABYLON.Tools.GetPointerCoordinates(pointerInfo.event)[1]);
-                        }
-                        break;
-                    case BABYLON.PointerEventTypes.POINTERUP:
-                        pinchDistanceStart = 0;
-                        break;
-                    case BABYLON.PointerEventTypes.POINTERMOVE:
-                        if (pinchDistanceStart > 0 && pointerInfo.event.pointerType === "touch" && pointerInfo.pickInfo.pickedMesh === mainCanvas) {
-                            var pinchDistance = BABYLON.Tools.GetPointerCoordinates(pointerInfo.event)[0].distanceTo(BABYLON.Tools.GetPointerCoordinates(pointerInfo.event)[1]);
-                            var pinchDelta = pinchDistance - pinchDistanceStart;
-                            camera.radius -= pinchDelta * pinchZoomSpeed;
-                            pinchDistanceStart = pinchDistance;
-                        }
-                        break;
-                }
-            });
+        for (var y = 0; y < height; y++) {
+            var row = [];
+            for (var x = 0; x < width; x++) {
+                var index = (y * width + x) * 4;
+                // Assuming the image is grayscale, use the red channel value
+                var pixelValue = pixelData[index];
+                row.push(pixelValue);
+            }
+            pixelArray.push(row);
+        }
 
-            // Render the scene
-            engine.runRenderLoop(function () {
-                scene.render();
+        // Use the pixel array to create a 3D scene in Babylon.js
+        createBabylonScene(pixelArray);
+    };
 
-                // Render the preview
-                var previewEngine = new BABYLON.Engine(previewCanvas, false);
-                var previewScene = new BABYLON.Scene(previewEngine);
-                var previewCamera = new BABYLON.ArcRotateCamera("previewCamera", 0, 0, 10, BABYLON.Vector3.Zero(), previewScene);
-                previewCamera.attachControl(previewCanvas, true);
+    // Babylon.js scene creation function
+    function createBabylonScene(pixelArray) {
+        var canvas = document.getElementById('renderCanvas');
+        var engine = new BABYLON.Engine(canvas, true);
+        var scene = new BABYLON.Scene(engine);
 
-                // Clone the main scene into the preview scene
-                scene.meshes.forEach(mesh => {
-                    var previewMesh = mesh.clone(mesh.name + "_preview", null, true);
-                    previewMesh.material = new BABYLON.StandardMaterial("previewMaterial", previewScene);
-                    previewMesh.material.wireframe = true;
-                    previewScene.addMesh(previewMesh);
-                });
+        // Camera
+        var camera = new BABYLON.ArcRotateCamera('camera', 0, 0, 10, BABYLON.Vector3.Zero(), scene);
+        camera.attachControl(canvas, true);
 
-                previewEngine.runRenderLoop(function () {
-                    previewScene.render();
-                });
+        // Light
+        var light = new BABYLON.HemisphericLight('light', BABYLON.Vector3.Up(), scene);
 
-                // Dispose of the resources when done rendering the preview
-                previewEngine.dispose();
-            });
+        // Create boxes based on the pixel values
+        for (var y = 0; y < pixelArray.length; y++) {
+            for (var x = 0; x < pixelArray[y].length; x++) {
+                var pixelValue = pixelArray[y][x];
+                // Create a box at (x, y, pixelValue)
+                var box = BABYLON.MeshBuilder.CreateBox('box', { size: 1 }, scene);
+                box.position = new BABYLON.Vector3(x, y, pixelValue);
+            }
+        }
 
-            // Handle window resize
-            window.addEventListener('resize', function () {
-                engine.resize();
-            });
+        // Render loop
+        engine.runRenderLoop(function () {
+            scene.render();
         });
-    </script>
+
+        // Handle window resize
+        window.addEventListener('resize', function () {
+            engine.resize();
+        });
+    }
+</script>
+
 </body>
 </html>
