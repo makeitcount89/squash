@@ -4,22 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Image to 2D Array</title>
-    <!-- OpenCV.js -->
-    <script async src="https://docs.opencv.org/master/opencv.js" onload="onOpenCvReady();" type="text/javascript"></script>
     <!-- Babylon.js library -->
     <script src="https://cdn.babylonjs.com/babylon.js"></script>
+    <!-- OpenCV.js -->
+    <script async src="https://docs.opencv.org/master/opencv.js" onload="onOpenCvReady();" type="text/javascript"></script>
 </head>
 <body>
 
 <input type="file" id="fileInput" accept=".png" onchange="handleFileSelect(event)">
 <button onclick="loadImage()">Load Image</button>
-<button onclick="displayAllBoundingBoxes()">All Bounding Boxes</button>
+<button onclick="displayBoundingBox()">Bounding</button>
 <button onclick="render3D()">Render 3D</button>
 <div id="loadingMessage"></div>
 <h2>Image:</h2>
 <canvas id="canvas" style="border:1px solid #000;"></canvas>
 <div id="titleDiv" style="position: absolute; top: 10px; left: 50%; transform: translateX(-50%); font-size: 20px; color: white;">3D Rendering Title</div>
-<div id="coordinatesDiv" style="position: absolute; top: 50px; left: 50%; transform: translateX(-50%); font-size: 16px; color: red;"></div>
 
 <script>
     var selectedFile;
@@ -64,92 +63,82 @@
         reader.readAsDataURL(selectedFile);
     }
 
-    function displayAllBoundingBoxes() {
-    if (!selectedFile) {
-        alert('Please load an image first.');
-        return;
-    }
-
-    var boundingBoxes = findAllBoundingBoxes();
-
-    if (!boundingBoxes || boundingBoxes.length === 0) {
-        alert('No shapes found in the image.');
-        return;
-    }
-
-    var canvas = document.getElementById('canvas');
-    var coordinatesDiv = document.getElementById('coordinatesDiv');
-    coordinatesDiv.innerHTML = 'Bounding Box Coordinates for all shapes: <br>';
-
-    boundingBoxes.forEach(function (box, index) {
-        // Exclude bounding boxes at the canvas edges
-        if (box.x === 0 && box.y === 0 && box.width === canvas.width && box.height === canvas.height) {
+    function displayBoundingBox() {
+        if (!selectedFile) {
+            alert('Please load an image first.');
             return;
         }
 
-        coordinatesDiv.innerHTML +=
-            `Shape ${index + 1}: minX: ${box.x}, minY: ${box.y}, maxX: ${box.x + box.width}, maxY: ${box.y + box.height} <br>`;
-    });
+        var boundingBox = findLargestConnectedComponent();
+
+        var canvas = document.getElementById('canvas');
+        var context = canvas.getContext('2d');
+        context.clearRect(0, 0, canvas.width, canvas.height);
+
+        var image = new Image();
+        image.src = canvas.toDataURL();
+        context.drawImage(image, 0, 0);
+
+        if (!boundingBox) {
+            alert('No shape found in the image.');
+            return;
+        }
+
+        context.strokeStyle = 'red';
+        context.lineWidth = 2;
+        context.strokeRect(boundingBox.x, boundingBox.y, boundingBox.width, boundingBox.height);
     }
-    
 
     function render3D() {
-    if (!selectedFile) {
-        alert('Please load an image first.');
-        return;
+        if (!selectedFile) {
+            alert('Please load an image first.');
+            return;
+        }
+
+        var boundingBox = findLargestConnectedComponent();
+
+        if (!boundingBox) {
+            alert('No shape found in the image.');
+            return;
+        }
+
+        var canvas = document.getElementById('canvas');
+        var context = canvas.getContext('2d');
+        context.clearRect(0, 0, canvas.width, canvas.height);
+
+        var image = new Image();
+        image.src = canvas.toDataURL();
+        context.drawImage(image, 0, 0);
+
+        var titleDiv = document.getElementById('titleDiv');
+        titleDiv.textContent = '3D Rendering Title'; // Change this to your desired title text
+
+        // Assuming Babylon.js scene and engine are globally accessible
+        var engine = new BABYLON.Engine(canvas, true);
+        var scene = new BABYLON.Scene(engine);
+
+        var material = new BABYLON.StandardMaterial('material', scene);
+        material.diffuseColor = new BABYLON.Color3(1, 0, 0);
+
+        var box = BABYLON.MeshBuilder.CreateBox('box', { size: 1 }, scene);
+        box.position = new BABYLON.Vector3(boundingBox.x + boundingBox.width / 2, boundingBox.y + boundingBox.height / 2, 0);
+        box.scaling = new BABYLON.Vector3(boundingBox.width, boundingBox.height, 1);
+        box.material = material;
+
+        var camera = new BABYLON.ArcRotateCamera('Camera', 0, 0, 10, BABYLON.Vector3.Zero(), scene);
+        camera.attachControl(canvas, true);
+        var light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(0, 1, 0), scene);
+
+        engine.runRenderLoop(function () {
+            scene.render();
+        });
+
+        window.addEventListener('resize', function () {
+            engine.resize();
+        });
     }
 
-    var boundingBoxes = findAllBoundingBoxes();
-
-    if (!boundingBoxes || boundingBoxes.length === 0) {
-        alert('No shapes found in the image.');
-        return;
-    }
-
-    // Use the first bounding box for rendering
-    var boundingBox = boundingBoxes[0];
-
-    var canvas = document.getElementById('canvas');
-    var context = canvas.getContext('2d');
-
-    context.strokeStyle = 'red';
-    context.lineWidth = 2;
-    context.strokeRect(boundingBox.minX, boundingBox.minY, boundingBox.width, boundingBox.height);
-
-    var image = new Image();
-    image.src = canvas.toDataURL();
-    context.drawImage(image, 0, 0);
-
-    var titleDiv = document.getElementById('titleDiv');
-    titleDiv.textContent = '3D Rendering Title'; // Change this to your desired title text
-
-    // Assuming Babylon.js scene and engine are globally accessible
-    var engine = new BABYLON.Engine(canvas, true);
-    var scene = new BABYLON.Scene(engine);
-
-    var material = new BABYLON.StandardMaterial('material', scene);
-    material.diffuseColor = new BABYLON.Color3(1, 0, 0);
-
-    var box = BABYLON.MeshBuilder.CreateBox('box', { size: 1 }, scene);
-    box.position = new BABYLON.Vector3(boundingBox.centerX, boundingBox.centerY, 0);
-    box.scaling = new BABYLON.Vector3(boundingBox.width / 100, boundingBox.height / 100, 1); // Adjust scaling
-    box.material = material;
-
-    var camera = new BABYLON.ArcRotateCamera('Camera', 0, 0, 10, BABYLON.Vector3.Zero(), scene);
-    camera.attachControl(canvas, true);
-    var light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(0, 1, 0), scene);
-
-    engine.runRenderLoop(function () {
-        scene.render();
-    });
-
-    window.addEventListener('resize', function () {
-        engine.resize();
-    });
-    }
-    
-
-    function findAllBoundingBoxes() {
+    function findLargestConnectedComponent() {
         if (!cv) {
             alert('OpenCV.js is not ready. Please wait.');
             return null;
@@ -172,11 +161,17 @@
         var hierarchy = new cv.Mat();
         cv.findContours(src, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
 
-        // Get bounding boxes for all contours
-        var boundingBoxes = [];
+        // Get bounding box for the largest contour
+        var largestBoundingBox = null;
+        var maxArea = -1;
+
         for (var i = 0; i < contours.size(); ++i) {
-            var boundingBox = cv.boundingRect(contours.get(i));
-            boundingBoxes.push(boundingBox);
+            var contourArea = cv.contourArea(contours.get(i));
+
+            if (contourArea > maxArea) {
+                maxArea = contourArea;
+                largestBoundingBox = cv.boundingRect(contours.get(i));
+            }
         }
 
         // Release resources
@@ -185,7 +180,7 @@
         contours.delete();
         hierarchy.delete();
 
-        return boundingBoxes;
+        return largestBoundingBox;
     }
 </script>
 
