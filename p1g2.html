@@ -110,21 +110,33 @@
 
         // Create boxes in 3D based on bounding box coordinates
         boundingBoxes.forEach(function (box, index) {
-            var babylonBox = BABYLON.MeshBuilder.CreateBox(`box${index + 1}`, {
+            // Create box for walls
+            var walls = BABYLON.MeshBuilder.CreateBox(`boxWalls${index + 1}`, {
                 width: box.width,
                 height: box.height,
-                depth: 1
+                depth: 1,
+                updatable: true,
+                sideOrientation: BABYLON.Mesh.DOUBLESIDE
             }, scene);
 
             // Move the box to the position based on bounding box coordinates
-            babylonBox.position.x = box.x + box.width / 2;
-            babylonBox.position.y = -box.y - box.height / 2; // Invert y-axis to match Babylon.js coordinate system
+            walls.position.x = box.x + box.width / 2;
+            walls.position.y = -box.y - box.height / 2; // Invert y-axis to match Babylon.js coordinate system
+
+            // Subtract the floor
+            var floor = BABYLON.MeshBuilder.CreateBox(`boxFloor${index + 1}`, {
+                width: box.width,
+                height: 0.01,  // Set a small height for the floor
+                depth: box.height,
+                updatable: true,
+                sideOrientation: BABYLON.Mesh.DOUBLESIDE
+            }, scene);
+
+            floor.position.x = box.x + box.width / 2;
+            floor.position.y = -box.y - box.height / 2; // Invert y-axis to match Babylon.js coordinate system
         });
 
-        // Run the Babylon.js engine
-        engine.runRenderLoop(function () {
-            scene.render();
-        });
+        // ... (remaining code)
     }
 
     function findAllBoundingBoxes() {
