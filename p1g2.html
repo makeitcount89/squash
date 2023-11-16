@@ -12,7 +12,7 @@
 
 <input type="file" id="fileInput" accept=".png" onchange="handleFileSelect(event)">
 <button onclick="loadImage()">Load Image</button>
-<button onclick="displayAllContours()">All Contours</button>
+<button onclick="displayAllBoundingBoxes()">All Bounding Boxes</button>
 <button onclick="render3D()">Render 3D</button>
 <div id="loadingMessage"></div>
 <h2>Image:</h2>
@@ -25,7 +25,7 @@
 <script>
     var selectedFile;
     var cv;
-    var contours = [];
+    var boundingBoxes = [];
 
     function onOpenCvReady() {
         cv = cv || cv;
@@ -66,76 +66,69 @@
         reader.readAsDataURL(selectedFile);
     }
 
-    function displayAllContours() {
+    function displayAllBoundingBoxes() {
         if (!selectedFile) {
             alert('Please load an image first.');
             return;
         }
 
-        contours = findAllContours();
+        boundingBoxes = findAllBoundingBoxes();
 
-        if (!contours || contours.length === 0) {
-            alert('No contours found in the image.');
+        if (!boundingBoxes || boundingBoxes.length === 0) {
+            alert('No shapes found in the image.');
             return;
         }
 
-        // Render contours on the canvas
-        var canvas = document.getElementById('canvas');
-        var context = canvas.getContext('2d');
-        context.strokeStyle = 'red';
+        var coordinatesDiv = document.getElementById('coordinatesDiv');
+        coordinatesDiv.innerHTML = 'Bounding Box Coordinates for all shapes: <br>';
 
-        contours.forEach(function (contour) {
-            context.beginPath();
-            context.moveTo(contour[0].x, contour[0].y);
-
-            for (var i = 1; i < contour.length; ++i) {
-                context.lineTo(contour[i].x, contour[i].y);
-            }
-
-            context.closePath();
-            context.stroke();
+        boundingBoxes.forEach(function (box, index) {
+            coordinatesDiv.innerHTML +=
+                `Shape ${index + 1}: minX: ${box.x}, minY: ${box.y}, maxX: ${box.x + box.width}, maxY: ${box.y + box.height} <br>`;
         });
     }
 
     function render3D() {
-        if (!selectedFile) {
-            alert('Please load an image first.');
-            return;
-        }
-
-        alert('Rendering 3D...'); // Display a message
-
-        // Create Babylon.js scene and camera
-        var babylonContainer = document.getElementById('babylonContainer');
-        babylonContainer.innerHTML = ''; // Clear previous Babylon canvas
-        var canvas = document.createElement('canvas');
-        canvas.id = 'renderCanvas';
-        babylonContainer.appendChild(canvas);
-
-        var engine = new BABYLON.Engine(canvas, true);
-        var scene = new BABYLON.Scene(engine);
-        scene.clearColor = new BABYLON.Color4(1, 1, 1, 1); // Set background color to white
-        var camera = new BABYLON.ArcRotateCamera("Camera", 0, 0, 10, BABYLON.Vector3.Zero(), scene);
-        camera.attachControl(canvas, true);
-
-        // Create extruded shapes based on contours
-        contours.forEach(function (contour, index) {
-            var babylonShape = createBabylonShape(contour, scene);
-            babylonShape.name = `shape${index + 1}`;
-        });
-
-        // Run the Babylon.js engine
-        engine.runRenderLoop(function () {
-            scene.render();
-        });
+    if (!selectedFile) {
+        alert('Please load an image first.');
+        return;
     }
 
-    function createBabylonShape(contour, scene) {
-        var shape = new BABYLON.PolygonMeshBuilder("shape", contour, scene);
-        return shape;
-    }
+    alert('Rendering 3D...'); // Display a message
 
-    function findAllContours() {
+    // Create Babylon.js scene and camera
+    var babylonContainer = document.getElementById('babylonContainer');
+    babylonContainer.innerHTML = ''; // Clear previous Babylon canvas
+    var canvas = document.createElement('canvas');
+    canvas.id = 'renderCanvas';
+    babylonContainer.appendChild(canvas);
+
+    var engine = new BABYLON.Engine(canvas, true);
+    var scene = new BABYLON.Scene(engine);
+    scene.clearColor = new BABYLON.Color4(1, 1, 1, 1); // Set background color to white
+    var camera = new BABYLON.ArcRotateCamera("Camera", 0, 0, 10, BABYLON.Vector3.Zero(), scene);
+    camera.attachControl(canvas, true);
+
+    boundingBoxes.forEach(function (box, index) {
+        var babylonBox = BABYLON.MeshBuilder.CreateBox(`box${index + 1}`, {
+            width: box.width,
+            height: box.height,
+            depth: 1,
+            wireframe: true  // Add this option to render only the outlines
+        }, scene);
+
+        // Move the box to the position based on bounding box coordinates
+        babylonBox.position.x = box.x + box.width / 2;
+        babylonBox.position.y = -box.y - box.height / 2; // Invert y-axis to match Babylon.js coordinate system
+    });
+
+    // Run the Babylon.js engine
+    engine.runRenderLoop(function () {
+        scene.render();
+    });
+    }
+    
+    function findAllBoundingBoxes() {
         if (!cv) {
             alert('OpenCV.js is not ready. Please wait.');
             return null;
@@ -151,23 +144,18 @@
         cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY);
 
         // Apply thresholding
-        cv.threshold(src, src, 128, 255, cv.THRESH_BINARY);
+        cv.threshold(src, src, 50, 255, cv.THRESH_BINARY);
 
         // Find contours
         var contours = new cv.MatVector();
         var hierarchy = new cv.Mat();
         cv.findContours(src, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
 
-        // Convert contours to JavaScript arrays
-        var contoursArray = [];
+        // Get bounding boxes for all contours
+        var boxes = [];
         for (var i = 0; i < contours.size(); ++i) {
-            var contour = contours.get(i);
-            var contourArray = [];
-            for (var j = 0; j < contour.total(); ++j) {
-                var point = contour.getPoint(j);
-                contourArray.push({ x: point.x, y: point.y });
-            }
-            contoursArray.push(contourArray);
+            var boundingBox = cv.boundingRect(contours.get(i));
+            boxes.push(boundingBox);
         }
 
         // Release resources
@@ -176,7 +164,7 @@
         contours.delete();
         hierarchy.delete();
 
-        return contoursArray;
+        return boxes;
     }
 </script>
 
