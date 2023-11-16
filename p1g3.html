@@ -19,8 +19,8 @@
 <canvas id="canvas" style="border:1px solid #000;"></canvas>
 <div id="coordinatesDiv" style="position: absolute; top: 50px; left: 50%; transform: translateX(-50%); font-size: 16px; color: red;"></div>
 
-<!-- Adjusted Babylon container size -->
-<div id="babylonContainer" style="position: absolute; top: 400px; left: 50%; transform: translateX(-50%); width: 600px; height: 400px;"></div>
+<!-- Babylon container taking up half the screen -->
+<div id="babylonContainer" style="position: absolute; top: 0; left: 0; width: 50vw; height: 100vh;"></div>
 
 <script>
     var selectedFile;
@@ -94,8 +94,6 @@
             return;
         }
 
-        alert('Rendering 3D...'); // Display a message
-
         // Create Babylon.js scene and camera
         var babylonContainer = document.getElementById('babylonContainer');
         babylonContainer.innerHTML = ''; // Clear previous Babylon canvas
@@ -112,13 +110,14 @@
         boundingBoxes.forEach(function (box, index) {
             var babylonBox = BABYLON.MeshBuilder.CreateBox(`box${index + 1}`, {
                 width: box.width,
-                height: box.height,
-                depth: 0.2 // Adjusted thickness of the walls
+                height: 2, // Adjusted height to reflect walls
+                depth: box.height
             }, scene);
 
             // Move the box to the position based on bounding box coordinates
             babylonBox.position.x = box.x + box.width / 2;
-            babylonBox.position.y = -box.y - box.height / 2; // Invert y-axis to match Babylon.js coordinate system
+            babylonBox.position.y = -box.y - 1; // Adjusted position for correct alignment
+            babylonBox.position.z = box.height / 2; // Adjusted position for correct alignment
         });
 
         // Run the Babylon.js engine
