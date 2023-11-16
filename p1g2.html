@@ -11,8 +11,10 @@
 
   <script>
     // Assuming you have a 2D floor plan with two rectangular rooms
-    const room1 = { width: 5, height: 7 };
-    const room2 = { width: 8, height: 10 };
+    const floorPlanData = [
+      { width: 5, height: 7, x: -5, y: 7 },
+      { width: 8, height: 10, x: 8, y: 10 }
+    ];
 
     // Initialize scene, camera, and renderer
     const scene = new THREE.Scene();
@@ -21,20 +23,20 @@
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    // Create 3D rectangles for each room
-    const geometry1 = new THREE.BoxGeometry(room1.width, room1.height, 1);
-    const material1 = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-    const roomMesh1 = new THREE.Mesh(geometry1, material1);
-    roomMesh1.position.set(-room1.width / 2, room1.height / 2, 0);
+    // Function to create a 3D room from 2D data
+    function createRoom(roomData) {
+      const geometry = new THREE.BoxGeometry(roomData.width, roomData.height, 1);
+      const material = new THREE.MeshBasicMaterial({ color: Math.random() * 0xffffff });
+      const roomMesh = new THREE.Mesh(geometry, material);
+      roomMesh.position.set(roomData.x, roomData.y, 0);
+      return roomMesh;
+    }
 
-    const geometry2 = new THREE.BoxGeometry(room2.width, room2.height, 1);
-    const material2 = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-    const roomMesh2 = new THREE.Mesh(geometry2, material2);
-    roomMesh2.position.set(room2.width / 2, room2.height / 2, 0);
-
-    // Add rooms to the scene
-    scene.add(roomMesh1);
-    scene.add(roomMesh2);
+    // Create 3D shapes from the 2D array
+    floorPlanData.forEach(roomData => {
+      const roomMesh = createRoom(roomData);
+      scene.add(roomMesh);
+    });
 
     // Set camera position
     camera.position.z = 15;
