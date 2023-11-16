@@ -7,12 +7,23 @@
 </head>
 <body>
 
-<input type="file" id="fileInput" accept=".png" onchange="loadImage(event)">
+<input type="file" id="fileInput" accept=".png" onchange="handleFileSelect(event)">
+<button onclick="loadImage()">Load Image</button>
 <div id="arrayDisplay"></div>
 
 <script>
-    function loadImage(event) {
-        var input = event.target;
+    var selectedFile;
+
+    function handleFileSelect(event) {
+        selectedFile = event.target.files[0];
+    }
+
+    function loadImage() {
+        if (!selectedFile) {
+            alert('Please select an image file first.');
+            return;
+        }
+
         var reader = new FileReader();
 
         reader.onload = function () {
@@ -50,7 +61,7 @@
         };
 
         // Read the selected image file
-        reader.readAsDataURL(input.files[0]);
+        reader.readAsDataURL(selectedFile);
     }
 
     function displayArray(array) {
