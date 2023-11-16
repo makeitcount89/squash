@@ -19,8 +19,8 @@
 <canvas id="canvas" style="border:1px solid #000;"></canvas>
 <div id="coordinatesDiv" style="position: absolute; top: 50px; left: 50%; transform: translateX(-50%); font-size: 16px; color: red;"></div>
 
-<!-- Babylon container taking up half the screen -->
-<div id="babylonContainer" style="position: absolute; top: 0; left: 50%; width: 50vw; height: 100vh;"></div>
+<!-- Container for Babylon.js canvas -->
+<div id="babylonContainer" style="position: absolute; top: 400px; left: 50%; transform: translateX(-50%);"></div>
 
 <script>
     var selectedFile;
@@ -94,13 +94,13 @@
             return;
         }
 
+        alert('Rendering 3D...'); // Display a message
+
         // Create Babylon.js scene and camera
         var babylonContainer = document.getElementById('babylonContainer');
         babylonContainer.innerHTML = ''; // Clear previous Babylon canvas
         var canvas = document.createElement('canvas');
         canvas.id = 'renderCanvas';
-        canvas.width = window.innerWidth / 2; // Set canvas width to half of the screen
-        canvas.height = window.innerHeight;
         babylonContainer.appendChild(canvas);
 
         var engine = new BABYLON.Engine(canvas, true);
@@ -108,18 +108,17 @@
         var camera = new BABYLON.ArcRotateCamera("Camera", 0, 0, 10, BABYLON.Vector3.Zero(), scene);
         camera.attachControl(canvas, true);
 
-        // Create boxes in 3D based on bounding box coordinates
+        // Create boxes in 3D based on bounding box coordinates and dimensions
         boundingBoxes.forEach(function (box, index) {
             var babylonBox = BABYLON.MeshBuilder.CreateBox(`box${index + 1}`, {
                 width: box.width,
-                height: 2, // Adjusted height to reflect walls
-                depth: box.height
+                height: box.height,
+                depth: 1
             }, scene);
 
             // Move the box to the position based on bounding box coordinates
             babylonBox.position.x = box.x + box.width / 2;
-            babylonBox.position.y = -box.y - 1; // Adjusted position for correct alignment
-            babylonBox.position.z = box.height / 2; // Adjusted position for correct alignment
+            babylonBox.position.y = -box.y - box.height / 2; // Invert y-axis to match Babylon.js coordinate system
         });
 
         // Run the Babylon.js engine
