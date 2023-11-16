@@ -11,16 +11,15 @@
 
 <input type="file" id="fileInput" accept=".png" onchange="handleFileSelect(event)">
 <button onclick="loadImage()">Load Image</button>
-<button onclick="displayBoundingBox()">Bounding</button> <!-- New button for displaying bounding box -->
+<button onclick="displayBoundingBox()">Bounding</button>
 <button onclick="render3D()">Render 3D</button>
 <div id="loadingMessage"></div>
-<h2>Generated Array:</h2>
-<div id="arrayDisplay"></div>
-<canvas id="canvas" style="border:1px solid #000;"></canvas> <!-- Add canvas element for rendering the bounding box -->
+<h2>Image:</h2>
+<canvas id="canvas" style="border:1px solid #000;"></canvas>
+<div id="titleDiv" style="position: absolute; top: 10px; left: 50%; transform: translateX(-50%); font-size: 20px; color: white;">3D Rendering Title</div>
 
 <script>
     var selectedFile;
-    var pixelArray;
 
     function handleFileSelect(event) {
         selectedFile = event.target.files[0];
@@ -32,7 +31,6 @@
             return;
         }
 
-        // Show loading message
         var loadingMessage = document.getElementById('loadingMessage');
         loadingMessage.textContent = 'Loading...';
 
@@ -50,50 +48,11 @@
                 canvas.height = image.height;
                 context.drawImage(image, 0, 0, image.width, image.height);
 
-                var imageData = context.getImageData(0, 0, image.width, image.height);
-                var pixelData = imageData.data;
-                var width = imageData.width;
-                var height = imageData.height;
-
-                pixelArray = [];
-
-                for (var y = 0; y < height; y++) {
-                    var row = [];
-                    for (var x = 0; x < width; x++) {
-                        var index = (y * width + x) * 4;
-                        // Use the red channel for intensity
-                        var intensity = pixelData[index];
-                        // Threshold example: if intensity > 128, set to 1; otherwise, set to 0
-                        var value = intensity > 128 ? 1 : 0;
-                        row.push(value);
-                    }
-
-                    pixelArray.push(row);
-                }
-
-                // Display the 2D array on the page
-                displayArray(pixelArray);
-
-                // Clear loading message
                 loadingMessage.textContent = '';
             };
         };
 
-        // Read the selected image file
         reader.readAsDataURL(selectedFile);
-    }
-
-    function displayArray(array) {
-        var arrayDisplay = document.getElementById('arrayDisplay');
-        arrayDisplay.innerHTML = ''; // Clear previous content
-
-        // Add a title
-        var title = document.createElement('h3');
-        title.textContent = 'Generated Array:';
-        arrayDisplay.appendChild(title);
-
-        // Display the array as JavaScript code
-        arrayDisplay.appendChild(document.createTextNode('var floorPlan = ' + JSON.stringify(array) + ';'));
     }
 
     function displayBoundingBox() {
@@ -102,20 +61,18 @@
             return;
         }
 
-        // Find the coordinates of the largest connected component
-        var boundingBox = findLargestConnectedComponent(pixelArray);
+        var boundingBox = findLargestConnectedComponent();
 
         var canvas = document.getElementById('canvas');
         var context = canvas.getContext('2d');
         context.clearRect(0, 0, canvas.width, canvas.height);
 
-        // Draw the original image for reference
         var image = new Image();
         image.src = canvas.toDataURL();
         context.drawImage(image, 0, 0);
 
         if (!boundingBox) {
-            alert('No shape found in the array.');
+            alert('No shape found in the image.');
             return;
         }
 
@@ -124,61 +81,68 @@
         context.strokeRect(boundingBox.minX, boundingBox.minY, boundingBox.width, boundingBox.height);
     }
 
-      function render3D() {
+    function render3D() {
         if (!selectedFile) {
             alert('Please load an image first.');
             return;
         }
 
-        // Find the coordinates of the largest connected component
-        var boundingBox = findLargestConnectedComponent(pixelArray);
+        var boundingBox = findLargestConnectedComponent();
 
         if (!boundingBox) {
-            alert('No shape found in the array.');
+            alert('No shape found in the image.');
             return;
         }
 
-        // Assuming Babylon.js scene and engine are globally accessible
-        var canvas = document.createElement('canvas');
-        canvas.width = 800; // Set your preferred width
-        canvas.height = 600; // Set your preferred height
-        document.body.appendChild(canvas);
+        var canvas = document.getElementById('canvas');
+        var context = canvas.getContext('2d');
+        context.clearRect(0, 0, canvas.width, canvas.height);
 
+        var image = new Image();
+        image.src = canvas.toDataURL();
+        context.drawImage(image, 0, 0);
+
+        var titleDiv = document.getElementById('titleDiv');
+        titleDiv.textContent = '3D Rendering Title'; // Change this to your desired title text
+
+        // Assuming Babylon.js scene and engine are globally accessible
         var engine = new BABYLON.Engine(canvas, true);
         var scene = new BABYLON.Scene(engine);
 
-        // Create a basic material
-        var material = new BABYLON.StandardMaterial("material", scene);
-        material.diffuseColor = new BABYLON.Color3(1, 0, 0); // Red color
+        var material = new BABYLON.StandardMaterial('material', scene);
+        material.diffuseColor = new BABYLON.Color3(1, 0, 0);
 
-        // Create a box for the detected shape
-        var box = BABYLON.MeshBuilder.CreateBox("box", { size: 1 }, scene);
-        box.position = new BABYLON.Vector3(boundingBox.centerX, boundingBox.centerY, 0);
+        var box = BABYLON.MeshBuilder.CreateBox('box', { size: 1 }, scene);
+        box.position = new BABYLON.Vector3(boundingBox.minX + boundingBox.width / 2, boundingBox.minY + boundingBox.height / 2, 0);
         box.scaling = new BABYLON.Vector3(boundingBox.width, boundingBox.height, 1);
         box.material = material;
 
-        // Set up camera and lights
-        var camera = new BABYLON.ArcRotateCamera("Camera", 0, 0, 10, BABYLON.Vector3.Zero(), scene);
+        var camera = new BABYLON.ArcRotateCamera('Camera', 0, 0, 10, BABYLON.Vector3.Zero(), scene);
         camera.attachControl(canvas, true);
-        var light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
+        var light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(0, 1, 0), scene);
 
-        // Run the Babylon.js engine
         engine.runRenderLoop(function () {
             scene.render();
         });
 
-        // Handle window resize
-        window.addEventListener("resize", function () {
+        window.addEventListener('resize', function () {
             engine.resize();
         });
     }
 
-    function findLargestConnectedComponent(array) {
-        var visited = new Array(array.length).fill(0).map(() => new Array(array[0].length).fill(false));
+    function findLargestConnectedComponent() {
+        var canvas = document.getElementById('canvas');
+        var context = canvas.getContext('2d');
+        var imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+        var pixelData = imageData.data;
+        var width = imageData.width;
+        var height = imageData.height;
+
+        var visited = new Array(height).fill(0).map(() => new Array(width).fill(false));
         var largestBoundingBox = null;
 
         function dfs(y, x, currentBoundingBox) {
-            if (y < 0 || y >= array.length || x < 0 || x >= array[0].length || visited[y][x] || array[y][x] !== 0) {
+            if (y < 0 || y >= height || x < 0 || x >= width || visited[y][x] || pixelData[(y * width + x) * 4] <= 128) {
                 return;
             }
 
@@ -194,9 +158,9 @@
             dfs(y, x + 1, currentBoundingBox);
         }
 
-        for (var y = 0; y < array.length; y++) {
-            for (var x = 0; x < array[y].length; x++) {
-                if (array[y][x] === 0 && !visited[y][x]) {
+        for (var y = 0; y < height; y++) {
+            for (var x = 0; x < width; x++) {
+                if (pixelData[(y * width + x) * 4] > 128 && !visited[y][x]) {
                     var currentBoundingBox = { minX: x, minY: y, maxX: x, maxY: y };
                     dfs(y, x, currentBoundingBox);
 
