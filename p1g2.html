@@ -12,7 +12,7 @@
 
 <input type="file" id="fileInput" accept=".png" onchange="handleFileSelect(event)">
 <button onclick="loadImage()">Load Image</button>
-<button onclick="displayAllBoundingBoxes()">All Bounding Boxes</button>
+<button onclick="displayAllContours()">All Contours</button>
 <button onclick="render3D()">Render 3D</button>
 <div id="loadingMessage"></div>
 <h2>Image:</h2>
@@ -66,7 +66,7 @@
         reader.readAsDataURL(selectedFile);
     }
 
-    function displayAllBoundingBoxes() {
+    function displayAllContours() {
         if (!selectedFile) {
             alert('Please load an image first.');
             return;
@@ -75,12 +75,26 @@
         contours = findAllContours();
 
         if (!contours || contours.length === 0) {
-            alert('No shapes found in the image.');
+            alert('No contours found in the image.');
             return;
         }
 
-        var coordinatesDiv = document.getElementById('coordinatesDiv');
-        coordinatesDiv.innerHTML = 'Contours found: ' + contours.length;
+        // Render contours on the canvas
+        var canvas = document.getElementById('canvas');
+        var context = canvas.getContext('2d');
+        context.strokeStyle = 'red';
+
+        contours.forEach(function (contour) {
+            context.beginPath();
+            context.moveTo(contour[0].x, contour[0].y);
+
+            for (var i = 1; i < contour.length; ++i) {
+                context.lineTo(contour[i].x, contour[i].y);
+            }
+
+            context.closePath();
+            context.stroke();
+        });
     }
 
     function render3D() {
@@ -104,20 +118,21 @@
         var camera = new BABYLON.ArcRotateCamera("Camera", 0, 0, 10, BABYLON.Vector3.Zero(), scene);
         camera.attachControl(canvas, true);
 
+        // Create extruded shapes based on contours
         contours.forEach(function (contour, index) {
-            var path = [];
-            for (var i = 0; i < contour.length; i++) {
-                path.push(new BABYLON.Vector3(contour[i].x, -contour[i].y, 0));
-            }
-
-            // Create a ribbon mesh using the contour path
-            var ribbon = BABYLON.MeshBuilder.CreateRibbon('ribbon' + index, { pathArray: [path] }, scene);
+            var babylonShape = createBabylonShape(contour, scene);
+            babylonShape.name = `shape${index + 1}`;
         });
 
         // Run the Babylon.js engine
         engine.runRenderLoop(function () {
             scene.render();
         });
+    }
+
+    function createBabylonShape(contour, scene) {
+        var shape = new BABYLON.PolygonMeshBuilder("shape", contour, scene);
+        return shape;
     }
 
     function findAllContours() {
@@ -143,25 +158,25 @@
         var hierarchy = new cv.Mat();
         cv.findContours(src, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
 
+        // Convert contours to JavaScript arrays
+        var contoursArray = [];
+        for (var i = 0; i < contours.size(); ++i) {
+            var contour = contours.get(i);
+            var contourArray = [];
+            for (var j = 0; j < contour.total(); ++j) {
+                var point = contour.getPoint(j);
+                contourArray.push({ x: point.x, y: point.y });
+            }
+            contoursArray.push(contourArray);
+        }
+
         // Release resources
         src.delete();
         dst.delete();
+        contours.delete();
         hierarchy.delete();
 
-        var result = [];
-        for (var i = 0; i < contours.size(); ++i) {
-            var contour = contours.get(i);
-            var points = [];
-            for (var j = 0; j < contour.size(); ++j) {
-                var point = contour.get(j);
-                points.push({ x: point.x, y: point.y });
-            }
-            result.push(points);
-        }
-
-        contours.delete(); // Release resources for contours
-
-        return result;
+        return contoursArray;
     }
 </script>
 
