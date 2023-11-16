@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>3D Floor Plan with Babylon.js</title>
+  <title>3D Extrusion with Babylon.js</title>
   <style>
-    body { margin: 0; overflow: hidden; }
+    body { margin: 0; }
     canvas { display: block; }
   </style>
 </head>
@@ -32,23 +32,15 @@
           [1, 1, 1, 1],
         ];
 
-        var shape = [];
-        for (var i = 0; i < floorPlan.length; i++) {
-          shape.push([]);
-          for (var j = 0; j < floorPlan[i].length; j++) {
-            shape[i].push(new BABYLON.Vector3(j, i, floorPlan[i][j] * 5));
-          }
-        }
+        var extrudeSettings = {
+          amount: 5,
+          depth: 1,
+          bevelEnabled: false,
+        };
 
-        var extrudePath = [
-          new BABYLON.Vector3(0, 0, 0),
-          new BABYLON.Vector3(1, 0, 0),
-          new BABYLON.Vector3(1, 1, 0),
-          new BABYLON.Vector3(0, 1, 0),
-          new BABYLON.Vector3(0, 0, 0),
-        ];
+        var shape = new BABYLON.PolygonMeshBuilder("shape", floorPlan, scene);
+        var extrudedStairs = shape.extrude("extrudedStairs", extrudeSettings);
 
-        var extrudedStairs = BABYLON.MeshBuilder.ExtrudeShape("extrudedStairs", { shape: shape, path: extrudePath, cap: BABYLON.Mesh.CAP_ALL }, scene);
         extrudedStairs.material = new BABYLON.StandardMaterial("extrudedStairsMaterial", scene);
         extrudedStairs.material.diffuseColor = new BABYLON.Color3(0, 1, 0);
 
