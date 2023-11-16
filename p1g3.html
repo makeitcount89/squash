@@ -3,9 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image to 2D Array</title>
+    <title>Image to 3D Rendering</title>
     <!-- Babylon.js library -->
     <script src="https://cdn.babylonjs.com/babylon.js"></script>
+    <style>
+        #canvas {
+            border: 1px solid #000;
+            display: block;
+            margin: 10px auto;
+        }
+
+        #boundingBoxInfo {
+            margin: 10px auto;
+            text-align: center;
+        }
+
+        #buttonsContainer {
+            text-align: center;
+        }
+
+        #titleDiv {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 20px;
+            color: white;
+        }
+    </style>
 </head>
 <body>
 
@@ -15,11 +40,17 @@
 <button onclick="render3D()">Render 3D</button>
 <div id="loadingMessage"></div>
 <h2>Image:</h2>
-<canvas id="canvas" style="border:1px solid #000;"></canvas>
-<div id="titleDiv" style="position: absolute; top: 10px; left: 50%; transform: translateX(-50%); font-size: 20px; color: white;">3D Rendering Title</div>
+<canvas id="canvas"></canvas>
+<div id="boundingBoxInfo"></div>
+<div id="buttonsContainer">
+    <button onclick="resetCanvas()">Reset Canvas</button>
+    <button onclick="clearBoundingBox()">Clear Bounding Box</button>
+</div>
+<div id="titleDiv"></div>
 
 <script>
     var selectedFile;
+    var boundingBox;
 
     function handleFileSelect(event) {
         selectedFile = event.target.files[0];
@@ -61,24 +92,17 @@
             return;
         }
 
-        var boundingBox = findLargestConnectedComponent();
-
-        var canvas = document.getElementById('canvas');
-        var context = canvas.getContext('2d');
-        context.clearRect(0, 0, canvas.width, canvas.height);
-
-        var image = new Image();
-        image.src = canvas.toDataURL();
-        context.drawImage(image, 0, 0);
+        boundingBox = findLargestConnectedComponent();
 
         if (!boundingBox) {
             alert('No shape found in the image.');
             return;
         }
 
-        context.strokeStyle = 'red';
-        context.lineWidth = 2;
-        context.strokeRect(boundingBox.minX, boundingBox.minY, boundingBox.width, boundingBox.height);
+        var boundingBoxInfo = document.getElementById('boundingBoxInfo');
+        boundingBoxInfo.textContent = 'Bounding Box Coordinates: ' +
+            'minX: ' + boundingBox.minX + ', minY: ' + boundingBox.minY +
+            ', maxX: ' + boundingBox.maxX + ', maxY: ' + boundingBox.maxY;
     }
 
     function render3D() {
@@ -86,8 +110,6 @@
             alert('Please load an image first.');
             return;
         }
-
-        var boundingBox = findLargestConnectedComponent();
 
         if (!boundingBox) {
             alert('No shape found in the image.');
@@ -105,7 +127,6 @@
         var titleDiv = document.getElementById('titleDiv');
         titleDiv.textContent = '3D Rendering Title'; // Change this to your desired title text
 
-        // Assuming Babylon.js scene and engine are globally accessible
         var engine = new BABYLON.Engine(canvas, true);
         var scene = new BABYLON.Scene(engine);
 
@@ -173,6 +194,23 @@
         }
 
         return largestBoundingBox;
+    }
+
+    function resetCanvas() {
+        var canvas = document.getElementById('canvas');
+        var context = canvas.getContext('2d');
+        context.clearRect(0, 0, canvas.width, canvas.height);
+
+        var boundingBoxInfo = document.getElementById('boundingBoxInfo');
+        boundingBoxInfo.textContent = '';
+
+        var titleDiv = document.getElementById('titleDiv');
+        titleDiv.textContent = '';
+    }
+
+    function clearBoundingBox() {
+        var boundingBoxInfo = document.getElementById('boundingBoxInfo');
+        boundingBoxInfo.textContent = '';
     }
 </script>
 
