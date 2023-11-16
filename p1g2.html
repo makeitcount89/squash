@@ -3,15 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>3D Box Example</title>
+  <title>3D Floor Plan with Babylon.js</title>
   <style>
     body { margin: 0; overflow: hidden; }
     canvas { display: block; }
-    h1 { position: absolute; top: 20px; left: 20px; color: white; }
   </style>
 </head>
 <body>
-  <h1>3D Box Example</h1>
   <script src="https://cdn.babylonjs.com/babylon.js"></script>
   <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
 
@@ -27,11 +25,32 @@
         var camera = new BABYLON.ArcRotateCamera('camera', Math.PI / 2, Math.PI / 4, 20, new BABYLON.Vector3(0, 0, 0), scene);
         camera.attachControl(canvas, true);
 
-        var box = BABYLON.MeshBuilder.CreateBox('box', { size: 2 }, scene);
-        box.scaling = new BABYLON.Vector3(12, 6, 2);
-        var material = new BABYLON.StandardMaterial('material', scene);
-        material.diffuseColor = new BABYLON.Color3(0, 1, 0);
-        box.material = material;
+        var floorPlan = [
+          [1, 1, 1, 1],
+          [1, 0, 0, 1],
+          [1, 0, 0, 1],
+          [1, 1, 1, 1],
+        ];
+
+        var shape = [];
+        for (var i = 0; i < floorPlan.length; i++) {
+          shape.push([]);
+          for (var j = 0; j < floorPlan[i].length; j++) {
+            shape[i].push(new BABYLON.Vector3(j, i, floorPlan[i][j] * 5));
+          }
+        }
+
+        var extrudePath = [
+          new BABYLON.Vector3(0, 0, 0),
+          new BABYLON.Vector3(1, 0, 0),
+          new BABYLON.Vector3(1, 1, 0),
+          new BABYLON.Vector3(0, 1, 0),
+          new BABYLON.Vector3(0, 0, 0),
+        ];
+
+        var extrudedStairs = BABYLON.MeshBuilder.ExtrudeShape("extrudedStairs", { shape: shape, path: extrudePath, cap: BABYLON.Mesh.CAP_ALL }, scene);
+        extrudedStairs.material = new BABYLON.StandardMaterial("extrudedStairsMaterial", scene);
+        extrudedStairs.material.diffuseColor = new BABYLON.Color3(0, 1, 0);
 
         return scene;
       };
