@@ -77,10 +77,13 @@
   }
 
   function render3D() {
-    if (!boundingBox) {
+    if (!boundingBoxes || boundingBoxes.length === 0) {
       alert('Please find bounding box coordinates first.');
       return;
     }
+
+    // For simplicity, use the first bounding box in this example
+    const boundingBox = boundingBoxes[0];
 
     // Create Babylon.js scene and camera
     const canvas = document.getElementById('renderCanvas');
@@ -104,6 +107,7 @@
     engine.runRenderLoop(function () {
       scene.render();
     });
+  }
 
   function findAllBoundingBoxes() {
     if (!cv) {
@@ -145,5 +149,3 @@
 
 </body>
 </html>
-
-
