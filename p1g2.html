@@ -5,25 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>3D Rectangle</title>
   <style>
-    body { margin: 0; }
+    body { margin: 0; overflow: hidden; }
     canvas { display: block; }
   </style>
 </head>
 <body>
-  <h1 style="text-align: center;">3D Render!</h1>
-  <script src="https://threejs.org/build/three.js"></script>
-  <script src="https://threejs.org/examples/js/controls/PointerLockControls.js"></script>
-
+  <h1 style="text-align: center;">3D Rectangle Render</h1>
   <script>
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     const renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
-
-    // Set up PointerLockControls
-    const controls = new THREE.PointerLockControls(camera, renderer.domElement);
-    scene.add(controls.getObject());
 
     const geometry = new THREE.BoxGeometry(12, 6, 2);
     const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
@@ -32,26 +25,35 @@
     scene.add(cube);
     camera.position.z = 15;
 
-    // Handle mouse lock
-    document.addEventListener('click', () => {
-      controls.lock();
+    let isMouseDown = false;
+    let startX = 0;
+    let startY = 0;
+
+    document.addEventListener('mousedown', (event) => {
+      isMouseDown = true;
+      startX = event.clientX;
+      startY = event.clientY;
     });
 
-    // Handle mouse movement
-    const onMouseMove = (event) => {
-      if (controls.isLocked) {
-        const movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
-        const movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
+    document.addEventListener('mouseup', () => {
+      isMouseDown = false;
+    });
 
-        const sensitivity = 0.002;
-        camera.rotation.y -= movementX * sensitivity;
-        camera.rotation.x -= movementY * sensitivity;
+    document.addEventListener('mousemove', (event) => {
+      if (isMouseDown) {
+        const sensitivity = 0.01;
+        const deltaX = (event.clientX - startX) * sensitivity;
+        const deltaY = (event.clientY - startY) * sensitivity;
+
+        camera.rotation.y -= deltaX;
+        camera.rotation.x -= deltaY;
 
         camera.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, camera.rotation.x));
-      }
-    };
 
-    document.addEventListener('mousemove', onMouseMove);
+        startX = event.clientX;
+        startY = event.clientY;
+      }
+    });
 
     const animate = () => {
       requestAnimationFrame(animate);
