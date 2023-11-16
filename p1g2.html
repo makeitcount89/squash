@@ -8,47 +8,13 @@
 </head>
 <body>
 
-<img id="boxImage" src="path/to/box.png" alt="Box Image" style="display: none;">
-
+<input type="file" id="fileInput" accept="image/*">
 <canvas id="renderCanvas"></canvas>
 
 <script>
-    // Load the image
-    var image = document.getElementById('boxImage');
-
-    // Create a canvas and draw the image on it
-    var canvas = document.createElement('canvas');
-    var context = canvas.getContext('2d');
-
-    // Ensure the image is loaded before getting its dimensions
-    image.onload = function () {
-        canvas.width = image.width;
-        canvas.height = image.height;
-        context.drawImage(image, 0, 0, image.width, image.height);
-
-        // Get pixel data
-        var imageData = context.getImageData(0, 0, image.width, image.height);
-        var pixelData = imageData.data;
-        var width = imageData.width;
-        var height = imageData.height;
-
-        // Convert to 2D array
-        var pixelArray = [];
-
-        for (var y = 0; y < height; y++) {
-            var row = [];
-            for (var x = 0; x < width; x++) {
-                var index = (y * width + x) * 4;
-                // Assuming the image is grayscale, use the red channel value
-                var pixelValue = pixelData[index];
-                row.push(pixelValue);
-            }
-            pixelArray.push(row);
-        }
-
-        // Use the pixel array to create a 3D scene in Babylon.js
-        createBabylonScene(pixelArray);
-    };
+    // File input
+    var fileInput = document.getElementById('fileInput');
+    fileInput.addEventListener('change', handleFileSelect);
 
     // Babylon.js scene creation function
     function createBabylonScene(pixelArray) {
@@ -82,6 +48,49 @@
         window.addEventListener('resize', function () {
             engine.resize();
         });
+    }
+
+    // Handle file selection
+    function handleFileSelect(event) {
+        var file = event.target.files[0];
+        if (file) {
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                var image = new Image();
+                image.onload = function () {
+                    // Create a canvas and draw the image on it
+                    var canvas = document.createElement('canvas');
+                    var context = canvas.getContext('2d');
+                    canvas.width = image.width;
+                    canvas.height = image.height;
+                    context.drawImage(image, 0, 0, image.width, image.height);
+
+                    // Get pixel data
+                    var imageData = context.getImageData(0, 0, image.width, image.height);
+                    var pixelData = imageData.data;
+                    var width = imageData.width;
+                    var height = imageData.height;
+
+                    // Convert to 2D array
+                    var pixelArray = [];
+                    for (var y = 0; y < height; y++) {
+                        var row = [];
+                        for (var x = 0; x < width; x++) {
+                            var index = (y * width + x) * 4;
+                            // Assuming the image is grayscale, use the red channel value
+                            var pixelValue = pixelData[index];
+                            row.push(pixelValue);
+                        }
+                        pixelArray.push(row);
+                    }
+
+                    // Use the pixel array to create a 3D scene in Babylon.js
+                    createBabylonScene(pixelArray);
+                };
+                image.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
     }
 </script>
 
