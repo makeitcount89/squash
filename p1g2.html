@@ -52,14 +52,27 @@
 
                 for (var y = 0; y < height; y++) {
                     var row = [];
+                    var lineValue = null; // Value for the entire line
                     for (var x = 0; x < width; x++) {
                         var index = (y * width + x) * 4;
                         // Use the red channel for intensity
                         var intensity = pixelData[index];
                         // Threshold example: if intensity > 128, set to 1; otherwise, set to 0
                         var value = intensity > 128 ? 1 : 0;
+
+                        // Assign line value if not set
+                        if (lineValue === null) {
+                            lineValue = value;
+                        }
+
                         row.push(value);
                     }
+
+                    // Assign the entire line the determined value
+                    for (var i = 0; i < row.length; i++) {
+                        row[i] = lineValue;
+                    }
+
                     pixelArray.push(row);
                 }
 
