@@ -3,53 +3,65 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>2D to 3D Conversion!</title>
-  <script src="https://threejs.org/build/three.js"></script>
+  <title>3D Rectangle</title>
+  <style>
+    body { margin: 0; }
+    canvas { display: block; }
+  </style>
 </head>
 <body>
-  <h1 style="text-align: center;">Floor Plan to 3D Conversion!!!!</h1>
-
+  <script src="https://threejs.org/build/three.js"></script>
   <script>
-    // Assuming you have a 2D floor plan with two rectangular rooms
-    const floorPlanData = [
-      { width: 5, height: 7, x: -5, y: 7 },
-      { width: 8, height: 10, x: 8, y: 10 }
-    ];
-
-    // Initialize scene, camera, and renderer
+    // Set up the scene
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     const renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    // Function to create a 3D room from 2D data
-    function createRoom(roomData) {
-      const geometry = new THREE.BoxGeometry(roomData.width, roomData.height, 1);
-      const material = new THREE.MeshBasicMaterial({ color: Math.random() * 0xffffff });
-      const roomMesh = new THREE.Mesh(geometry, material);
-      roomMesh.position.set(roomData.x, roomData.y, 0);
-      return roomMesh;
+    // Create a 2D array for representing heights
+    const rectangleDimensions = { length: 12, width: 6, height: 2 };
+    const heights = [
+      [0, 0, 0, 0],
+      [0, 0, 0, 0],
+      [0, 0, 0, 0],
+      [0, 0, 0, 0],
+    ];
+
+    // Create the 3D rectangle
+    const cubeSize = 1;
+    const cubeGeometry = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
+
+    for (let i = 0; i < heights.length; i++) {
+      for (let j = 0; j < heights[i].length; j++) {
+        const cubeHeight = heights[i][j] * rectangleDimensions.height;
+        const cubeMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+        const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+        cube.position.set(j * cubeSize, i * cubeSize, cubeHeight);
+        scene.add(cube);
+      }
     }
 
-    // Create 3D shapes from the 2D array
-    floorPlanData.forEach(roomData => {
-      const roomMesh = createRoom(roomData);
-      scene.add(roomMesh);
-    });
+    // Set up the camera position
+    camera.position.z = 5;
 
-    // Set camera position
-    camera.position.z = 15;
+    // Add ambient light to the scene
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    scene.add(ambientLight);
 
-    // Create animation loop
-    const animate = function () {
+    // Add directional light to the scene
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+    scene.add(directionalLight);
+
+    // Animation loop
+    const animate = () => {
       requestAnimationFrame(animate);
 
-      // Render the scene
+      // Add any animations or updates here
+
       renderer.render(scene, camera);
     };
 
-    // Run the animation loop
     animate();
   </script>
 </body>
