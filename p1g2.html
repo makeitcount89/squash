@@ -10,7 +10,7 @@
   </style>
 </head>
 <body>
-  <h1 style="text-align: center;">3D Rec Render</h1>
+  <h1 style="text-align: center;">3D Rectangle Render</h1>
   <script src="https://threejs.org/build/three.js"></script>
 
   <script>
@@ -46,55 +46,26 @@
 
     document.addEventListener('mousemove', (event) => {
       if (isMouseDown) {
-        const sensitivity = 0.01;
+        const sensitivity = 0.005;
         const deltaX = (event.clientX - startX) * sensitivity;
         const deltaY = (event.clientY - startY) * sensitivity;
 
-        camera.rotation.y -= deltaX;
-        camera.rotation.x -= deltaY;
+        cube.rotation.y += deltaX;
+        cube.rotation.x += deltaY;
 
-        camera.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, camera.rotation.x));
-
-        startX = event.clientX;
         startY = event.clientY;
+        startX = event.clientX;
       }
     });
 
-    // Add touch controls
-    let touchStartX = 0;
-    let touchStartY = 0;
-
-    document.addEventListener('touchstart', (event) => {
-      if (event.touches.length === 1) {
-        touchStartX = event.touches[0].clientX;
-        touchStartY = event.touches[0].clientY;
-      }
-    });
-
-    document.addEventListener('touchmove', (event) => {
-      if (event.touches.length === 1) {
-        const touchDeltaX = event.touches[0].clientX - touchStartX;
-        const touchDeltaY = event.touches[0].clientY - touchStartY;
-
-        const touchSensitivity = 0.01;
-        camera.rotation.y -= touchDeltaX * touchSensitivity;
-        camera.rotation.x -= touchDeltaY * touchSensitivity;
-
-        camera.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, camera.rotation.x));
-
-        touchStartX = event.touches[0].clientX;
-        touchStartY = event.touches[0].clientY;
-      }
-    });
-
-    let initialDistance = 0;
+    let initialZoomDistance = 0;
 
     document.addEventListener('touchstart', (event) => {
       if (event.touches.length === 2) {
         const touch1 = event.touches[0];
         const touch2 = event.touches[1];
 
-        initialDistance = Math.hypot(touch1.clientX - touch2.clientX, touch1.clientY - touch2.clientY);
+        initialZoomDistance = Math.hypot(touch1.clientX - touch2.clientX, touch1.clientY - touch2.clientY);
       }
     });
 
@@ -103,8 +74,8 @@
         const touch1 = event.touches[0];
         const touch2 = event.touches[1];
 
-        const currentDistance = Math.hypot(touch1.clientX - touch2.clientX, touch1.clientY - touch2.clientY);
-        const zoomFactor = currentDistance / initialDistance;
+        const currentZoomDistance = Math.hypot(touch1.clientX - touch2.clientX, touch1.clientY - touch2.clientY);
+        const zoomFactor = currentZoomDistance / initialZoomDistance;
 
         const zoomSensitivity = 0.1;
         camera.position.z /= zoomFactor;
@@ -112,7 +83,7 @@
         if (camera.position.z < 10) camera.position.z = 10;
         if (camera.position.z > 50) camera.position.z = 50;
 
-        initialDistance = currentDistance;
+        initialZoomDistance = currentZoomDistance;
       }
     });
 
