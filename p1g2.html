@@ -18,15 +18,16 @@
 
 <input type="file" id="imageInput" />
 <button onclick="loadImage()">Load Image</button>
-<button onclick="findBoundingBox()">Find Bounding Box</button>
+<button onclick="displayAllBoundingBoxes()">All Bounding Boxes</button>
 <button onclick="render3D()">Render 3D</button>
 
 <div id="imageContainer"></div>
 <div id="renderCanvas"></div>
+<div id="coordinatesDiv" style="position: absolute; top: 50px; left: 50%; transform: translateX(-50%); font-size: 16px; color: red;"></div>
 
 <script>
   let img;
-  let boundingBox;
+  let boundingBoxes = [];
 
   function onOpenCvReady() {
     // OpenCV is ready
@@ -53,45 +54,26 @@
     reader.readAsDataURL(file);
   }
 
-  function findBoundingBox() {
+  function displayAllBoundingBoxes() {
     if (!img) {
       alert('Please load an image first.');
       return;
     }
 
-    cv.imread(img, (mat) => {
-      cv.cvtColor(mat, mat, cv.COLOR_RGBA2GRAY);
-      cv.threshold(mat, mat, 128, 255, cv.THRESH_BINARY);
+    boundingBoxes = findAllBoundingBoxes();
 
-      const contours = new cv.MatVector();
-      const hierarchy = new cv.Mat();
-      cv.findContours(mat, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
-
-      const largestContour = getLargestContour(contours);
-      boundingBox = cv.boundingRect(largestContour);
-
-      console.log('Bounding Box Coordinates:', boundingBox);
-      alert(`Bounding Box Coordinates:\nX: ${boundingBox.x}, Y: ${boundingBox.y}, Width: ${boundingBox.width}, Height: ${boundingBox.height}`);
-
-      contours.delete();
-      hierarchy.delete();
-      mat.delete();
-    });
-  }
-
-  function getLargestContour(contours) {
-    let maxArea = -1;
-    let maxContour = null;
-
-    for (let i = 0; i < contours.size(); i++) {
-      const area = cv.contourArea(contours.get(i));
-      if (area > maxArea) {
-        maxArea = area;
-        maxContour = contours.get(i);
-      }
+    if (!boundingBoxes || boundingBoxes.length === 0) {
+      alert('No shapes found in the image.');
+      return;
     }
 
-    return maxContour;
+    const coordinatesDiv = document.getElementById('coordinatesDiv');
+    coordinatesDiv.innerHTML = 'Bounding Box Coordinates for all shapes: <br>';
+
+    boundingBoxes.forEach(function (box, index) {
+      coordinatesDiv.innerHTML +=
+        `Shape ${index + 1}: minX: ${box.x}, minY: ${box.y}, maxX: ${box.x + box.width}, maxY: ${box.y + box.height} <br>`;
+    });
   }
 
   function render3D() {
@@ -122,8 +104,46 @@
     engine.runRenderLoop(function () {
       scene.render();
     });
+
+  function findAllBoundingBoxes() {
+    if (!cv) {
+      alert('OpenCV.js is not ready. Please wait.');
+      return null;
+    }
+
+    const canvas = document.getElementById('imageContainer');
+    const context = canvas.getContext('2d');
+    const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+    const src = cv.matFromImageData(imageData);
+
+    // Convert to grayscale
+    cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY);
+
+    // Apply thresholding
+    cv.threshold(src, src, 128, 255, cv.THRESH_BINARY);
+
+    // Find contours
+    const contours = new cv.MatVector();
+    const hierarchy = new cv.Mat();
+    cv.findContours(src, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
+
+    // Get bounding boxes for all contours
+    const boxes = [];
+    for (let i = 0; i < contours.size(); ++i) {
+      const boundingBox = cv.boundingRect(contours.get(i));
+      boxes.push(boundingBox);
+    }
+
+    // Release resources
+    src.delete();
+    contours.delete();
+    hierarchy.delete();
+
+    return boxes;
   }
 </script>
 
 </body>
 </html>
+
+
