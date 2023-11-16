@@ -12,7 +12,7 @@
 
 <input type="file" id="fileInput" accept=".png" onchange="handleFileSelect(event)">
 <button onclick="loadImage()">Load Image</button>
-<button onclick="displayAllBoundingBoxes()">All Bounding Boxes</button>
+<button onclick="displayAllShapes()">Display Shapes</button>
 <button onclick="render3D()">Render 3D</button>
 <div id="loadingMessage"></div>
 <h2>Image:</h2>
@@ -25,7 +25,7 @@
 <script>
     var selectedFile;
     var cv;
-    var boundingBoxes = [];
+    var shapeCoordinates = [];
 
     function onOpenCvReady() {
         cv = cv || cv;
@@ -66,25 +66,25 @@
         reader.readAsDataURL(selectedFile);
     }
 
-    function displayAllBoundingBoxes() {
+    function displayAllShapes() {
         if (!selectedFile) {
             alert('Please load an image first.');
             return;
         }
 
-        boundingBoxes = findAllBoundingBoxes();
+        shapeCoordinates = findAllShapes();
 
-        if (!boundingBoxes || boundingBoxes.length === 0) {
-            alert('No shapes found in the image.');
+        if (!shapeCoordinates || shapeCoordinates.length === 0) {
+            alert('No black shapes found in the image.');
             return;
         }
 
         var coordinatesDiv = document.getElementById('coordinatesDiv');
-        coordinatesDiv.innerHTML = 'Bounding Box Coordinates for all shapes: <br>';
+        coordinatesDiv.innerHTML = 'Coordinates for all black shapes: <br>';
 
-        boundingBoxes.forEach(function (box, index) {
+        shapeCoordinates.forEach(function (shape, index) {
             coordinatesDiv.innerHTML +=
-                `Shape ${index + 1}: minX: ${box.x}, minY: ${box.y}, maxX: ${box.x + box.width}, maxY: ${box.y + box.height} <br>`;
+                `Shape ${index + 1}: minX: ${shape.x}, minY: ${shape.y}, maxX: ${shape.x + shape.width}, maxY: ${shape.y + shape.height} <br>`;
         });
     }
 
@@ -109,17 +109,17 @@
         var camera = new BABYLON.ArcRotateCamera("Camera", 0, 0, 10, BABYLON.Vector3.Zero(), scene);
         camera.attachControl(canvas, true);
 
-        boundingBoxes.forEach(function (box, index) {
+        shapeCoordinates.forEach(function (shape, index) {
             var babylonBox = BABYLON.MeshBuilder.CreateBox(`box${index + 1}`, {
-                width: box.width,
-                height: box.height,
+                width: shape.width,
+                height: shape.height,
                 depth: 1,
                 wireframe: true  // Add this option to render only the outlines
             }, scene);
 
-            // Move the box to the position based on bounding box coordinates
-            babylonBox.position.x = box.x + box.width / 2;
-            babylonBox.position.y = -box.y - box.height / 2; // Invert y-axis to match Babylon.js coordinate system
+            // Move the box to the position based on shape coordinates
+            babylonBox.position.x = shape.x + shape.width / 2;
+            babylonBox.position.y = -shape.y - shape.height / 2; // Invert y-axis to match Babylon.js coordinate system
         });
 
         // Run the Babylon.js engine
@@ -128,7 +128,7 @@
         });
     }
 
-    function findAllBoundingBoxes() {
+    function findAllShapes() {
         if (!cv) {
             alert('OpenCV.js is not ready. Please wait.');
             return null;
@@ -143,19 +143,19 @@
         // Convert to grayscale
         cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY);
 
-        // Apply thresholding
-        cv.threshold(src, src, 50, 255, cv.THRESH_BINARY);
+        // Thresholding to identify black shapes
+        cv.threshold(src, src, 1, 255, cv.THRESH_BINARY);
 
-        // Find contours with RETR_LIST mode
+        // Find contours
         var contours = new cv.MatVector();
         var hierarchy = new cv.Mat();
-        cv.findContours(src, contours, hierarchy, cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE);
+        cv.findContours(src, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
 
         // Get bounding boxes for all contours
-        var boxes = [];
+        var shapes = [];
         for (var i = 0; i < contours.size(); ++i) {
             var boundingBox = cv.boundingRect(contours.get(i));
-            boxes.push(boundingBox);
+            shapes.push(boundingBox);
         }
 
         // Release resources
@@ -164,7 +164,7 @@
         contours.delete();
         hierarchy.delete();
 
-        return boxes;
+        return shapes;
     }
 </script>
 
