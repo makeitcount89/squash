@@ -6,38 +6,44 @@
   <title>3D Rectangle</title>
   <style>
     body { margin: 0; }
+    canvas { display: block; }
   </style>
 </head>
 <body>
-  <div id="root"></div>
-  <script type="module">
-    import * as React from 'https://unpkg.com/react@17/umd/react.development.js';
-    import * as ReactDOM from 'https://unpkg.com/react-dom@17/umd/react-dom.development.js';
-    import { Canvas, useFrame } from 'https://cdn.skypack.dev/react-three-fiber';
+  <script src="https://cdn.babylonjs.com/babylon.js"></script>
+  <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
 
-    const Box = () => {
-      const boxRef = React.useRef();
+  <canvas id="renderCanvas"></canvas>
 
-      useFrame(() => {
-        boxRef.current.rotation.x += 0.01;
-        boxRef.current.rotation.y += 0.01;
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      var canvas = document.getElementById('renderCanvas');
+      var engine = new BABYLON.Engine(canvas, true);
+
+      var createScene = function () {
+        var scene = new BABYLON.Scene(engine);
+        var camera = new BABYLON.ArcRotateCamera('camera', Math.PI / 2, Math.PI / 4, 20, new BABYLON.Vector3(0, 0, 0), scene);
+        camera.attachControl(canvas, true);
+
+        var box = BABYLON.MeshBuilder.CreateBox('box', { size: 2 }, scene);
+        box.scaling = new BABYLON.Vector3(12, 6, 2);
+        var material = new BABYLON.StandardMaterial('material', scene);
+        material.diffuseColor = new BABYLON.Color3(0, 1, 0);
+        box.material = material;
+
+        return scene;
+      };
+
+      var scene = createScene();
+
+      engine.runRenderLoop(function () {
+        scene.render();
       });
 
-      return (
-        <mesh ref={boxRef}>
-          <boxBufferGeometry args={[12, 6, 2]} />
-          <meshBasicMaterial color={0x00ff00} />
-        </mesh>
-      );
-    };
-
-    ReactDOM.createRoot(document.getElementById('root')).render(
-      <Canvas>
-        <ambientLight />
-        <pointLight position={[10, 10, 10]} />
-        <Box />
-      </Canvas>
-    );
+      window.addEventListener('resize', function () {
+        engine.resize();
+      });
+    });
   </script>
 </body>
 </html>
