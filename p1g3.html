@@ -1,98 +1,124 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2D to 3D Floor Plan</title>
-    <script async src="https://docs.opencv.org/master/opencv.js" onload="onOpenCvReady();" type="text/javascript"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/babylonjs/5.6.3/babylon.max.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Processing and 3D Rendering</title>
+  <!-- Include OpenCV.js -->
+  <script async src="https://docs.opencv.org/master/opencv.js" onload="onOpenCvReady();" type="text/javascript"></script>
+  <!-- Include Babylon.js -->
+  <script src="https://cdn.babylonjs.com/babylon.js"></script>
+  <style>
+    #canvas2D {
+      border: 1px solid #000;
+      margin-top: 20px;
+    }
+  </style>
 </head>
 <body>
-    <input type="file" id="imageInput" accept="image/*" style="display: none;">
-    <button onclick="uploadImage()">Upload Image</button>
-    <button onclick="extractLines()">Extract Lines</button>
-    <button onclick="render3D()">Render 3D</button>
+  <input type="file" id="imageInput" accept="image/*">
+  <button onclick="loadImage()">Load Image</button>
+  <button onclick="detectLines()">Detect Lines</button>
+  <label for="lineThickness">Line Thickness:</label>
+  <input type="number" id="lineThickness" value="5">
+  <label for="lineHeight">Line Height (3D):</label>
+  <input type="number" id="lineHeight" value="10">
+  <canvas id="canvas2D" width="400" height="400"></canvas>
+  <canvas id="canvas3D" width="400" height="400"></canvas>
 
-    <label for="wallThickness">Wall Thickness:</label>
-    <input type="number" id="wallThickness" value="0.1">
+  <script>
+    let img, context2D, babylonCanvas, lineThicknessInput, lineHeightInput;
 
-    <label for="wallHeight">Wall Height:</label>
-    <input type="number" id="wallHeight" value="1">
+    function onOpenCvReady() {
+      // OpenCV is ready
+    }
 
-    <canvas id="renderCanvas" width="800" height="600"></canvas>
+    function loadImage() {
+      const input = document.getElementById('imageInput');
+      img = new Image();
+      img.onload = function () {
+        context2D = document.getElementById('canvas2D').getContext('2d');
+        context2D.clearRect(0, 0, context2D.canvas.width, context2D.canvas.height);
+        context2D.drawImage(img, 0, 0, context2D.canvas.width, context2D.canvas.height);
+      };
+      img.src = URL.createObjectURL(input.files[0]);
+    }
 
-    <script>
-        var canvas = document.getElementById("renderCanvas");
-        var engine = new BABYLON.Engine(canvas, true);
-        var scene = new BABYLON.Scene(engine);
-        var camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 2, Math.PI / 4, 4, BABYLON.Vector3.Zero(), scene);
-        camera.attachControl(canvas, true);
+    function detectLines() {
+      if (!img) {
+        alert('Please load an image first.');
+        return;
+      }
 
-        var lines;
+      const lineThickness = parseInt(document.getElementById('lineThickness').value);
+      const canvas2D = document.getElementById('canvas2D');
+      const src = cv.imread(canvas2D);
+      const dst = new cv.Mat();
 
-        function uploadImage() {
-            var input = document.getElementById("imageInput");
-            input.click();
+      cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY);
+      cv.Canny(src, dst, 50, 100, 3, false);
 
-            input.onchange = function () {
-                var file = input.files[0];
-                if (file) {
-                    var reader = new FileReader();
-                    reader.onload = function (e) {
-                        var img = new Image();
-                        img.src = e.target.result;
-                        img.onload = function () {
-                            extractLinesFromImage(img);
-                        };
-                    };
-                    reader.readAsDataURL(file);
-                }
-            };
-        }
+      // Display the result on the 2D canvas
+      cv.imshow(canvas2D, dst);
 
-        function extractLines() {
-            if (lines) {
-                lines.forEach(line => line.dispose());
-            }
+      // Convert the detected lines to Babylon.js format
+      const lines = [];
+      const linesP = new cv.Mat();
+      cv.HoughLinesP(dst, linesP, 1, Math.PI / 180, 50, 50, 10);
 
-            var wallThickness = parseFloat(document.getElementById("wallThickness").value);
-            var wallHeight = parseFloat(document.getElementById("wallHeight").value);
+      for (let i = 0; i < linesP.rows; i++) {
+        const line = linesP.data32S.subarray(i * 4, i * 4 + 4);
+        lines.push({
+          x1: line[0],
+          y1: line[1],
+          x2: line[2],
+          y2: line[3]
+        });
+      }
 
-            // Implement your line extraction logic here
-            extractLinesFromImage(document.getElementById("inputImage"));
-        }
+      // Render 3D lines using Babylon.js
+      render3DLines(lines);
 
-        function render3D() {
-            // Implement your 3D rendering logic here
-            // This is a placeholder for illustration purposes
-            // You may want to use the lines generated earlier to create walls
-            console.log("Rendering 3D");
-        }
+      src.delete();
+      dst.delete();
+      linesP.delete();
+    }
 
-        function onOpenCvReady() {
-            document.getElementById('inputImage').onchange = function (e) {
-                var reader = new FileReader();
-                reader.onload = function (event) {
-                    var img = cv.imread(new Uint8Array(event.target.result));
-                    var gray = new cv.Mat();
-                    cv.cvtColor(img, gray, cv.COLOR_RGBA2GRAY);
-                    var edges = new cv.Mat();
-                    cv.Canny(gray, edges, 50, 150, 3, false);
-                    cv.imshow('outputCanvas', edges);
-                    gray.delete();
-                    edges.delete();
-                };
-                reader.readAsArrayBuffer(this.files[0]);
-            };
-        }
+    function render3DLines(lines) {
+      if (!babylonCanvas) {
+        babylonCanvas = document.getElementById('canvas3D');
+        const engine = new BABYLON.Engine(babylonCanvas, true);
+        const scene = new BABYLON.Scene(engine);
+
+        // Set up camera and light
+        const camera = new BABYLON.ArcRotateCamera('camera', -Math.PI / 2, Math.PI / 4, 5, new BABYLON.Vector3(0, 0, 0));
+        camera.attachControl(babylonCanvas, true);
+        const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(1, 1, 0));
 
         engine.runRenderLoop(function () {
-            scene.render();
+          scene.render();
         });
+      }
 
-        window.addEventListener("resize", function () {
-            engine.resize();
-        });
-    </script>
+      // Clear existing meshes
+      const scene = babylonCanvas._babylonScene;
+      scene.meshes.forEach(mesh => mesh.dispose());
+
+      // Render lines in 3D
+      lines.forEach(line => {
+        const points = [
+          new BABYLON.Vector3(line.x1, line.y1, 0),
+          new BABYLON.Vector3(line.x2, line.y2, 0)
+        ];
+
+        const lineMesh = BABYLON.MeshBuilder.CreateLines('line', { points });
+        lineMesh.color = new BABYLON.Color3(1, 1, 1);
+        lineMesh.enableEdgesRendering();
+        lineMesh.edgesWidth = parseInt(document.getElementById('lineThickness').value);
+        lineMesh.edgesColor = new BABYLON.Color4(0, 0, 0, 1);
+        lineMesh.position.y = parseInt(document.getElementById('lineHeight').value);
+      });
+    }
+  </script>
 </body>
 </html>
