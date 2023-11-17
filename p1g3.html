@@ -44,7 +44,7 @@
     var selectedFile;
     var cv;
     var shapes = [];
-    var wallHeight;
+    var wallThickness;
 
     function onOpenCvReady() {
         cv = cv || window.cv;
@@ -113,10 +113,10 @@
             return;
         }
 
-        wallHeight = prompt('Enter the vertical height of the 3D walls:');
+        wallThickness = prompt('Enter the wall thickness:');
 
-        if (isNaN(wallHeight) || wallHeight <= 0) {
-            alert('Please enter a valid positive number for wall height.');
+        if (isNaN(wallThickness) || wallThickness <= 0) {
+            alert('Please enter a valid positive number for wall thickness.');
             return;
         }
 
@@ -144,8 +144,8 @@
         shapes.forEach(function (shape, index) {
             var babylonBox = BABYLON.MeshBuilder.CreateBox(`box${index + 1}`, {
                 width: bottomHalfWidth / shapes.length,
-                height: wallHeight,
-                depth: 1,
+                height: bottomHalfHeight,
+                depth: wallThickness,
                 faceColors: [new BABYLON.Color4(0, 0, 0, 0), new BABYLON.Color4(0, 0, 0, 0), new BABYLON.Color4(0, 0, 0, 0), new BABYLON.Color4(0, 0, 0, 0), new BABYLON.Color4(0, 0, 0, 0), new BABYLON.Color4(0, 0, 0, 0)],
                 wireframe: true
             }, scene);
