@@ -162,9 +162,9 @@
                         new BABYLON.Vector3(shape.width, 0, 0),
                         new BABYLON.Vector3(shape.width, shape.height, 0),
                         new BABYLON.Vector3(0, shape.height, 0),
-                    ],
+                    ].reverse(), // Reverse the order of vertices
                     path: [new BABYLON.Vector3(0, 0, 0), new BABYLON.Vector3(0, 0, -wallHeight)], // Adjust for wall height
-                    cap: BABYLON.Mesh.CAP_ALL, // Ensure caps on both sides
+                    cap: BABYLON.Mesh.NO_CAP,
                     sideOrientation: BABYLON.Mesh.DOUBLESIDE,
                 },
                 scene
@@ -172,7 +172,7 @@
 
             // Move the walls to the position based on shape coordinates
             extrudedShape.position.x = shape.x + shape.width / 2;
-            extrudedShape.position.y = -shape.y - shape.height / 2;
+            extrudedShape.position.y = -(shape.y + shape.height / 2); // Negate the y-coordinate
 
             // Rotate the walls to stand upright
             extrudedShape.rotation.x = Math.PI / 2;
