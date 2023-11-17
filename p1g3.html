@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>2D to 3D Floor Plan</title>
+    <script async src="https://docs.opencv.org/master/opencv.js" onload="onOpenCvReady();" type="text/javascript"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babylonjs/5.6.3/babylon.max.js"></script>
 </head>
 <body>
@@ -58,10 +59,7 @@
             var wallHeight = parseFloat(document.getElementById("wallHeight").value);
 
             // Implement your line extraction logic here
-            // This is a placeholder for illustration purposes
-            // You may want to use more advanced techniques or libraries
-            // For simplicity, we create a few random lines
-            lines = createRandomLines(scene, wallThickness, wallHeight);
+            extractLinesFromImage(document.getElementById("inputImage"));
         }
 
         function render3D() {
@@ -71,37 +69,21 @@
             console.log("Rendering 3D");
         }
 
-        function extractLinesFromImage(image) {
-            // Implement your image processing logic here
-            // This is a placeholder for illustration purposes
-            // You may want to use more advanced techniques or libraries
-            // For simplicity, we create a few random lines
-            lines = createRandomLines(scene, 0.1, 1);
-        }
-
-        function createRandomLines(scene, thickness, height) {
-            var randomLines = [];
-
-            // Creating a few random lines for illustration purposes
-            for (var i = 0; i < 5; i++) {
-                var x1 = Math.random() * 5;
-                var y1 = Math.random() * 5;
-                var x2 = Math.random() * 5;
-                var y2 = Math.random() * 5;
-
-                var points = [
-                    new BABYLON.Vector3(x1, 0, y1),
-                    new BABYLON.Vector3(x2, 0, y2)
-                ];
-
-                var line = BABYLON.MeshBuilder.CreateLines(null, { points: points, instance: null }, scene);
-                line.color = new BABYLON.Color3(Math.random(), Math.random(), Math.random());
-                line.isPickable = false;
-
-                randomLines.push(line);
-            }
-
-            return randomLines;
+        function onOpenCvReady() {
+            document.getElementById('inputImage').onchange = function (e) {
+                var reader = new FileReader();
+                reader.onload = function (event) {
+                    var img = cv.imread(new Uint8Array(event.target.result));
+                    var gray = new cv.Mat();
+                    cv.cvtColor(img, gray, cv.COLOR_RGBA2GRAY);
+                    var edges = new cv.Mat();
+                    cv.Canny(gray, edges, 50, 150, 3, false);
+                    cv.imshow('outputCanvas', edges);
+                    gray.delete();
+                    edges.delete();
+                };
+                reader.readAsArrayBuffer(this.files[0]);
+            };
         }
 
         engine.runRenderLoop(function () {
