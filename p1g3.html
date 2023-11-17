@@ -3,93 +3,114 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image to Binary Converter</title>
-    <style>
-        table {
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-
-        table, th, td {
-            border: 1px solid black;
-        }
-
-        th, td {
-            width: 20px;
-            height: 20px;
-            text-align: center;
-            vertical-align: middle;
-            font-size: 12px;
-        }
-    </style>
+    <title>2D to 3D Floor Plan</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babylonjs/5.6.3/babylon.max.js"></script>
 </head>
 <body>
+    <input type="file" id="imageInput" accept="image/*" style="display: none;">
+    <button onclick="uploadImage()">Upload Image</button>
+    <button onclick="extractLines()">Extract Lines</button>
+    <button onclick="render3D()">Render 3D</button>
 
-    <h1>Image to Binary Converter</h1>
+    <label for="wallThickness">Wall Thickness:</label>
+    <input type="number" id="wallThickness" value="0.1">
 
-    <input type="file" id="imageInput" accept="image/*" onchange="handleImageChange()">
+    <label for="wallHeight">Wall Height:</label>
+    <input type="number" id="wallHeight" value="1">
 
-    <div>
-        <img id="selectedImage" alt="Selected Image" style="max-width: 300px; margin-top: 10px;">
-    </div>
-
-    <div>
-        <h2>Binary Representation:</h2>
-        <table id="binaryTable"></table>
-    </div>
+    <canvas id="renderCanvas" width="800" height="600"></canvas>
 
     <script>
-        function handleImageChange() {
-            const input = document.getElementById('imageInput');
-            const image = document.getElementById('selectedImage');
-            const binaryTable = document.getElementById('binaryTable');
+        var canvas = document.getElementById("renderCanvas");
+        var engine = new BABYLON.Engine(canvas, true);
+        var scene = new BABYLON.Scene(engine);
+        var camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 2, Math.PI / 4, 4, BABYLON.Vector3.Zero(), scene);
+        camera.attachControl(canvas, true);
 
-            const file = input.files[0];
+        var lines;
 
-            if (file) {
-                const reader = new FileReader();
+        function uploadImage() {
+            var input = document.getElementById("imageInput");
+            input.click();
 
-                reader.onload = function (e) {
-                    const binaryData = arrayBufferToBinaryString(e.target.result);
-                    image.src = e.target.result;
-                    displayBinaryTable(binaryData, binaryTable);
-                };
-
-                reader.readAsArrayBuffer(file);
-            }
-        }
-
-        function arrayBufferToBinaryString(buffer) {
-            const bytes = new Uint8Array(buffer);
-            let binaryString = '';
-
-            for (let i = 0; i < bytes.length; i++) {
-                const binary = bytes[i].toString(2);
-                const paddedBinary = '00000000'.slice(binary.length) + binary;
-                binaryString += paddedBinary;
-            }
-
-            return binaryString;
-        }
-
-        function displayBinaryTable(binaryData, table) {
-            table.innerHTML = '';
-
-            const numRows = 8; // Assuming 8 bits per byte
-            const numCols = Math.ceil(binaryData.length / numRows);
-
-            for (let i = 0; i < numRows; i++) {
-                const row = table.insertRow();
-
-                for (let j = 0; j < numCols; j++) {
-                    const cell = row.insertCell();
-                    const index = i * numCols + j;
-                    const bit = binaryData.charAt(index) || '0';
-                    cell.textContent = bit;
+            input.onchange = function () {
+                var file = input.files[0];
+                if (file) {
+                    var reader = new FileReader();
+                    reader.onload = function (e) {
+                        var img = new Image();
+                        img.src = e.target.result;
+                        img.onload = function () {
+                            extractLinesFromImage(img);
+                        };
+                    };
+                    reader.readAsDataURL(file);
                 }
-            }
+            };
         }
-    </script>
 
+        function extractLines() {
+            if (lines) {
+                lines.forEach(line => line.dispose());
+            }
+
+            var wallThickness = parseFloat(document.getElementById("wallThickness").value);
+            var wallHeight = parseFloat(document.getElementById("wallHeight").value);
+
+            // Implement your line extraction logic here
+            // This is a placeholder for illustration purposes
+            // You may want to use more advanced techniques or libraries
+            // For simplicity, we create a few random lines
+            lines = createRandomLines(scene, wallThickness, wallHeight);
+        }
+
+        function render3D() {
+            // Implement your 3D rendering logic here
+            // This is a placeholder for illustration purposes
+            // You may want to use the lines generated earlier to create walls
+            console.log("Rendering 3D");
+        }
+
+        function extractLinesFromImage(image) {
+            // Implement your image processing logic here
+            // This is a placeholder for illustration purposes
+            // You may want to use more advanced techniques or libraries
+            // For simplicity, we create a few random lines
+            lines = createRandomLines(scene, 0.1, 1);
+        }
+
+        function createRandomLines(scene, thickness, height) {
+            var randomLines = [];
+
+            // Creating a few random lines for illustration purposes
+            for (var i = 0; i < 5; i++) {
+                var x1 = Math.random() * 5;
+                var y1 = Math.random() * 5;
+                var x2 = Math.random() * 5;
+                var y2 = Math.random() * 5;
+
+                var points = [
+                    new BABYLON.Vector3(x1, 0, y1),
+                    new BABYLON.Vector3(x2, 0, y2)
+                ];
+
+                var line = BABYLON.MeshBuilder.CreateLines(null, { points: points, instance: null }, scene);
+                line.color = new BABYLON.Color3(Math.random(), Math.random(), Math.random());
+                line.isPickable = false;
+
+                randomLines.push(line);
+            }
+
+            return randomLines;
+        }
+
+        engine.runRenderLoop(function () {
+            scene.render();
+        });
+
+        window.addEventListener("resize", function () {
+            engine.resize();
+        });
+    </script>
 </body>
 </html>
