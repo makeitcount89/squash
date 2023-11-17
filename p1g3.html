@@ -3,255 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- OpenCV.js -->
-    <script async src="https://docs.opencv.org/master/opencv.js" onload="onOpenCvReady();" type="text/javascript"></script>
-    <!-- Babylon.js library -->
-    <script src="https://cdn.babylonjs.com/babylon.js"></script>
-    <style>
-        /* Adjust button and input sizes */
-        button, input {
-            width: 5em; /* 5 times bigger */
-            height: 2em; /* Adjust as needed */
-        }
-
-        /* Adjust user input slots sizes */
-        input[type="number"], input[type="color"] {
-            width: 10em; /* 5 times bigger */
-            height: 2em; /* Adjust as needed */
-        }
-    </style>
+    <title>Image to Binary Converter</title>
 </head>
 <body>
 
-<!-- Containers for Babylon.js canvas, image, and coordinates -->
-<div id="containersWrapper" style="display: flex; height: 100vh; flex-direction: column;">
+    <h1>Image to Binary Converter</h1>
 
-    <!-- Image container (top quarter) -->
-    <div id="imageContainer" style="flex: 1; display: flex; flex-direction: column;">
-        <h2>Image:</h2>
-        <input type="file" id="fileInput" accept=".png" onchange="handleFileSelect(event)">
-        <button onclick="loadImage()">Load Image</button>
-        <button onclick="displayAllShapes()">All Shapes</button>
+    <input type="file" id="imageInput" accept="image/*" onchange="handleImageChange()">
+
+    <div>
+        <img id="selectedImage" alt="Selected Image" style="max-width: 300px; margin-top: 10px;">
     </div>
 
-    <!-- Coordinates container (next quarter) -->
-    <div id="coordinatesContainer" style="flex: 1; position: relative;">
-        <div id="coordinatesDiv" style="position: absolute; top: 50px; left: 50%; transform: translateX(-50%); font-size: 16px; color: red;"></div>
+    <div>
+        <h2>Binary Representation:</h2>
+        <textarea id="binaryTextArea" rows="10" cols="50" readonly></textarea>
     </div>
 
-    <!-- Container for Babylon.js canvas (bottom half) -->
-    <div id="babylonContainer" style="flex: 2; position: relative; height: 100%;">
-        <!-- Babylon.js canvas will be appended here dynamically -->
-    </div>
+    <script>
+        function handleImageChange() {
+            const input = document.getElementById('imageInput');
+            const image = document.getElementById('selectedImage');
+            const binaryTextArea = document.getElementById('binaryTextArea');
 
-</div>
+            const file = input.files[0];
 
-<!-- Additional HTML content (buttons, loading messages, etc.) -->
-<div id="loadingMessage"></div>
+            if (file) {
+                const reader = new FileReader();
 
-<!-- Display binary array -->
-<div id="binaryArray"></div>
+                reader.onload = function (e) {
+                    const binaryData = arrayBufferToBinaryString(e.target.result);
+                    image.src = e.target.result;
+                    binaryTextArea.value = binaryData;
+                };
 
-<!-- User options -->
-<label for="wallHeight">Wall Height:</label>
-<input type="number" id="wallHeight" value="5"> <!-- Default value: 5 units -->
-
-<label for="wallThickness">Wall Thickness:</label>
-<input type="number" id="wallThickness" value="0.2"> <!-- Default value: 0.2 units -->
-
-<label for="wallColor">Wall Color:</label>
-<input type="color" id="wallColor" value="#808080"> <!-- Default value: Gray -->
-
-<!-- Line thickness threshold input -->
-<label for="lineThicknessThreshold">Line Thickness Threshold:</label>
-<input type="number" id="lineThicknessThreshold" value="5"> <!-- Default value: 5 units -->
-
-<!-- Render 3D button -->
-<button onclick="render3D()">Render 3D</button>
-
-<script>
-    var selectedFile;
-    var cv;
-    var binaryArray = [];
-
-    function onOpenCvReady() {
-        cv = cv || window.cv;
-        document.getElementById('loadingMessage').textContent = 'OpenCV.js is ready.';
-    }
-
-    function handleFileSelect(event) {
-        selectedFile = event.target.files[0];
-    }
-
-    function loadImage() {
-        if (!selectedFile) {
-            alert('Please select an image file first.');
-            return;
-        }
-
-        var loadingMessage = document.getElementById('loadingMessage');
-        loadingMessage.textContent = 'Loading...';
-
-        var reader = new FileReader();
-
-        reader.onload = function () {
-            var image = new Image();
-            image.src = reader.result;
-
-            image.onload = function () {
-                var canvas = document.getElementById('canvas');
-                var context = canvas.getContext('2d');
-
-                canvas.width = image.width;
-                canvas.height = image.height;
-                context.drawImage(image, 0, 0, image.width, image.height);
-
-                // Convert the image to binary array
-                binaryArray = convertImageToArray();
-
-                // Display binary array on the screen
-                displayBinaryArrayOnScreen();
-
-                loadingMessage.textContent = '';
-            };
-        };
-
-        reader.readAsDataURL(selectedFile);
-    }
-
-    function displayBinaryArrayOnScreen() {
-        var binaryArrayElement = document.getElementById('binaryArray');
-        binaryArrayElement.textContent = 'Binary Array: ' + binaryArray.join(', ');
-    }
-
-    function displayAllShapes() {
-        if (!selectedFile) {
-            alert('Please load an image first.');
-            return;
-        }
-
-        var shapes = findAllShapes();
-
-        if (!shapes || shapes.length === 0) {
-            alert('No shapes found in the image.');
-            return;
-        }
-
-        var coordinatesDiv = document.getElementById('coordinatesDiv');
-        coordinatesDiv.innerHTML = 'Bounding Box Coordinates for all shapes: <br>';
-
-        shapes.forEach(function (shape, index) {
-            coordinatesDiv.innerHTML +=
-                `Shape ${index + 1}: minX: ${shape.x}, minY: ${shape.y}, maxX: ${shape.x + shape.width}, maxY: ${shape.y + shape.height} <br>`;
-        });
-    }
-
-    function render3D() {
-        if (!selectedFile) {
-            alert('Please load an image first.');
-            return;
-        }
-
-        alert('Rendering 3D...'); // Display a message
-
-        // Create Babylon.js scene and camera
-        var babylonContainer = document.getElementById('babylonContainer');
-        babylonContainer.innerHTML = ''; // Clear previous Babylon canvas
-        var canvas = document.createElement('canvas');
-        canvas.id = 'renderCanvas';
-        canvas.width = 800; // Adjust to your desired width
-        canvas.height = 600; // Adjust to your desired height
-        babylonContainer.appendChild(canvas);
-
-        var engine = new BABYLON.Engine(canvas, true);
-        var scene = new BABYLON.Scene(engine);
-        scene.clearColor = new BABYLON.Color4(1, 1, 1, 1); // Set background color to white
-        var camera = new BABYLON.ArcRotateCamera("Camera", 0, 0, 10, new BABYLON.Vector3(0, 0, 0), scene);
-        camera.attachControl(canvas, true);
-
-        // Adjust width and height based on the bottom half of the canvas
-        var bottomHalfWidth = canvas.width;
-        var bottomHalfHeight = canvas.height / 2;
-
-        // Create cubes based on binary array
-        for (var i = 0; i < binaryArray.length; i++) {
-            if (binaryArray[i] === 1) {
-                var cube = BABYLON.MeshBuilder.CreateBox("cube", { size: 1 }, scene);
-                var x = i % canvas.width;
-                var y = Math.floor(i / canvas.width);
-                cube.position.x = x - canvas.width / 2;
-                cube.position.y = -y + canvas.height / 2;
+                reader.readAsArrayBuffer(file);
             }
         }
 
-        // Run the Babylon.js engine
-        engine.runRenderLoop(function () {
-            scene.render();
-        });
-    }
+        function arrayBufferToBinaryString(buffer) {
+            const bytes = new Uint8Array(buffer);
+            let binaryString = '';
 
-    function convertImageToArray() {
-        var canvas = document.getElementById('canvas');
-        var context = canvas.getContext('2d');
-        var imageData = context.getImageData(0, 0, canvas.width, canvas.height).data;
-        var dataArray = [];
-
-        for (var i = 0; i < imageData.length; i += 4) {
-            // Convert RGBA to 1 (black) or 0 (white)
-            var value = (imageData[i] === 0 && imageData[i + 1] === 0 && imageData[i + 2] === 0) ? 1 : 0;
-            dataArray.push(value);
-        }
-
-        return dataArray;
-    }
-
-    function findAllShapes() {
-        if (!cv) {
-            alert('OpenCV.js is not ready. Please wait.');
-            return null;
-        }
-
-        // Retrieve line thickness threshold from user input
-        var lineThicknessThreshold = parseFloat(document.getElementById('lineThicknessThreshold').value);
-
-        var canvas = document.getElementById('canvas');
-        var context = canvas.getContext('2d');
-        var imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-        var src = cv.matFromImageData(imageData);
-        var dst = new cv.Mat();
-
-        // Convert to grayscale
-        cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY);
-
-        // Apply GaussianBlur to reduce noise and improve contour detection
-        cv.GaussianBlur(src, src, { width: 5, height: 5 }, 0, 0, cv.BORDER_DEFAULT);
-
-        // Use Canny edge detector to find contours
-        cv.Canny(src, src, 50, 150, 3);
-
-        // Find contours
-        var contours = new cv.MatVector();
-        var hierarchy = new cv.Mat();
-        cv.findContours(src, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
-
-        // Get bounding boxes for contours with thickness greater than the threshold
-        var shapes = [];
-        for (var i = 0; i < contours.size(); ++i) {
-            var boundingBox = cv.boundingRect(contours.get(i));
-            if (boundingBox.width >= lineThicknessThreshold || boundingBox.height >= lineThicknessThreshold) {
-                shapes.push(boundingBox);
+            for (let i = 0; i < bytes.length; i++) {
+                const binary = bytes[i].toString(2);
+                const paddedBinary = '00000000'.slice(binary.length) + binary;
+                binaryString += paddedBinary + ' ';
             }
+
+            return binaryString.trim();
         }
-
-        // Release resources
-        src.delete();
-        dst.delete();
-        contours.delete();
-        hierarchy.delete();
-
-        return shapes;
-    }
-</script>
+    </script>
 
 </body>
 </html>
