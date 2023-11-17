@@ -144,7 +144,8 @@
         cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY);
 
         // Thresholding to identify black shapes
-        cv.threshold(src, src, 1, 255, cv.THRESH_BINARY);
+        cv.threshold(src, src, 0, 255, cv.THRESH_BINARY + cv.THRESH_OTSU);
+        
 
         // Find contours
         var contours = new cv.MatVector();
