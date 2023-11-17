@@ -4,6 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Image to Binary Converter</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        table, th, td {
+            border: 1px solid black;
+        }
+
+        th, td {
+            width: 20px;
+            height: 20px;
+            text-align: center;
+            vertical-align: middle;
+            font-size: 12px;
+        }
+    </style>
 </head>
 <body>
 
@@ -17,14 +35,14 @@
 
     <div>
         <h2>Binary Representation:</h2>
-        <textarea id="binaryTextArea" rows="10" cols="50" readonly></textarea>
+        <table id="binaryTable"></table>
     </div>
 
     <script>
         function handleImageChange() {
             const input = document.getElementById('imageInput');
             const image = document.getElementById('selectedImage');
-            const binaryTextArea = document.getElementById('binaryTextArea');
+            const binaryTable = document.getElementById('binaryTable');
 
             const file = input.files[0];
 
@@ -34,7 +52,7 @@
                 reader.onload = function (e) {
                     const binaryData = arrayBufferToBinaryString(e.target.result);
                     image.src = e.target.result;
-                    binaryTextArea.value = binaryData;
+                    displayBinaryTable(binaryData, binaryTable);
                 };
 
                 reader.readAsArrayBuffer(file);
@@ -48,10 +66,28 @@
             for (let i = 0; i < bytes.length; i++) {
                 const binary = bytes[i].toString(2);
                 const paddedBinary = '00000000'.slice(binary.length) + binary;
-                binaryString += paddedBinary + ' ';
+                binaryString += paddedBinary;
             }
 
-            return binaryString.trim();
+            return binaryString;
+        }
+
+        function displayBinaryTable(binaryData, table) {
+            table.innerHTML = '';
+
+            const numRows = 8; // Assuming 8 bits per byte
+            const numCols = Math.ceil(binaryData.length / numRows);
+
+            for (let i = 0; i < numRows; i++) {
+                const row = table.insertRow();
+
+                for (let j = 0; j < numCols; j++) {
+                    const cell = row.insertCell();
+                    const index = i * numCols + j;
+                    const bit = binaryData.charAt(index) || '0';
+                    cell.textContent = bit;
+                }
+            }
         }
     </script>
 
