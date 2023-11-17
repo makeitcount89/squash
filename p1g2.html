@@ -140,9 +140,9 @@
         var bottomHalfHeight = canvas.height / 2;
 
         shapes.forEach(function (shape, index) {
-            // Extrude the shape based on depth map
-            var extrudedShape = BABYLON.MeshBuilder.ExtrudeShapeCustom(
-                `wall${index + 1}`,
+            // Create the extruded shape for each contour
+            var extrudedShape = BABYLON.MeshBuilder.ExtrudeShape(
+                `extrudedShape${index + 1}`,
                 {
                     shape: [
                         new BABYLON.Vector3(shape.x, shape.y, 0),
@@ -167,7 +167,7 @@
 
             // Apply material to fill the walls
             var wallMaterial = new BABYLON.StandardMaterial(`wallMaterial${index + 1}`, scene);
-            wallMaterial.diffuseColor = new BABYLON.Color3(0.8, 0.8, 0.8); // Light gray color
+            wallMaterial.diffuseColor = new BABYLON.Color3(1, 1, 1); // White color
             extrudedShape.material = wallMaterial;
         });
 
