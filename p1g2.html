@@ -40,6 +40,10 @@
 <!-- Render 3D button -->
 <button onclick="render3D()">Render 3D</button>
 
+<!-- Wall height input -->
+<label for="wallHeight">Wall Height:</label>
+<input type="number" id="wallHeight" value="200">
+
 <script>
     var selectedFile;
     var cv;
@@ -114,6 +118,8 @@
 
         alert('Rendering 3D...'); // Display a message
 
+        var wallHeight = parseInt(document.getElementById('wallHeight').value, 10) || 200;
+
         // Create Babylon.js scene and camera
         var babylonContainer = document.getElementById('babylonContainer');
         babylonContainer.innerHTML = ''; // Clear previous Babylon canvas
@@ -139,24 +145,30 @@
                 `wall${index + 1}`,
                 {
                     shape: [
-                        new BABYLON.Vector3(0, 0, 0),
-                        new BABYLON.Vector3(shape.width, 0, 0),
-                        new BABYLON.Vector3(shape.width, shape.height, 0),
-                        new BABYLON.Vector3(0, shape.height, 0),
+                        new BABYLON.Vector3(shape.x, shape.y, 0),
+                        new BABYLON.Vector3(shape.x + shape.width, shape.y, 0),
+                        new BABYLON.Vector3(shape.x + shape.width, shape.y + shape.height, 0),
+                        new BABYLON.Vector3(shape.x, shape.y + shape.height, 0),
+                        new BABYLON.Vector3(shape.x, shape.y, 0), // Closing the path
                     ],
-                    path: [new BABYLON.Vector3(0, 0, 0), new BABYLON.Vector3(0, 0, -1)],
-                    cap: BABYLON.Mesh.NO_CAP,
+                    depth: wallHeight, // Set the extrusion depth
                     sideOrientation: BABYLON.Mesh.DOUBLESIDE,
+                    updatable: true,
                 },
                 scene
             );
 
-            // Move the walls to the position based on shape coordinates
+            // Position the walls based on shape coordinates
             extrudedShape.position.x = shape.x + shape.width / 2;
             extrudedShape.position.y = -shape.y - shape.height / 2;
 
             // Rotate the walls to stand upright
             extrudedShape.rotation.x = Math.PI / 2;
+
+            // Apply material to fill the walls
+            var wallMaterial = new BABYLON.StandardMaterial(`wallMaterial${index + 1}`, scene);
+            wallMaterial.diffuseColor = new BABYLON.Color3(0.8, 0.8, 0.8); // Light gray color
+            extrudedShape.material = wallMaterial;
         });
 
         // Run the Babylon.js engine
