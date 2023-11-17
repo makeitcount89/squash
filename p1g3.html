@@ -9,7 +9,7 @@
   <!-- Include Babylon.js -->
   <script src="https://cdn.babylonjs.com/babylon.js"></script>
   <style>
-    #canvas2D {
+    #canvas2D, #canvas3D {
       border: 1px solid #000;
       margin-top: 20px;
     }
@@ -23,11 +23,12 @@
   <input type="number" id="lineThickness" value="5">
   <label for="lineHeight">Line Height (3D):</label>
   <input type="number" id="lineHeight" value="10">
-  <canvas id="canvas2D" width="400" height="400"></canvas>
-  <canvas id="canvas3D" width="400" height="400"></canvas>
+  <button onclick="render3D()">Render 3D</button>
+  <canvas id="canvas2D" width="600" height="600"></canvas>
+  <canvas id="canvas3D" width="1200" height="1200"></canvas>
 
   <script>
-    let img, context2D, babylonCanvas, lineThicknessInput, lineHeightInput;
+    let img, context2D, babylonCanvas, lineThicknessInput, lineHeightInput, lines;
 
     function onOpenCvReady() {
       // OpenCV is ready
@@ -62,7 +63,7 @@
       cv.imshow(canvas2D, dst);
 
       // Convert the detected lines to Babylon.js format
-      const lines = [];
+      lines = [];
       const linesP = new cv.Mat();
       cv.HoughLinesP(dst, linesP, 1, Math.PI / 180, 50, 50, 10);
 
@@ -76,15 +77,17 @@
         });
       }
 
-      // Render 3D lines using Babylon.js
-      render3DLines(lines);
-
       src.delete();
       dst.delete();
       linesP.delete();
     }
 
-    function render3DLines(lines) {
+    function render3D() {
+      if (!lines) {
+        alert('Please detect lines first.');
+        return;
+      }
+
       if (!babylonCanvas) {
         babylonCanvas = document.getElementById('canvas3D');
         const engine = new BABYLON.Engine(babylonCanvas, true);
