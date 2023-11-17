@@ -10,27 +10,32 @@
 </head>
 <body>
 
-<!-- Containers for Babylon.js canvas and image -->
-<div id="containersWrapper" style="display: flex; height: 100vh;">
+<!-- Containers for Babylon.js canvas, image, and coordinates -->
+<div id="containersWrapper" style="display: flex; height: 100vh; flex-direction: column;">
 
-    <!-- Container for Babylon.js canvas -->
-    <div id="babylonContainer" style="flex: 1; position: relative;">
-        <!-- Your Babylon.js canvas will be appended here dynamically -->
-    </div>
-
-    <!-- Image container -->
-    <div id="imageContainer" style="flex: 1;">
+    <!-- Image container (top quarter) -->
+    <div id="imageContainer" style="flex: 1; display: flex; flex-direction: column;">
         <h2>Image:</h2>
-        <canvas id="canvas" style="border: 1px solid #000; width: 100%; height: 100%;"></canvas>
-        <div id="coordinatesDiv" style="position: absolute; top: 50px; left: 50%; transform: translateX(-50%); font-size: 16px; color: red;"></div>
+        <canvas id="canvas" style="border: 1px solid #000; flex: 1;"></canvas>
         <input type="file" id="fileInput" accept=".png" onchange="handleFileSelect(event)">
         <button onclick="loadImage()">Load Image</button>
         <button onclick="displayAllShapes()">All Shapes</button>
-        <button onclick="render3D()">Render 3D</button>
-        <div id="loadingMessage"></div>
+    </div>
+
+    <!-- Coordinates container (next quarter) -->
+    <div id="coordinatesContainer" style="flex: 1; position: relative;">
+        <div id="coordinatesDiv" style="position: absolute; top: 50px; left: 50%; transform: translateX(-50%); font-size: 16px; color: red;"></div>
+    </div>
+
+    <!-- Container for Babylon.js canvas (bottom half) -->
+    <div id="babylonContainer" style="flex: 2; position: relative;">
+        <!-- Your Babylon.js canvas will be appended here dynamically -->
     </div>
 
 </div>
+
+<!-- Additional HTML content (buttons, loading messages, etc.) -->
+<div id="loadingMessage"></div>
 
 <script>
     var selectedFile;
