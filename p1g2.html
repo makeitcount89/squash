@@ -10,26 +10,35 @@
 </head>
 <body>
 
-<input type="file" id="fileInput" accept=".png" onchange="handleFileSelect(event)">
-<button onclick="loadImage()">Load Image</button>
-<button onclick="displayAllShapes()">All Shapes</button>
-<button onclick="render3D()">Render 3D</button>
-<div id="loadingMessage"></div>
-<h2>Image:</h2>
-<canvas id="canvas" style="border:1px solid #000;"></canvas>
-<div id="coordinatesDiv" style="position: absolute; top: 50px; left: 50%; transform: translateX(-50%); font-size: 16px; color: red;"></div>
+<!-- Containers for Babylon.js canvas and image -->
+<div id="containersWrapper" style="display: flex; height: 100vh;">
 
-<!-- Container for Babylon.js canvas -->
-<div id="babylonContainer" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;"></div>
-    
-    
+    <!-- Container for Babylon.js canvas -->
+    <div id="babylonContainer" style="flex: 1; position: relative;">
+        <!-- Your Babylon.js canvas will be appended here dynamically -->
+    </div>
+
+    <!-- Image container -->
+    <div id="imageContainer" style="flex: 1;">
+        <h2>Image:</h2>
+        <canvas id="canvas" style="border: 1px solid #000; width: 100%; height: 100%;"></canvas>
+        <div id="coordinatesDiv" style="position: absolute; top: 50px; left: 50%; transform: translateX(-50%); font-size: 16px; color: red;"></div>
+        <input type="file" id="fileInput" accept=".png" onchange="handleFileSelect(event)">
+        <button onclick="loadImage()">Load Image</button>
+        <button onclick="displayAllShapes()">All Shapes</button>
+        <button onclick="render3D()">Render 3D</button>
+        <div id="loadingMessage"></div>
+    </div>
+
+</div>
+
 <script>
     var selectedFile;
     var cv;
     var shapes = [];
 
     function onOpenCvReady() {
-        cv = cv || cv;
+        cv = cv || window.cv;
         document.getElementById('loadingMessage').textContent = 'OpenCV.js is ready.';
     }
 
