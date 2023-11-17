@@ -44,7 +44,7 @@
     var selectedFile;
     var cv;
     var shapes = [];
-    var wallThickness;
+    var wallHeight;
 
     function onOpenCvReady() {
         cv = cv || window.cv;
@@ -113,10 +113,10 @@
             return;
         }
 
-        wallThickness = prompt('Enter the wall thickness:');
+        wallHeight = prompt('Enter the wall height:');
 
-        if (isNaN(wallThickness) || wallThickness <= 0) {
-            alert('Please enter a valid positive number for wall thickness.');
+        if (isNaN(wallHeight) || wallHeight <= 0) {
+            alert('Please enter a valid positive number for wall height.');
             return;
         }
 
@@ -142,18 +142,16 @@
         var bottomHalfHeight = canvas.height / 2;
 
         shapes.forEach(function (shape, index) {
-            var babylonBox = BABYLON.MeshBuilder.CreateBox(`box${index + 1}`, {
-                width: bottomHalfWidth / shapes.length,
-                height: bottomHalfHeight,
-                depth: wallThickness,
-                faceColors: [new BABYLON.Color4(1, 1, 1, 0), new BABYLON.Color4(1, 1, 1, 0), new BABYLON.Color4(1, 1, 1, 0), new BABYLON.Color4(1, 1, 1, 0), new BABYLON.Color4(0, 0, 0, 0), new BABYLON.Color4(0, 0, 0, 0)],
-                wireframe: true
-            }, scene);
+            // Extrude the shape to create walls
+            var extrudedLines = BABYLON.MeshBuilder.ExtrudeShape(
+                `wall${index + 1}`,
+                { shape: [new BABYLON.Vector3(0, 0, 0), new BABYLON.Vector3(shape.width, 0, 0)], depth: wallHeight, sideOrientation: BABYLON.Mesh.DOUBLESIDE },
+                scene
+            );
 
-            // Move the box to the position based on shape coordinates
-            babylonBox.position.x = shape.x + shape.width / 2;
-            babylonBox.position.y = -shape.y - shape.height / 2;
-            babylonBox.position.z = -wallThickness / 2; // Adjust to position the box at the front
+            // Move the walls to the position based on shape coordinates
+            extrudedLines.position.x = shape.x + shape.width / 2;
+            extrudedLines.position.y = -shape.y - shape.height / 2;
         });
 
         // Run the Babylon.js engine
