@@ -10,25 +10,43 @@
 </head>
 <body>
 
-<input type="file" id="fileInput" accept=".png" onchange="handleFileSelect(event)">
-<button onclick="loadImage()">Load Image</button>
-<button onclick="displayAllBoundingBoxes()">All Bounding Boxes</button>
-<button onclick="render3D()">Render 3D</button>
-<div id="loadingMessage"></div>
-<h2>Image:</h2>
-<canvas id="canvas" style="border:1px solid #000;"></canvas>
-<div id="coordinatesDiv" style="position: absolute; top: 50px; left: 50%; transform: translateX(-50%); font-size: 16px; color: red;"></div>
+<!-- Containers for Babylon.js canvas, image, and coordinates -->
+<div id="containersWrapper" style="display: flex; height: 100vh; flex-direction: column;">
 
-<!-- Container for Babylon.js canvas -->
-<div id="babylonContainer" style="position: absolute; top: 400px; left: 50%; transform: translateX(-50%);"></div>
+    <!-- Image container (top quarter) -->
+    <div id="imageContainer" style="flex: 1; display: flex; flex-direction: column;">
+        <h2>Image:</h2>
+        <canvas id="canvas" style="border: 1px solid #000; flex: 1;"></canvas>
+        <input type="file" id="fileInput" accept=".png" onchange="handleFileSelect(event)">
+        <button onclick="loadImage()">Load Image</button>
+        <button onclick="displayAllShapes()">All Shapes</button>
+    </div>
+
+    <!-- Coordinates container (next quarter) -->
+    <div id="coordinatesContainer" style="flex: 1; position: relative;">
+        <div id="coordinatesDiv" style="position: absolute; top: 50px; left: 50%; transform: translateX(-50%); font-size: 16px; color: red;"></div>
+    </div>
+
+    <!-- Container for Babylon.js canvas (bottom half) -->
+    <div id="babylonContainer" style="flex: 2; position: relative; height: 100%;">
+        <!-- Babylon.js canvas will be appended here dynamically -->
+    </div>
+
+</div>
+
+<!-- Additional HTML content (buttons, loading messages, etc.) -->
+<div id="loadingMessage"></div>
+
+<!-- Render 3D button -->
+<button onclick="render3D()">Render 3D</button>
 
 <script>
     var selectedFile;
     var cv;
-    var boundingBoxes = [];
+    var shapes = [];
 
     function onOpenCvReady() {
-        cv = cv || cv;
+        cv = cv || window.cv;
         document.getElementById('loadingMessage').textContent = 'OpenCV.js is ready.';
     }
 
@@ -66,15 +84,15 @@
         reader.readAsDataURL(selectedFile);
     }
 
-    function displayAllBoundingBoxes() {
+    function displayAllShapes() {
         if (!selectedFile) {
             alert('Please load an image first.');
             return;
         }
 
-        boundingBoxes = findAllBoundingBoxes();
+        shapes = findAllShapes();
 
-        if (!boundingBoxes || boundingBoxes.length === 0) {
+        if (!shapes || shapes.length === 0) {
             alert('No shapes found in the image.');
             return;
         }
@@ -82,53 +100,60 @@
         var coordinatesDiv = document.getElementById('coordinatesDiv');
         coordinatesDiv.innerHTML = 'Bounding Box Coordinates for all shapes: <br>';
 
-        boundingBoxes.forEach(function (box, index) {
+        shapes.forEach(function (shape, index) {
             coordinatesDiv.innerHTML +=
-                `Shape ${index + 1}: minX: ${box.x}, minY: ${box.y}, maxX: ${box.x + box.width}, maxY: ${box.y + box.height} <br>`;
+                `Shape ${index + 1}: minX: ${shape.x}, minY: ${shape.y}, maxX: ${shape.x + shape.width}, maxY: ${shape.y + shape.height} <br>`;
         });
     }
 
     function render3D() {
-    if (!selectedFile) {
-        alert('Please load an image first.');
-        return;
+        if (!selectedFile) {
+            alert('Please load an image first.');
+            return;
+        }
+
+        alert('Rendering 3D...'); // Display a message
+
+        // Create Babylon.js scene and camera
+        var babylonContainer = document.getElementById('babylonContainer');
+        babylonContainer.innerHTML = ''; // Clear previous Babylon canvas
+        var canvas = document.createElement('canvas');
+        canvas.id = 'renderCanvas';
+        canvas.width = 800; // Adjust to your desired width
+        canvas.height = 600; // Adjust to your desired height
+        babylonContainer.appendChild(canvas);
+
+        var engine = new BABYLON.Engine(canvas, true);
+        var scene = new BABYLON.Scene(engine);
+        scene.clearColor = new BABYLON.Color4(1, 1, 1, 1); // Set background color to white
+        var camera = new BABYLON.ArcRotateCamera("Camera", 0, 0, 10, new BABYLON.Vector3(0, 0, 0), scene);
+        camera.attachControl(canvas, true);
+
+        // Adjust width and height based on the bottom half of the canvas
+        var bottomHalfWidth = canvas.width;
+        var bottomHalfHeight = canvas.height / 2;
+
+        shapes.forEach(function (shape, index) {
+            var babylonBox = BABYLON.MeshBuilder.CreateBox(`box${index + 1}`, {
+                width: bottomHalfWidth / shapes.length,
+                height: bottomHalfHeight,
+                depth: 1,
+                faceColors: [new BABYLON.Color4(0, 0, 0, 0), new BABYLON.Color4(0, 0, 0, 0), new BABYLON.Color4(0, 0, 0, 0), new BABYLON.Color4(0, 0, 0, 0), new BABYLON.Color4(0, 0, 0, 0), new BABYLON.Color4(0, 0, 0, 0)],
+                wireframe: true
+            }, scene);
+
+            // Move the box to the position based on shape coordinates
+            babylonBox.position.x = shape.x + shape.width / 2;
+            babylonBox.position.y = -shape.y - shape.height / 2;
+        });
+
+        // Run the Babylon.js engine
+        engine.runRenderLoop(function () {
+            scene.render();
+        });
     }
 
-    alert('Rendering 3D...'); // Display a message
-
-    // Create Babylon.js scene and camera
-    var babylonContainer = document.getElementById('babylonContainer');
-    babylonContainer.innerHTML = ''; // Clear previous Babylon canvas
-    var canvas = document.createElement('canvas');
-    canvas.id = 'renderCanvas';
-    babylonContainer.appendChild(canvas);
-
-    var engine = new BABYLON.Engine(canvas, true);
-    var scene = new BABYLON.Scene(engine);
-    scene.clearColor = new BABYLON.Color4(1, 1, 1, 1); // Set background color to white
-    var camera = new BABYLON.ArcRotateCamera("Camera", 0, 0, 10, BABYLON.Vector3.Zero(), scene);
-    camera.attachControl(canvas, true);
-
-    boundingBoxes.forEach(function (box, index) {
-        var babylonBox = BABYLON.MeshBuilder.CreateBox(`box${index + 1}`, {
-            width: box.width,
-            height: box.height,
-            depth: 1,
-            wireframe: true  // Add this option to render only the outlines
-        }, scene);
-
-        // Move the box to the position based on bounding box coordinates
-        babylonBox.position.x = box.x + box.width / 2;
-        babylonBox.position.y = -box.y - box.height / 2; // Invert y-axis to match Babylon.js coordinate system
-    });
-
-    // Run the Babylon.js engine
-    engine.runRenderLoop(function () {
-        scene.render();
-    });
-    }
-    
-    function findAllBoundingBoxes() {
+    function findAllShapes() {
         if (!cv) {
             alert('OpenCV.js is not ready. Please wait.');
             return null;
@@ -143,8 +168,11 @@
         // Convert to grayscale
         cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY);
 
-        // Apply thresholding
-        cv.threshold(src, src, 128, 255, cv.THRESH_BINARY);
+        // Apply GaussianBlur to reduce noise and improve contour detection
+        cv.GaussianBlur(src, src, { width: 5, height: 5 }, 0, 0, cv.BORDER_DEFAULT);
+
+        // Use Canny edge detector to find contours
+        cv.Canny(src, src, 50, 150, 3);
 
         // Find contours
         var contours = new cv.MatVector();
@@ -152,10 +180,10 @@
         cv.findContours(src, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
 
         // Get bounding boxes for all contours
-        var boxes = [];
+        var shapes = [];
         for (var i = 0; i < contours.size(); ++i) {
             var boundingBox = cv.boundingRect(contours.get(i));
-            boxes.push(boundingBox);
+            shapes.push(boundingBox);
         }
 
         // Release resources
@@ -164,7 +192,7 @@
         contours.delete();
         hierarchy.delete();
 
-        return boxes;
+        return shapes;
     }
 </script>
 
