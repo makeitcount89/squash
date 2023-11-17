@@ -44,6 +44,7 @@
     var selectedFile;
     var cv;
     var shapes = [];
+    var wallHeight;
 
     function onOpenCvReady() {
         cv = cv || window.cv;
@@ -112,6 +113,13 @@
             return;
         }
 
+        wallHeight = prompt('Enter the vertical height of the 3D walls:');
+
+        if (isNaN(wallHeight) || wallHeight <= 0) {
+            alert('Please enter a valid positive number for wall height.');
+            return;
+        }
+
         alert('Rendering 3D...'); // Display a message
 
         // Create Babylon.js scene and camera
@@ -136,7 +144,7 @@
         shapes.forEach(function (shape, index) {
             var babylonBox = BABYLON.MeshBuilder.CreateBox(`box${index + 1}`, {
                 width: bottomHalfWidth / shapes.length,
-                height: bottomHalfHeight,
+                height: wallHeight,
                 depth: 1,
                 faceColors: [new BABYLON.Color4(0, 0, 0, 0), new BABYLON.Color4(0, 0, 0, 0), new BABYLON.Color4(0, 0, 0, 0), new BABYLON.Color4(0, 0, 0, 0), new BABYLON.Color4(0, 0, 0, 0), new BABYLON.Color4(0, 0, 0, 0)],
                 wireframe: true
