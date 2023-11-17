@@ -12,7 +12,7 @@
 
 <input type="file" id="fileInput" accept=".png" onchange="handleFileSelect(event)">
 <button onclick="loadImage()">Load Image</button>
-<button onclick="displayAllShapes()">Display Shapes</button>
+<button onclick="displayAllShapes()">All Shapes</button>
 <button onclick="render3D()">Render 3D</button>
 <div id="loadingMessage"></div>
 <h2>Image:</h2>
@@ -25,7 +25,7 @@
 <script>
     var selectedFile;
     var cv;
-    var shapeCoordinates = [];
+    var shapes = [];
 
     function onOpenCvReady() {
         cv = cv || cv;
@@ -72,17 +72,17 @@
             return;
         }
 
-        shapeCoordinates = findAllShapes();
+        shapes = findAllShapes();
 
-        if (!shapeCoordinates || shapeCoordinates.length === 0) {
-            alert('No black shapes found in the image.');
+        if (!shapes || shapes.length === 0) {
+            alert('No shapes found in the image.');
             return;
         }
 
         var coordinatesDiv = document.getElementById('coordinatesDiv');
-        coordinatesDiv.innerHTML = 'Coordinates for all black shapes: <br>';
+        coordinatesDiv.innerHTML = 'Bounding Box Coordinates for all shapes: <br>';
 
-        shapeCoordinates.forEach(function (shape, index) {
+        shapes.forEach(function (shape, index) {
             coordinatesDiv.innerHTML +=
                 `Shape ${index + 1}: minX: ${shape.x}, minY: ${shape.y}, maxX: ${shape.x + shape.width}, maxY: ${shape.y + shape.height} <br>`;
         });
@@ -109,7 +109,7 @@
         var camera = new BABYLON.ArcRotateCamera("Camera", 0, 0, 10, BABYLON.Vector3.Zero(), scene);
         camera.attachControl(canvas, true);
 
-        shapeCoordinates.forEach(function (shape, index) {
+        shapes.forEach(function (shape, index) {
             var babylonBox = BABYLON.MeshBuilder.CreateBox(`box${index + 1}`, {
                 width: shape.width,
                 height: shape.height,
@@ -143,22 +143,22 @@
         // Convert to grayscale
         cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY);
 
-        // Thresholding to identify black shapes
-        cv.threshold(src, src, 0, 255, cv.THRESH_BINARY + cv.THRESH_OTSU);
-        
+        // Apply GaussianBlur to reduce noise and improve contour detection
+        cv.GaussianBlur(src, src, { width: 5, height: 5 }, 0, 0, cv.BORDER_DEFAULT);
+
+        // Use Canny edge detector to find contours
+        cv.Canny(src, src, 50, 150, 3);
 
         // Find contours
         var contours = new cv.MatVector();
         var hierarchy = new cv.Mat();
         cv.findContours(src, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
 
-        // Get bounding boxes for contours excluding the larger one (perimeter)
+        // Get bounding boxes for all contours
         var shapes = [];
         for (var i = 0; i < contours.size(); ++i) {
             var boundingBox = cv.boundingRect(contours.get(i));
-            if (boundingBox.width < canvas.width - 5 && boundingBox.height < canvas.height - 5) {
-                shapes.push(boundingBox);
-            }
+            shapes.push(boundingBox);
         }
 
         // Release resources
