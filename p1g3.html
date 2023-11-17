@@ -153,6 +153,7 @@
             // Move the box to the position based on shape coordinates
             babylonBox.position.x = shape.x + shape.width / 2;
             babylonBox.position.y = -shape.y - shape.height / 2;
+            babylonBox.position.z = wallThickness / 2; // Adjust to position the box at the front
         });
 
         // Run the Babylon.js engine
