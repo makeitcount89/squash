@@ -23,13 +23,14 @@
   <input type="number" id="lineThickness" value="5">
   <label for="lineHeight">Line Height (3D):</label>
   <input type="number" id="lineHeight" value="10">
+  <button onclick="generateBabylonFormat()">Generate Babylon Format</button>
   <button onclick="render3D()">Render 3D</button>
   <canvas id="canvas2D" width="600" height="600"></canvas>
   <canvas id="canvas3D" width="1200" height="1200"></canvas>
   <p id="coordinates"></p>
 
   <script>
-    let img, context2D, babylonCanvas, lineThicknessInput, lineHeightInput, lines;
+    let img, context2D, babylonCanvas, lines;
 
     function onOpenCvReady() {
       // OpenCV is ready
@@ -52,7 +53,6 @@
         return;
       }
 
-      const lineThickness = parseInt(document.getElementById('lineThickness').value);
       const canvas2D = document.getElementById('canvas2D');
       const src = cv.imread(canvas2D);
       const dst = new cv.Mat();
@@ -95,9 +95,32 @@
       });
     }
 
-    function render3D() {
+    function generateBabylonFormat() {
       if (!lines) {
         alert('Please detect lines first.');
+        return;
+      }
+
+      // Generate Babylon.js-compatible format
+      const babylonFormat = lines.map(line => {
+        return {
+          points: [
+            new BABYLON.Vector3(line.x1, line.y1, 0),
+            new BABYLON.Vector3(line.x2, line.y2, 0)
+          ],
+          thickness: parseInt(document.getElementById('lineThickness').value),
+          height: parseInt(document.getElementById('lineHeight').value)
+        };
+      });
+
+      // Store the generated Babylon format for later use
+      window.babylonFormat = babylonFormat;
+      alert('Babylon format generated and stored. You can now render 3D.');
+    }
+
+    function render3D() {
+      if (!window.babylonFormat) {
+        alert('Please generate Babylon format first.');
         return;
       }
 
@@ -123,23 +146,23 @@
       const scene = babylonCanvas._babylonScene;
       scene.meshes.forEach(mesh => mesh.dispose());
 
-      // Render lines in 3D
-      lines.forEach(line => {
-        // Adjust 2D line points based on user input for thickness and height
-        const thickness = parseInt(document.getElementById('lineThickness').value);
-        const height = parseInt(document.getElementById('lineHeight').value);
-
+      // Render lines in 3D using the stored Babylon format
+      window.babylonFormat.forEach(line => {
         const points = [
-          new BABYLON.Vector3(line.x1 - thickness / 2, line.y1 - thickness / 2, height),
-          new BABYLON.Vector3(line.x2 - thickness / 2, line.y2 - thickness / 2, height)
+          new BABYLON.Vector3(line.points[0].x, line.points[0].y, line.points[0].z),
+          new BABYLON.Vector3(line.points[1].x, line.points[1].y, line.points[1].z)
         ];
 
         const lineMesh = BABYLON.MeshBuilder.CreateLines('line', { points });
         lineMesh.color = new BABYLON.Color3(1, 1, 1);
         lineMesh.enableEdgesRendering();
-        lineMesh.edgesWidth = thickness;
+        lineMesh.edgesWidth = line.thickness;
         lineMesh.edgesColor = new BABYLON.Color4(0, 0, 0, 1);
+        lineMesh.position.y = line.height;
       });
+
+      // Clear the stored Babylon format
+      window.babylonFormat = null;
     }
   </script>
 </body>
