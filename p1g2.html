@@ -44,7 +44,6 @@
     var selectedFile;
     var cv;
     var shapes = [];
-    var wallHeight;
 
     function onOpenCvReady() {
         cv = cv || window.cv;
@@ -113,13 +112,6 @@
             return;
         }
 
-        wallHeight = prompt('Enter the wall height:');
-
-        if (isNaN(wallHeight) || wallHeight <= 0) {
-            alert('Please enter a valid positive number for wall height.');
-            return;
-        }
-
         alert('Rendering 3D...'); // Display a message
 
         // Create Babylon.js scene and camera
@@ -142,16 +134,29 @@
         var bottomHalfHeight = canvas.height / 2;
 
         shapes.forEach(function (shape, index) {
-            // Extrude the shape to create walls
-            var extrudedLines = BABYLON.MeshBuilder.ExtrudeShape(
+            // Extrude the shape based on depth map
+            var extrudedShape = BABYLON.MeshBuilder.ExtrudeShapeCustom(
                 `wall${index + 1}`,
-                { shape: [new BABYLON.Vector3(0, 0, 0), new BABYLON.Vector3(shape.width, 0, 0)], depth: wallHeight, sideOrientation: BABYLON.Mesh.DOUBLESIDE },
+                {
+                    shape: [
+                        new BABYLON.Vector3(0, 0, 0),
+                        new BABYLON.Vector3(shape.width, 0, 0),
+                        new BABYLON.Vector3(shape.width, shape.height, 0),
+                        new BABYLON.Vector3(0, shape.height, 0),
+                    ],
+                    path: [new BABYLON.Vector3(0, 0, 0), new BABYLON.Vector3(0, 0, -1)],
+                    cap: BABYLON.Mesh.NO_CAP,
+                    sideOrientation: BABYLON.Mesh.DOUBLESIDE,
+                },
                 scene
             );
 
             // Move the walls to the position based on shape coordinates
-            extrudedLines.position.x = shape.x + shape.width / 2;
-            extrudedLines.position.y = -shape.y - shape.height / 2;
+            extrudedShape.position.x = shape.x + shape.width / 2;
+            extrudedShape.position.y = -shape.y - shape.height / 2;
+
+            // Rotate the walls to stand upright
+            extrudedShape.rotation.x = Math.PI / 2;
         });
 
         // Run the Babylon.js engine
