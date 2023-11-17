@@ -164,7 +164,7 @@
                         new BABYLON.Vector3(0, shape.height, 0),
                     ],
                     path: [new BABYLON.Vector3(0, 0, 0), new BABYLON.Vector3(0, 0, -wallHeight)], // Adjust for wall height
-                    cap: BABYLON.Mesh.NO_CAP,
+                    cap: BABYLON.Mesh.CAP_ALL, // Ensure caps on both sides
                     sideOrientation: BABYLON.Mesh.DOUBLESIDE,
                 },
                 scene
