@@ -55,8 +55,8 @@
                 var canvas = document.getElementById('canvas');
                 var context = canvas.getContext('2d');
 
-                canvas.width = 800;
-                canvas.height = 600;
+                canvas.width = image.width;
+                canvas.height = image.height;
                 context.drawImage(image, 0, 0, image.width, image.height);
 
                 loadingMessage.textContent = '';
