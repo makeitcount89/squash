@@ -129,8 +129,8 @@
 
         shapes.forEach(function (shape, index) {
             var babylonBox = BABYLON.MeshBuilder.CreateBox(`box${index + 1}`, {
-                width: shape.width,
-                height: shape.height,
+                width: 600,
+                height: 800,
                 depth: 1,
                 wireframe: true  // Add this option to render only the outlines
             }, scene);
