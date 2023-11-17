@@ -151,11 +151,13 @@
         var hierarchy = new cv.Mat();
         cv.findContours(src, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
 
-        // Get bounding boxes for all contours
+        // Get bounding boxes for contours excluding the larger one (perimeter)
         var shapes = [];
         for (var i = 0; i < contours.size(); ++i) {
             var boundingBox = cv.boundingRect(contours.get(i));
-            shapes.push(boundingBox);
+            if (boundingBox.width < canvas.width - 5 && boundingBox.height < canvas.height - 5) {
+                shapes.push(boundingBox);
+            }
         }
 
         // Release resources
