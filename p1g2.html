@@ -37,12 +37,22 @@
 <!-- Additional HTML content (buttons, loading messages, etc.) -->
 <div id="loadingMessage"></div>
 
+<!-- User options -->
+<label for="wallHeight">Wall Height:</label>
+<input type="number" id="wallHeight" value="5"> <!-- Default value: 5 units -->
+
+<label for="wallThickness">Wall Thickness:</label>
+<input type="number" id="wallThickness" value="0.2"> <!-- Default value: 0.2 units -->
+
+<label for="wallColor">Wall Color:</label>
+<input type="color" id="wallColor" value="#808080"> <!-- Default value: Gray -->
+
+<!-- Line thickness threshold input -->
+<label for="lineThicknessThreshold">Line Thickness Threshold:</label>
+<input type="number" id="lineThicknessThreshold" value="5"> <!-- Default value: 5 units -->
+
 <!-- Render 3D button -->
 <button onclick="render3D()">Render 3D</button>
-
-<!-- Wall height input -->
-<label for="wallHeight">Wall Height:</label>
-<input type="number" id="wallHeight" value="200">
 
 <script>
     var selectedFile;
@@ -116,9 +126,12 @@
             return;
         }
 
-        alert('Rendering 3D...'); // Display a message
+        // Retrieve user options
+        var wallHeight = parseFloat(document.getElementById('wallHeight').value);
+        var wallThickness = parseFloat(document.getElementById('wallThickness').value);
+        var wallColor = document.getElementById('wallColor').value;
 
-        var wallHeight = parseInt(document.getElementById('wallHeight').value, 10) || 200;
+        alert('Rendering 3D...'); // Display a message
 
         // Create Babylon.js scene and camera
         var babylonContainer = document.getElementById('babylonContainer');
@@ -140,35 +153,34 @@
         var bottomHalfHeight = canvas.height / 2;
 
         shapes.forEach(function (shape, index) {
-            // Create the extruded shape for each contour
-            var extrudedShape = BABYLON.MeshBuilder.ExtrudeShape(
-                `extrudedShape${index + 1}`,
+            // Extrude the shape based on user options
+            var extrudedShape = BABYLON.MeshBuilder.ExtrudeShapeCustom(
+                `wall${index + 1}`,
                 {
                     shape: [
-                        new BABYLON.Vector3(shape.x, shape.y, 0),
-                        new BABYLON.Vector3(shape.x + shape.width, shape.y, 0),
-                        new BABYLON.Vector3(shape.x + shape.width, shape.y + shape.height, 0),
-                        new BABYLON.Vector3(shape.x, shape.y + shape.height, 0),
-                        new BABYLON.Vector3(shape.x, shape.y, 0), // Closing the path
+                        new BABYLON.Vector3(0, 0, 0),
+                        new BABYLON.Vector3(shape.width, 0, 0),
+                        new BABYLON.Vector3(shape.width, shape.height, 0),
+                        new BABYLON.Vector3(0, shape.height, 0),
                     ],
-                    depth: wallHeight, // Set the extrusion depth
+                    path: [new BABYLON.Vector3(0, 0, 0), new BABYLON.Vector3(0, 0, -wallHeight)], // Adjust for wall height
+                    cap: BABYLON.Mesh.NO_CAP,
                     sideOrientation: BABYLON.Mesh.DOUBLESIDE,
-                    updatable: true,
                 },
                 scene
             );
 
-            // Position the walls based on shape coordinates
+            // Move the walls to the position based on shape coordinates
             extrudedShape.position.x = shape.x + shape.width / 2;
             extrudedShape.position.y = -shape.y - shape.height / 2;
 
             // Rotate the walls to stand upright
             extrudedShape.rotation.x = Math.PI / 2;
 
-            // Apply material to fill the walls
-            var wallMaterial = new BABYLON.StandardMaterial(`wallMaterial${index + 1}`, scene);
-            wallMaterial.diffuseColor = new BABYLON.Color3(1, 1, 1); // White color
-            extrudedShape.material = wallMaterial;
+            // Adjust wall thickness and color
+            extrudedShape.scaling = new BABYLON.Vector3(1 - wallThickness, 1 - wallThickness, 1);
+            extrudedShape.material = new BABYLON.StandardMaterial("mat", scene);
+            extrudedShape.material.diffuseColor = new BABYLON.Color3.FromHexString(wallColor);
         });
 
         // Run the Babylon.js engine
@@ -182,6 +194,9 @@
             alert('OpenCV.js is not ready. Please wait.');
             return null;
         }
+
+        // Retrieve line thickness threshold from user input
+        var lineThicknessThreshold = parseFloat(document.getElementById('lineThicknessThreshold').value);
 
         var canvas = document.getElementById('canvas');
         var context = canvas.getContext('2d');
@@ -203,11 +218,13 @@
         var hierarchy = new cv.Mat();
         cv.findContours(src, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
 
-        // Get bounding boxes for all contours
+        // Get bounding boxes for contours with thickness greater than the threshold
         var shapes = [];
         for (var i = 0; i < contours.size(); ++i) {
             var boundingBox = cv.boundingRect(contours.get(i));
-            shapes.push(boundingBox);
+            if (boundingBox.width >= lineThicknessThreshold || boundingBox.height >= lineThicknessThreshold) {
+                shapes.push(boundingBox);
+            }
         }
 
         // Release resources
