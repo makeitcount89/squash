@@ -7,6 +7,19 @@
     <script async src="https://docs.opencv.org/master/opencv.js" onload="onOpenCvReady();" type="text/javascript"></script>
     <!-- Babylon.js library -->
     <script src="https://cdn.babylonjs.com/babylon.js"></script>
+    <style>
+        /* Adjust button and input sizes */
+        button, input {
+            width: 5em; /* 5 times bigger */
+            height: 2em; /* Adjust as needed */
+        }
+
+        /* Adjust user input slots sizes */
+        input[type="number"], input[type="color"] {
+            width: 10em; /* 5 times bigger */
+            height: 2em; /* Adjust as needed */
+        }
+    </style>
 </head>
 <body>
 
@@ -16,7 +29,6 @@
     <!-- Image container (top quarter) -->
     <div id="imageContainer" style="flex: 1; display: flex; flex-direction: column;">
         <h2>Image:</h2>
-        <canvas id="canvas" style="border: 1px solid #000; flex: 1;"></canvas>
         <input type="file" id="fileInput" accept=".png" onchange="handleFileSelect(event)">
         <button onclick="loadImage()">Load Image</button>
         <button onclick="displayAllShapes()">All Shapes</button>
@@ -37,6 +49,20 @@
 <!-- Additional HTML content (buttons, loading messages, etc.) -->
 <div id="loadingMessage"></div>
 
+<!-- User options -->
+<label for="wallHeight">Wall Height:</label>
+<input type="number" id="wallHeight" value="5"> <!-- Default value: 5 units -->
+
+<label for="wallThickness">Wall Thickness:</label>
+<input type="number" id="wallThickness" value="0.2"> <!-- Default value: 0.2 units -->
+
+<label for="wallColor">Wall Color:</label>
+<input type="color" id="wallColor" value="#808080"> <!-- Default value: Gray -->
+
+<!-- Line thickness threshold input -->
+<label for="lineThicknessThreshold">Line Thickness Threshold:</label>
+<input type="number" id="lineThicknessThreshold" value="5"> <!-- Default value: 5 units -->
+
 <!-- Render 3D button -->
 <button onclick="render3D()">Render 3D</button>
 
@@ -44,7 +70,6 @@
     var selectedFile;
     var cv;
     var shapes = [];
-    var wallThickness;
 
     function onOpenCvReady() {
         cv = cv || window.cv;
@@ -113,12 +138,13 @@
             return;
         }
 
-        wallThickness = prompt('Enter the wall thickness:');
+        // Convert the image to an array of 1's and 0's
+        var imageDataArray = convertImageToArray();
 
-        if (isNaN(wallThickness) || wallThickness <= 0) {
-            alert('Please enter a valid positive number for wall thickness.');
-            return;
-        }
+        // Retrieve user options
+        var wallHeight = parseFloat(document.getElementById('wallHeight').value);
+        var wallThickness = parseFloat(document.getElementById('wallThickness').value);
+        var wallColor = document.getElementById('wallColor').value;
 
         alert('Rendering 3D...'); // Display a message
 
@@ -142,18 +168,34 @@
         var bottomHalfHeight = canvas.height / 2;
 
         shapes.forEach(function (shape, index) {
-            var babylonBox = BABYLON.MeshBuilder.CreateBox(`box${index + 1}`, {
-                width: bottomHalfWidth / shapes.length,
-                height: bottomHalfHeight,
-                depth: wallThickness,
-                faceColors: [new BABYLON.Color4(0, 0, 0, 0), new BABYLON.Color4(0, 0, 0, 0), new BABYLON.Color4(0, 0, 0, 0), new BABYLON.Color4(0, 0, 0, 0), new BABYLON.Color4(0, 0, 0, 0), new BABYLON.Color4(0, 0, 0, 0)],
-                wireframe: true
-            }, scene);
+            // Extrude the shape based on user options
+            var extrudedShape = BABYLON.MeshBuilder.ExtrudeShapeCustom(
+                `wall${index + 1}`,
+                {
+                    shape: [
+                        new BABYLON.Vector3(0, 0, 0),
+                        new BABYLON.Vector3(shape.width, 0, 0),
+                        new BABYLON.Vector3(shape.width, shape.height, 0),
+                        new BABYLON.Vector3(0, shape.height, 0),
+                    ].reverse(), // Reverse the order of vertices
+                    path: [new BABYLON.Vector3(0, 0, 0), new BABYLON.Vector3(0, 0, -wallHeight)], // Adjust for wall height
+                    cap: BABYLON.Mesh.NO_CAP,
+                    sideOrientation: BABYLON.Mesh.DOUBLESIDE,
+                },
+                scene
+            );
 
-            // Move the box to the position based on shape coordinates
-            babylonBox.position.x = shape.x + shape.width / 2;
-            babylonBox.position.y = -shape.y - shape.height / 2;
-            babylonBox.position.z = wallThickness / 2; // Adjust to position the box at the front
+            // Move the walls to the position based on shape coordinates
+            extrudedShape.position.x = shape.x + shape.width / 2;
+            extrudedShape.position.y = -(shape.y + shape.height / 2); // Negate the y-coordinate
+
+            // Rotate the walls to stand upright
+            extrudedShape.rotation.x = Math.PI / 2;
+
+            // Adjust wall thickness and color
+            extrudedShape.scaling = new BABYLON.Vector3(1 - wallThickness, 1 - wallThickness, 1);
+            extrudedShape.material = new BABYLON.StandardMaterial("mat", scene);
+            extrudedShape.material.diffuseColor = new BABYLON.Color3.FromHexString(wallColor);
         });
 
         // Run the Babylon.js engine
@@ -162,11 +204,29 @@
         });
     }
 
+    function convertImageToArray() {
+        var canvas = document.getElementById('canvas');
+        var context = canvas.getContext('2d');
+        var imageData = context.getImageData(0, 0, canvas.width, canvas.height).data;
+        var dataArray = [];
+
+        for (var i = 0; i < imageData.length; i += 4) {
+            // Convert RGBA to 1 (black) or 0 (white)
+            var value = (imageData[i] === 0 && imageData[i + 1] === 0 && imageData[i + 2] === 0) ? 1 : 0;
+            dataArray.push(value);
+        }
+
+        return dataArray;
+    }
+
     function findAllShapes() {
         if (!cv) {
             alert('OpenCV.js is not ready. Please wait.');
             return null;
         }
+
+        // Retrieve line thickness threshold from user input
+        var lineThicknessThreshold = parseFloat(document.getElementById('lineThicknessThreshold').value);
 
         var canvas = document.getElementById('canvas');
         var context = canvas.getContext('2d');
@@ -188,11 +248,13 @@
         var hierarchy = new cv.Mat();
         cv.findContours(src, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
 
-        // Get bounding boxes for all contours
+        // Get bounding boxes for contours with thickness greater than the threshold
         var shapes = [];
         for (var i = 0; i < contours.size(); ++i) {
             var boundingBox = cv.boundingRect(contours.get(i));
-            shapes.push(boundingBox);
+            if (boundingBox.width >= lineThicknessThreshold || boundingBox.height >= lineThicknessThreshold) {
+                shapes.push(boundingBox);
+            }
         }
 
         // Release resources
