@@ -30,7 +30,7 @@
   <p id="coordinates"></p>
 
   <script>
-    let img, context2D, babylonCanvas, lines;
+    let img, context2D, babylonCanvas, lines, babylonFormat;
 
     function onOpenCvReady() {
       // OpenCV is ready
@@ -102,7 +102,7 @@
       }
 
       // Generate Babylon.js-compatible format
-      const babylonFormat = lines.map(line => {
+      babylonFormat = lines.map(line => {
         return {
           points: [
             new BABYLON.Vector3(line.x1, line.y1, 0),
@@ -111,6 +111,13 @@
           thickness: parseInt(document.getElementById('lineThickness').value),
           height: parseInt(document.getElementById('lineHeight').value)
         };
+      });
+
+      // Display coordinates on the screen
+      const coordinatesElement = document.getElementById('coordinates');
+      coordinatesElement.innerHTML += '<br><strong>Combined Coordinates:</strong><br>';
+      babylonFormat.forEach((line, index) => {
+        coordinatesElement.innerHTML += `Line ${index + 1}: (${line.points[0].x}, ${line.points[0].y}) to (${line.points[1].x}, ${line.points[1].y})<br>`;
       });
 
       // Store the generated Babylon format for later use
