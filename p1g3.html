@@ -69,7 +69,7 @@
 <script>
     var selectedFile;
     var cv;
-    var shapes = [];
+    var binaryArray = [];
 
     function onOpenCvReady() {
         cv = cv || window.cv;
@@ -103,6 +103,12 @@
                 canvas.height = image.height;
                 context.drawImage(image, 0, 0, image.width, image.height);
 
+                // Convert the image to binary array
+                binaryArray = convertImageToArray();
+
+                // Display binary array (for demonstration purposes)
+                console.log(binaryArray);
+
                 loadingMessage.textContent = '';
             };
         };
@@ -116,7 +122,7 @@
             return;
         }
 
-        shapes = findAllShapes();
+        var shapes = findAllShapes();
 
         if (!shapes || shapes.length === 0) {
             alert('No shapes found in the image.');
@@ -137,14 +143,6 @@
             alert('Please load an image first.');
             return;
         }
-
-        // Convert the image to an array of 1's and 0's
-        var imageDataArray = convertImageToArray();
-
-        // Retrieve user options
-        var wallHeight = parseFloat(document.getElementById('wallHeight').value);
-        var wallThickness = parseFloat(document.getElementById('wallThickness').value);
-        var wallColor = document.getElementById('wallColor').value;
 
         alert('Rendering 3D...'); // Display a message
 
@@ -167,36 +165,16 @@
         var bottomHalfWidth = canvas.width;
         var bottomHalfHeight = canvas.height / 2;
 
-        shapes.forEach(function (shape, index) {
-            // Extrude the shape based on user options
-            var extrudedShape = BABYLON.MeshBuilder.ExtrudeShapeCustom(
-                `wall${index + 1}`,
-                {
-                    shape: [
-                        new BABYLON.Vector3(0, 0, 0),
-                        new BABYLON.Vector3(shape.width, 0, 0),
-                        new BABYLON.Vector3(shape.width, shape.height, 0),
-                        new BABYLON.Vector3(0, shape.height, 0),
-                    ].reverse(), // Reverse the order of vertices
-                    path: [new BABYLON.Vector3(0, 0, 0), new BABYLON.Vector3(0, 0, -wallHeight)], // Adjust for wall height
-                    cap: BABYLON.Mesh.NO_CAP,
-                    sideOrientation: BABYLON.Mesh.DOUBLESIDE,
-                },
-                scene
-            );
-
-            // Move the walls to the position based on shape coordinates
-            extrudedShape.position.x = shape.x + shape.width / 2;
-            extrudedShape.position.y = -(shape.y + shape.height / 2); // Negate the y-coordinate
-
-            // Rotate the walls to stand upright
-            extrudedShape.rotation.x = Math.PI / 2;
-
-            // Adjust wall thickness and color
-            extrudedShape.scaling = new BABYLON.Vector3(1 - wallThickness, 1 - wallThickness, 1);
-            extrudedShape.material = new BABYLON.StandardMaterial("mat", scene);
-            extrudedShape.material.diffuseColor = new BABYLON.Color3.FromHexString(wallColor);
-        });
+        // Create cubes based on binary array
+        for (var i = 0; i < binaryArray.length; i++) {
+            if (binaryArray[i] === 1) {
+                var cube = BABYLON.MeshBuilder.CreateBox("cube", { size: 1 }, scene);
+                var x = i % canvas.width;
+                var y = Math.floor(i / canvas.width);
+                cube.position.x = x - canvas.width / 2;
+                cube.position.y = -y + canvas.height / 2;
+            }
+        }
 
         // Run the Babylon.js engine
         engine.runRenderLoop(function () {
