@@ -49,6 +49,9 @@
 <!-- Additional HTML content (buttons, loading messages, etc.) -->
 <div id="loadingMessage"></div>
 
+<!-- Display binary array -->
+<div id="binaryArray"></div>
+
 <!-- User options -->
 <label for="wallHeight">Wall Height:</label>
 <input type="number" id="wallHeight" value="5"> <!-- Default value: 5 units -->
@@ -106,14 +109,19 @@
                 // Convert the image to binary array
                 binaryArray = convertImageToArray();
 
-                // Display binary array (for demonstration purposes)
-                console.log(binaryArray);
+                // Display binary array on the screen
+                displayBinaryArrayOnScreen();
 
                 loadingMessage.textContent = '';
             };
         };
 
         reader.readAsDataURL(selectedFile);
+    }
+
+    function displayBinaryArrayOnScreen() {
+        var binaryArrayElement = document.getElementById('binaryArray');
+        binaryArrayElement.textContent = 'Binary Array: ' + binaryArray.join(', ');
     }
 
     function displayAllShapes() {
