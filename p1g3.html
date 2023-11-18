@@ -50,7 +50,7 @@
   </select>
 
   <label for="wallHeight">Wall Height:</label>
-  <input type="number" id="wallHeight" value="250">
+  <input type="number" id="wallHeight" value="600">
 
   <label for="wallThickness">Wall Thickness:</label>
   <input type="number" id="wallThickness" value="0.2">
@@ -126,48 +126,56 @@
       const wallHeight = parseFloat(document.getElementById('wallHeight').value);
       const wallThickness = parseFloat(document.getElementById('wallThickness').value);
 
+      // External walls as solid boxes, others as dashed lines
       detectedLines.forEach(line => {
-        const length = Math.sqrt((line.x2 - line.x1) ** 2 + (line.y2 - line.y1) ** 2);
-        const angle = Math.atan2(line.y2 - line.y1, line.x2 - line.x1);
-
         const points = [
           new BABYLON.Vector3(line.x1, 0, line.y1),
-          new BABYLON.Vector3(line.x2, 0, line.y2),
-          new BABYLON.Vector3(line.x2, wallHeight, line.y2),
           new BABYLON.Vector3(line.x1, wallHeight, line.y1),
+          new BABYLON.Vector3(line.x2, wallHeight, line.y2),
+          new BABYLON.Vector3(line.x2, 0, line.y2),
+          new BABYLON.Vector3(line.x1, 0, line.y1)
         ];
 
-        const wallMesh = BABYLON.MeshBuilder.CreateDashedLines(null, {
-          points,
-          dashSize: lineThickness,
-          updatable: true,
-        });
+        // Check if the line is near the edge (adjust the threshold as needed)
+        const nearEdgeThreshold = 20;
+        const isExternal = (
+          line.x1 < nearEdgeThreshold ||
+          line.x2 < nearEdgeThreshold ||
+          line.x1 > img.width - nearEdgeThreshold ||
+          line.x2 > img.width - nearEdgeThreshold ||
+          line.y1 < nearEdgeThreshold ||
+          line.y2 < nearEdgeThreshold ||
+          line.y1 > img.height - nearEdgeThreshold ||
+          line.y2 > img.height - nearEdgeThreshold
+        );
 
-        wallMesh.color = new BABYLON.Color3.FromHexString(wallColor);
-
-        if (line.x1 === 0 || line.y1 === 0 || line.x2 === context2D.canvas.width || line.y2 === context2D.canvas.height) {
-          wallMesh.dispose(); // Dispose dashed lines mesh
-
-          // Create external walls using CreateBox
-          const wallBox = BABYLON.MeshBuilder.CreateBox(null, {
-            width: length,
-            height: wallHeight,
-            depth: wallThickness,
-          });
-          wallBox.position.x = (line.x1 + line.x2) / 2;
-          wallBox.position.y = wallHeight / 2;
-          wallBox.position.z = (line.y1 + line.y2) / 2;
-          wallBox.rotation.y = -angle;
-
-          wallBox.color = new BABYLON.Color3.FromHexString(wallColor);
+        if (isExternal) {
+          // Create solid box for external walls
+          const wallMesh = BABYLON.MeshBuilder.CreateBox(null, { width: Math.abs(line.x2 - line.x1), height: wallHeight, depth: wallThickness });
+          wallMesh.position = new BABYLON.Vector3((line.x1 + line.x2) / 2, wallHeight / 2, (line.y1 + line.y2) / 2);
+          wallMesh.material = createMaterial(wallTexture, wallColor);
+        } else {
+          // Create dashed lines for internal walls
+          const wallMesh = BABYLON.MeshBuilder.CreateDashedLines(null, { points, dashSize: lineThickness, updatable: true });
+          wallMesh.color = new BABYLON.Color3.FromHexString(wallColor);
 
           if (wallTexture) {
-            const wallMaterial = new BABYLON.StandardMaterial("wallMaterial", babylonCanvas._babylonScene);
-            wallMaterial.diffuseTexture = new BABYLON.Texture(wallTexture, babylonCanvas._babylonScene);
-            wallBox.material = wallMaterial;
+            wallMesh.material = createMaterial(wallTexture, wallColor);
           }
+
+          wallMesh.scaling.y = wallThickness;
         }
       });
+    }
+
+    // Function to create material with texture and color
+    function createMaterial(textureUrl, color) {
+      const material = new BABYLON.StandardMaterial("wallMaterial", babylonCanvas._babylonScene);
+      if (textureUrl) {
+        material.diffuseTexture = new BABYLON.Texture(textureUrl, babylonCanvas._babylonScene);
+      }
+      material.emissiveColor = new BABYLON.Color3.FromHexString(color);
+      return material;
     }
 
     // Load Babylon canvas on page load
@@ -228,10 +236,13 @@
         babylonCanvas.style.display = 'block';
       }
 
-     
+      // Clear the 2D canvas
+      context2D.clearRect(0, 0, context2D.canvas.width, context2D.canvas.height);
+
+      // Reset detectedLines or other relevant variables
+      detectedLines = null;
     }
   </script>
 </body>
 
 </html>
-
