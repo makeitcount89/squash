@@ -141,13 +141,38 @@
         scene.render();
       });
     };
- function resetCanvas() {
+function resetCanvas() {
   if (babylonCanvas) {
-    // Dispose the Babylon engine
-    const engine = babylonCanvas._babylonEngine;
-    engine.stopRenderLoop();
-    engine.dispose();
-    babylonCanvas = null;
+    // Hide the Babylon canvas
+    babylonCanvas.style.display = 'none';
+
+    // Dispose the Babylon scene
+    const scene = babylonCanvas._babylonScene;
+    scene.dispose();
+
+    // Create a new Babylon scene
+    const engine = new BABYLON.Engine(babylonCanvas, true);
+    const newScene = new BABYLON.Scene(engine);
+
+    // Set up camera and light for the new scene (you may need to adjust these parameters)
+    const camera = new BABYLON.ArcRotateCamera('camera', -Math.PI / 2, Math.PI / 4, 5, new BABYLON.Vector3(0, 0, 0));
+    camera.attachControl(babylonCanvas, true);
+    const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(1, 1, 0));
+
+    // Set background color to a lighter gray
+    newScene.clearColor = new BABYLON.Color4(0.9, 0.9, 0.9, 1);
+
+    // Run the Babylon.js engine for the new scene
+    engine.runRenderLoop(function () {
+      newScene.render();
+    });
+
+    // Update the babylonCanvas and babylonScene variables
+    babylonCanvas._babylonEngine = engine;
+    babylonCanvas._babylonScene = newScene;
+
+    // Show the Babylon canvas again
+    babylonCanvas.style.display = 'block';
   }
 
   // Reset other variables or perform additional cleanup as needed
@@ -165,6 +190,7 @@
 
   // Update or reset other UI elements as needed
 }
+
 
 
 
