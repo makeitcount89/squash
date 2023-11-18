@@ -37,7 +37,7 @@
   <label for="lineHeight">Line Height (3D):</label>
   <input type="number" id="lineHeight" value="10">
   <button onclick="generateBabylonFormat()">Generate Babylon Format</button>
-  <button onclick="convertToBabylonFormat()">Converted to Babylon Format</button>
+  <button onclick="convertToBabylonFormat()">Convert to Babylon Format</button>
   <button onclick="render3D()">Render 3D</button>
   <canvas id="canvas2D" width="600" height="600"></canvas>
   <canvas id="canvas3D" width="1200" height="1200"></canvas>
@@ -148,6 +148,9 @@
         return;
       }
 
+      const lineThickness = parseInt(document.getElementById('lineThickness').value);
+      const lineHeight = parseInt(document.getElementById('lineHeight').value);
+
       // Convert to Babylon.js-compatible format
       babylonFormat = lines.map(line => {
         return {
@@ -166,6 +169,9 @@
       babylonFormat.forEach((line, index) => {
         coordinatesElement.innerHTML += `Line ${index + 1}: (${line.points[0].x}, ${line.points[0].y}) to (${line.points[1].x}, ${line.points[1].y}) - Thickness: ${line.thickness}, Height: ${line.height}<br>`;
       });
+
+      // Store the converted Babylon format for later use
+      window.babylonFormat = babylonFormat;
     }
 
     function render3D() {
