@@ -45,7 +45,7 @@
   <input type="text" id="wallTexture" placeholder="Texture URL" value="https://www.babylonjs-playground.com/textures/brick.jpg">
 
   <label for="wallHeight">Wall Height:</label>
-  <input type="number" id="wallHeight" value="600">
+  <input type="number" id="wallHeight" value="250">
 
   <label for="wallThickness">Wall Thickness:</label>
   <input type="number" id="wallThickness" value="0.2">
@@ -203,12 +203,7 @@
         babylonCanvas.style.display = 'block';
       }
 
-      // Clear the 2D canvas
-      context2D.clearRect(0, 0, context2D.canvas.width, context2D.canvas.height);
-
-      // Reset detectedLines or other relevant variables
-      detectedLines = null;
-    }
+     
   </script>
 </body>
 
