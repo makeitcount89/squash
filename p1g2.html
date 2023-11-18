@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -45,7 +45,7 @@
   <input type="text" id="wallTexture" placeholder="Texture URL" value="https://www.babylonjs-playground.com/textures/brick.jpg">
 
   <label for="wallHeight">Wall Height:</label>
-  <input type="number" id="wallHeight" value="250">
+  <input type="number" id="wallHeight" value="600">
 
   <label for="wallThickness">Wall Thickness:</label>
   <input type="number" id="wallThickness" value="0.2">
@@ -110,68 +110,59 @@
     }
 
     function convertTo3D() {
-  if (!detectedLines) {
-    alert('Please detect lines first.');
-    return;
-  }
+      if (!detectedLines) {
+        alert('Please detect lines first.');
+        return;
+      }
 
-  const lineThickness = parseInt(document.getElementById('lineThickness').value);
-  const wallColor = document.getElementById('wallColor').value;
-  const wallTexture = document.getElementById('wallTexture').value;
-  const wallHeight = parseFloat(document.getElementById('wallHeight').value);
-  const wallThickness = parseFloat(document.getElementById('wallThickness').value);
+      const lineThickness = parseInt(document.getElementById('lineThickness').value);
+      const wallColor = document.getElementById('wallColor').value;
+      const wallTexture = document.getElementById('wallTexture').value;
+      const wallHeight = parseFloat(document.getElementById('wallHeight').value);
+      const wallThickness = parseFloat(document.getElementById('wallThickness').value);
 
-  // Calculate the bounding box of the detected lines
-  let minX = Infinity,
-    minY = Infinity,
-    maxX = -Infinity,
-    maxY = -Infinity;
+      detectedLines.forEach(line => {
+        const points = [
+          new BABYLON.Vector3(line.x1, 0, line.y1),
+          new BABYLON.Vector3(line.x1, wallHeight, line.y1),
+          new BABYLON.Vector3(line.x2, wallHeight, line.y2),
+          new BABYLON.Vector3(line.x2, 0, line.y2),
+          new BABYLON.Vector3(line.x1, 0, line.y1)
+        ];
 
-  detectedLines.forEach(line => {
-    minX = Math.min(minX, line.x1, line.x2);
-    minY = Math.min(minY, line.y1, line.y2);
-    maxX = Math.max(maxX, line.x1, line.x2);
-    maxY = Math.max(maxY, line.y1, line.y2);
-  });
+        const wallMesh = BABYLON.MeshBuilder.CreateDashedLines(null, { points, dashSize: lineThickness, updatable: true });
+        wallMesh.color = new BABYLON.Color3.FromHexString(wallColor);
+        
+        if (wallTexture) {
+          const wallMaterial = new BABYLON.StandardMaterial("wallMaterial", babylonCanvas._babylonScene);
+          wallMaterial.diffuseTexture = new BABYLON.Texture(wallTexture, babylonCanvas._babylonScene);
+          wallMesh.material = wallMaterial;
+        }
 
-  const centerX = (minX + maxX) / 2;
-  const centerY = (minY + maxY) / 2;
-  const width = maxX - minX;
-  const height = maxY - minY;
-
-  // Adjust camera position and target based on the bounding box
-  const cameraPosition = new BABYLON.Vector3(centerX, wallHeight, -Math.max(width, height) * 1.5);
-  const cameraTarget = new BABYLON.Vector3(centerX, centerY, 0);
-
-  // Set up camera and light
-  const camera = new BABYLON.FreeCamera('camera', cameraPosition, babylonCanvas._babylonScene);
-  camera.setTarget(cameraTarget);
-  camera.attachControl(babylonCanvas, true);
-
-  const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(1, 1, 0));
-
-  detectedLines.forEach(line => {
-    const points = [
-      new BABYLON.Vector3(line.x1 - centerX, 0, line.y1 - centerY),
-      new BABYLON.Vector3(line.x1 - centerX, wallHeight, line.y1 - centerY),
-      new BABYLON.Vector3(line.x2 - centerX, wallHeight, line.y2 - centerY),
-      new BABYLON.Vector3(line.x2 - centerX, 0, line.y2 - centerY),
-      new BABYLON.Vector3(line.x1 - centerX, 0, line.y1 - centerY)
-    ];
-
-    const wallMesh = BABYLON.MeshBuilder.CreateDashedLines(null, { points, dashSize: lineThickness, updatable: true });
-    wallMesh.color = new BABYLON.Color3.FromHexString(wallColor);
-
-    if (wallTexture) {
-      const wallMaterial = new BABYLON.StandardMaterial("wallMaterial", babylonCanvas._babylonScene);
-      wallMaterial.diffuseTexture = new BABYLON.Texture(wallTexture, babylonCanvas._babylonScene);
-      wallMesh.material = wallMaterial;
+        wallMesh.scaling.y = wallThickness;
+      });
     }
 
-    wallMesh.scaling.y = wallThickness;
-  });
-}
+    // Load Babylon canvas on page load
+    window.onload = function () {
+      babylonCanvas = document.getElementById('canvas3D');
+      const engine = new BABYLON.Engine(babylonCanvas, true);
+      const scene = new BABYLON.Scene(engine);
 
+      // Set up camera and light
+      const camera = new BABYLON.FreeCamera('camera', new BABYLON.Vector3(0, 5, -10), scene);
+      camera.setTarget(BABYLON.Vector3.Zero());
+      camera.attachControl(babylonCanvas, true);
+      const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(1, 1, 0));
+
+      // Set background color to a lighter gray
+      scene.clearColor = new BABYLON.Color4(0.9, 0.9, 0.9, 1);
+
+      // Run the Babylon.js engine
+      engine.runRenderLoop(function () {
+        scene.render();
+      });
+    };
 
     function resetCanvas() {
       if (babylonCanvas) {
@@ -212,7 +203,12 @@
         babylonCanvas.style.display = 'block';
       }
 
-     
+      // Clear the 2D canvas
+      context2D.clearRect(0, 0, context2D.canvas.width, context2D.canvas.height);
+
+      // Reset detectedLines or other relevant variables
+      detectedLines = null;
+    }
   </script>
 </body>
 
