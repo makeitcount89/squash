@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,7 +10,8 @@
   <!-- Include Babylon.js -->
   <script src="https://cdn.babylonjs.com/babylon.js"></script>
   <style>
-    #canvas2D, #canvas3D {
+    #canvas2D,
+    #canvas3D {
       border: 1px solid #000;
       margin-top: 20px;
     }
@@ -25,6 +27,7 @@
     }
   </style>
 </head>
+
 <body>
   <input type="file" id="imageInput" accept="image/*">
   <button onclick="loadImage()">Load Image</button>
@@ -34,6 +37,7 @@
   <label for="lineHeight">Line Height (3D):</label>
   <input type="number" id="lineHeight" value="10">
   <button onclick="generateBabylonFormat()">Generate Babylon Format</button>
+  <button onclick="convertToBabylonFormat()">Converted to Babylon Format</button>
   <button onclick="render3D()">Render 3D</button>
   <canvas id="canvas2D" width="600" height="600"></canvas>
   <canvas id="canvas3D" width="1200" height="1200"></canvas>
@@ -105,25 +109,6 @@
       });
     }
 
-    function convertToBabylonFormat(inputText) {
-      return inputText.trim().split('\n').map(line => {
-        const match = line.match(/\((\d+), (\d+)\) to \((\d+), (\d+)\) - Thickness: (\d+), Height: (\d+)/);
-        if (match) {
-          const [, x1, y1, x2, y2, thickness, height] = match;
-          return {
-            points: [
-              new BABYLON.Vector3(parseFloat(x1), parseFloat(y1), 0),
-              new BABYLON.Vector3(parseFloat(x2), parseFloat(y2), 0)
-            ],
-            thickness: parseFloat(thickness),
-            height: parseFloat(height)
-          };
-        } else {
-          return null;
-        }
-      }).filter(line => line !== null);
-    }
-
     function generateBabylonFormat() {
       if (!lines) {
         alert('Please detect lines first.');
@@ -133,8 +118,47 @@
       const lineThickness = parseInt(document.getElementById('lineThickness').value);
       const lineHeight = parseInt(document.getElementById('lineHeight').value);
 
-      // Convert Babylon coordinates to Babylon.js-compatible format
-      babylonFormat = convertToBabylonFormat(document.getElementById('coordinates').innerText);
+      // Generate Babylon.js-compatible format
+      babylonFormat = lines.map(line => {
+        return {
+          points: [
+            new BABYLON.Vector3(line.x1, line.y1, 0),
+            new BABYLON.Vector3(line.x2, line.y2, 0)
+          ],
+          thickness: lineThickness,
+          height: lineHeight
+        };
+      });
+
+      // Display coordinates on the screen
+      const coordinatesElement = document.getElementById('coordinates');
+      coordinatesElement.innerHTML += '<br><strong>Combined Coordinates:</strong><br>';
+      babylonFormat.forEach((line, index) => {
+        coordinatesElement.innerHTML += `Line ${index + 1}: (${line.points[0].x}, ${line.points[0].y}) to (${line.points[1].x}, ${line.points[1].y}) - Thickness: ${line.thickness}, Height: ${line.height}<br>`;
+      });
+
+      // Store the generated Babylon format for later use
+      window.babylonFormat = babylonFormat;
+      alert('Babylon format generated and stored. You can now render 3D.');
+    }
+
+    function convertToBabylonFormat() {
+      if (!lines) {
+        alert('Please detect lines first.');
+        return;
+      }
+
+      // Convert to Babylon.js-compatible format
+      babylonFormat = lines.map(line => {
+        return {
+          points: [
+            new BABYLON.Vector3(line.points[0].x, line.points[0].y, 0),
+            new BABYLON.Vector3(line.points[1].x, line.points[1].y, 0)
+          ],
+          thickness: line.thickness,
+          height: line.height
+        };
+      });
 
       // Display coordinates on the screen
       const coordinatesElement = document.getElementById('coordinates');
@@ -142,15 +166,11 @@
       babylonFormat.forEach((line, index) => {
         coordinatesElement.innerHTML += `Line ${index + 1}: (${line.points[0].x}, ${line.points[0].y}) to (${line.points[1].x}, ${line.points[1].y}) - Thickness: ${line.thickness}, Height: ${line.height}<br>`;
       });
-
-      // Store the converted Babylon format for later use
-      window.babylonFormat = babylonFormat;
-      alert('Babylon format generated and stored. You can now render 3D.');
     }
 
     function render3D() {
       if (!window.babylonFormat) {
-        alert('Please generate Babylon format first.');
+        alert('Please generate or convert Babylon format first.');
         return;
       }
 
@@ -193,4 +213,5 @@
     }
   </script>
 </body>
+
 </html>
