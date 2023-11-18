@@ -39,10 +39,10 @@
   <input type="number" id="lineThickness" value="50">
   
   <label for="wallColor">Wall Color:</label>
-  <input type="color" id="wallColor" value="#ffffff">
+  <input type="color" id="wallColor" value="#000000">
 
   <label for="wallTexture">Wall Texture:</label>
-  <input type="text" id="wallTexture" placeholder="Texture URL">
+  <input type="text" id="wallTexture" placeholder="Texture URL" value="https://www.babylonjs-playground.com/textures/brick.jpg">
 
   <label for="wallHeight">Wall Height:</label>
   <input type="number" id="wallHeight" value="600">
@@ -127,10 +127,9 @@
           new BABYLON.Vector3(line.x1, wallHeight, line.y1),
           new BABYLON.Vector3(line.x2, wallHeight, line.y2),
           new BABYLON.Vector3(line.x2, 0, line.y2),
-          new BABYLON.Vector3(line.x1, 0, line.y1)
         ];
 
-        const wallMesh = BABYLON.MeshBuilder.CreateDashedLines(null, { points, dashSize: lineThickness, updatable: true });
+        const wallMesh = BABYLON.MeshBuilder.CreatePolygon(null, { shape: points, updatable: true });
         wallMesh.color = new BABYLON.Color3.FromHexString(wallColor);
         
         if (wallTexture) {
