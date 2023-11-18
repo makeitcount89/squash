@@ -31,7 +31,7 @@
 <body>
   <input type="file" id="imageInput" accept="image/*" onchange="loadAndDetect()">
   <label for="lineThickness">Line Thickness:</label>
-  <input type="number" id="lineThickness" value="5">
+  <input type="number" id="lineThickness" value="50">
   <label for="lineHeight">Line Height (3D):</label>
   <input type="number" id="lineHeight" value="10">
   <button onclick="updateInputs()">Update Inputs</button>
@@ -41,7 +41,7 @@
   <p id="coordinates"></p>
 
   <script>
-    let img, context2D, babylonCanvas, detectedLines, babylonFormat;
+    let img, context2D, babylonCanvas, detectedLines;
 
     function onOpenCvReady() {
       // OpenCV is ready
@@ -93,6 +93,19 @@
     }
 
     function updateInputs() {
+      // Display coordinates on the screen
+      const coordinatesElement = document.getElementById('coordinates');
+      coordinatesElement.innerHTML = '<strong>Detected Lines:</strong><br>';
+      detectedLines.forEach((line, index) => {
+        coordinatesElement.innerHTML += `Line ${index + 1}: (${line.x1}, ${line.y1}) to (${line.x2}, ${line.y2})<br>`;
+      });
+
+      // Clear existing meshes on Babylon canvas
+      const scene = babylonCanvas._babylonScene;
+      scene.meshes.forEach(mesh => mesh.dispose());
+    }
+
+    function convertTo3D() {
       if (!detectedLines) {
         alert('Please detect lines first.');
         return;
@@ -101,49 +114,19 @@
       const lineThickness = parseInt(document.getElementById('lineThickness').value);
       const lineHeight = parseInt(document.getElementById('lineHeight').value);
 
-      // Combine user inputs with detected lines
-      babylonFormat = detectedLines.map(line => {
-        return {
-          points: [
-            new BABYLON.Vector3(line.x1, line.y1, 0),
-            new BABYLON.Vector3(line.x2, line.y2, 0)
-          ],
-          thickness: lineThickness,
-          height: lineHeight
-        };
-      });
-
-      // Display coordinates on the screen
-      const coordinatesElement = document.getElementById('coordinates');
-      coordinatesElement.innerHTML = '<strong>Combined Coordinates:</strong><br>';
-      babylonFormat.forEach((line, index) => {
-        coordinatesElement.innerHTML += `Line ${index + 1}: (${line.points[0].x}, ${line.points[0].y}) to (${line.points[1].x}, ${line.points[1].y}) - Thickness: ${line.thickness}, Height: ${line.height}<br>`;
-      });
-
-      // Store the combined Babylon format for later use
-      window.babylonFormat = babylonFormat;
-
-      // Clear existing meshes on Babylon canvas
-      const scene = babylonCanvas._babylonScene;
-      scene.meshes.forEach(mesh => mesh.dispose());
-    }
-
-    function convertTo3D() {
-      if (!window.babylonFormat) {
-        alert('Please update inputs first.');
-        return;
-      }
-
-      // Render lines in 3D using the stored Babylon format
-      window.babylonFormat.forEach(line => {
-        const points = line.points.map(point => new BABYLON.Vector3(point.x, point.y, point.z));
+      // Render lines in 3D using the detected lines
+      detectedLines.forEach(line => {
+        const points = [
+          new BABYLON.Vector3(line.x1, line.y1, 0),
+          new BABYLON.Vector3(line.x2, line.y2, 0)
+        ];
 
         const lineMesh = BABYLON.MeshBuilder.CreateLines(null, { points });
         lineMesh.color = new BABYLON.Color3(1, 1, 1);
         lineMesh.enableEdgesRendering();
-        lineMesh.edgesWidth = line.thickness;
+        lineMesh.edgesWidth = lineThickness;
         lineMesh.edgesColor = new BABYLON.Color4(0, 0, 0, 1);
-        lineMesh.position.y = line.height;
+        lineMesh.position.y = lineHeight;
       });
     }
 
