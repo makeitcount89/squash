@@ -59,8 +59,6 @@
 
   <script>
     let img, context2D, babylonCanvas, detectedLines;
-    let touchStartX = 0;
-    let touchStartY = 0;
 
     function onOpenCvReady() {
       // OpenCV is ready
@@ -123,14 +121,38 @@
       const wallHeight = parseFloat(document.getElementById('wallHeight').value);
       const wallThickness = parseFloat(document.getElementById('wallThickness').value);
 
-      // Create a scene
-      const scene = new BABYLON.Scene(babylonCanvas._babylonEngine);
+      detectedLines.forEach(line => {
+        const points = [
+          new BABYLON.Vector3(line.x1, 0, line.y1),
+          new BABYLON.Vector3(line.x1, wallHeight, line.y1),
+          new BABYLON.Vector3(line.x2, wallHeight, line.y2),
+          new BABYLON.Vector3(line.x2, 0, line.y2),
+          new BABYLON.Vector3(line.x1, 0, line.y1)
+        ];
 
-      // Create a UniversalCamera
-      const camera = new BABYLON.UniversalCamera("camera", new BABYLON.Vector3(0, 5, -10), scene);
+        const wallMesh = BABYLON.MeshBuilder.CreateDashedLines(null, { points, dashSize: lineThickness, updatable: true });
+        wallMesh.color = new BABYLON.Color3.FromHexString(wallColor);
+        
+        if (wallTexture) {
+          const wallMaterial = new BABYLON.StandardMaterial("wallMaterial", babylonCanvas._babylonScene);
+          wallMaterial.diffuseTexture = new BABYLON.Texture(wallTexture, babylonCanvas._babylonScene);
+          wallMesh.material = wallMaterial;
+        }
+
+        wallMesh.scaling.y = wallThickness;
+      });
+    }
+
+    // Load Babylon canvas on page load
+    window.onload = function () {
+      babylonCanvas = document.getElementById('canvas3D');
+      const engine = new BABYLON.Engine(babylonCanvas, true);
+      const scene = new BABYLON.Scene(engine);
+
+      // Set up camera and light
+      const camera = new BABYLON.UniversalCamera('camera', new BABYLON.Vector3(0, 5, -10), scene);
       camera.setTarget(BABYLON.Vector3.Zero());
       camera.attachControl(babylonCanvas, true);
-      
       const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(1, 1, 0));
 
       // Set background color to a lighter gray
@@ -185,6 +207,4 @@
   </script>
 </body>
 
-</html>   
-
-        
+</html>
