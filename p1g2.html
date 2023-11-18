@@ -160,7 +160,7 @@
       window.babylonFormat.forEach(line => {
         const points = line.points.map(point => new BABYLON.Vector3(point.x, point.y, point.z));
 
-        const lineMesh = BABYLON.MeshBuilder.CreateLines(null, { points });
+        const lineMesh = BABYLON.MeshBuilder.CreateLines('line', { points });
         lineMesh.color = new BABYLON.Color3(1, 1, 1);
         lineMesh.enableEdgesRendering();
         lineMesh.edgesWidth = line.thickness;
