@@ -45,7 +45,7 @@
   <input type="text" id="wallTexture" placeholder="Texture URL" value="https://www.babylonjs-playground.com/textures/brick.jpg">
 
   <label for="wallHeight">Wall Height:</label>
-  <input type="number" id="wallHeight" value="250">
+  <input type="number" id="wallHeight" value="600">
 
   <label for="wallThickness">Wall Thickness:</label>
   <input type="number" id="wallThickness" value="0.2">
@@ -142,27 +142,27 @@
         wallMesh.scaling.y = wallThickness;
       });
     }
+window.onload = function () {
+  babylonCanvas = document.getElementById('canvas3D');
+  const engine = new BABYLON.Engine(babylonCanvas, true);
+  const scene = new BABYLON.Scene(engine);
 
-    // Load Babylon canvas on page load
-    window.onload = function () {
-      babylonCanvas = document.getElementById('canvas3D');
-      const engine = new BABYLON.Engine(babylonCanvas, true);
-      const scene = new BABYLON.Scene(engine);
+  // Set up camera and light
+  const camera = new BABYLON.FreeCamera('camera', new BABYLON.Vector3(0, 5, -10), scene);
+  camera.setTarget(BABYLON.Vector3.Zero());
+  camera.attachControl(babylonCanvas, true);
 
-      // Set up camera and light
-      const camera = new BABYLON.FreeCamera('camera', new BABYLON.Vector3(0, 5, -10), scene);
-      camera.setTarget(BABYLON.Vector3.Zero());
-      camera.attachControl(babylonCanvas, true);
-      const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(1, 1, 0));
+  const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(1, 1, 0));
 
-      // Set background color to a lighter gray
-      scene.clearColor = new BABYLON.Color4(0.9, 0.9, 0.9, 1);
+  // Set background color to a lighter gray
+  scene.clearColor = new BABYLON.Color4(0.9, 0.9, 0.9, 1);
 
-      // Run the Babylon.js engine
-      engine.runRenderLoop(function () {
-        scene.render();
-      });
-    };
+  // Run the Babylon.js engine
+  engine.runRenderLoop(function () {
+    scene.render();
+  });
+};
+
 
     function resetCanvas() {
       if (babylonCanvas) {
@@ -182,8 +182,7 @@
         const newScene = new BABYLON.Scene(engine);
 
         // Set up camera and light for the new scene (you may need to adjust these parameters)
-        const camera = new BABYLON.FreeCamera('camera', new BABYLON.Vector3(0, 5, -10), newScene);
-        camera.setTarget(BABYLON.Vector3.Zero());
+        const camera = new BABYLON.ArcRotateCamera('camera', -Math.PI / 2, Math.PI / 4, 5, new BABYLON.Vector3(0, 0, 0));
         camera.attachControl(babylonCanvas, true);
         const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(1, 1, 0));
 
@@ -203,7 +202,12 @@
         babylonCanvas.style.display = 'block';
       }
 
-  
+      // Clear the 2D canvas
+      context2D.clearRect(0, 0, context2D.canvas.width, context2D.canvas.height);
+
+      // Reset detectedLines or other relevant variables
+      detectedLines = null;
+    }
   </script>
 </body>
 
