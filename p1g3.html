@@ -123,70 +123,18 @@
       const wallHeight = parseFloat(document.getElementById('wallHeight').value);
       const wallThickness = parseFloat(document.getElementById('wallThickness').value);
 
-      detectedLines.forEach(line => {
-        const points = [
-          new BABYLON.Vector3(line.x1, 0, line.y1),
-          new BABYLON.Vector3(line.x1, wallHeight, line.y1),
-          new BABYLON.Vector3(line.x2, wallHeight, line.y2),
-          new BABYLON.Vector3(line.x2, 0, line.y2),
-          new BABYLON.Vector3(line.x1, 0, line.y1)
-        ];
+      // Create a scene
+      const scene = new BABYLON.Scene(babylonCanvas._babylonEngine);
 
-        const wallMesh = BABYLON.MeshBuilder.CreateDashedLines(null, { points, dashSize: lineThickness, updatable: true });
-        wallMesh.color = new BABYLON.Color3.FromHexString(wallColor);
-        
-        if (wallTexture) {
-          const wallMaterial = new BABYLON.StandardMaterial("wallMaterial", babylonCanvas._babylonScene);
-          wallMaterial.diffuseTexture = new BABYLON.Texture(wallTexture, babylonCanvas._babylonScene);
-          wallMesh.material = wallMaterial;
-        }
-
-        wallMesh.scaling.y = wallThickness;
-      });
-    }
-
-    // Load Babylon canvas on page load
-    window.onload = function () {
-      babylonCanvas = document.getElementById('canvas3D');
-      const engine = new BABYLON.Engine(babylonCanvas, true);
-      const scene = new BABYLON.Scene(engine);
-
-      // Set up camera and light
-      const camera = new BABYLON.FreeCamera('camera', new BABYLON.Vector3(0, 5, -10), scene);
+      // Create a UniversalCamera
+      const camera = new BABYLON.UniversalCamera("camera", new BABYLON.Vector3(0, 5, -10), scene);
       camera.setTarget(BABYLON.Vector3.Zero());
       camera.attachControl(babylonCanvas, true);
+      
       const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(1, 1, 0));
 
       // Set background color to a lighter gray
       scene.clearColor = new BABYLON.Color4(0.9, 0.9, 0.9, 1);
-
-      // Touch controls
-      babylonCanvas.addEventListener("touchstart", handleTouchStart, false);
-      babylonCanvas.addEventListener("touchmove", handleTouchMove, false);
-
-      function handleTouchStart(event) {
-        touchStartX = event.touches[0].clientX;
-        touchStartY = event.touches[0].clientY;
-      }
-
-      function handleTouchMove(event) {
-        if (event.touches.length === 2) {
-          const touchEndX = event.touches[1].clientX;
-          const touchEndY = event.touches[1].clientY;
-
-          const deltaX = touchEndX - touchStartX;
-          const deltaY = touchEndY - touchStartY;
-
-          // Adjust camera or perform other actions based on deltaX and deltaY
-          // For example, you can modify the camera position or perform scene transformations
-          // camera.position.x += deltaX * sensitivity;
-          // camera.position.z += deltaY * sensitivity;
-
-          // Optionally, update touchStartX and touchStartY for the next movement
-          touchStartX = touchEndX;
-          touchStartY = touchEndY;
-        }
-      }
 
       // Run the Babylon.js engine
       engine.runRenderLoop(function () {
@@ -232,8 +180,11 @@
         // Show the new Babylon canvas
         babylonCanvas.style.display = 'block';
       }
-    }
+
+  
   </script>
 </body>
 
-</html>
+</html>   
+
+        
