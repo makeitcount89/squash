@@ -32,8 +32,12 @@
       // Set background color to a lighter gray
       scene.clearColor = new BABYLON.Color4(0.9, 0.9, 0.9, 1);
 
-      // Create a 2D square
-      const squarePoints = [
+      // Create floor
+      const floor = BABYLON.MeshBuilder.CreateGround('floor', { width: 2, height: 2 });
+
+      // Extrude the floor into walls
+      const wallHeight = 2;
+      const wallShape = [
         new BABYLON.Vector3(-1, 0, -1),
         new BABYLON.Vector3(1, 0, -1),
         new BABYLON.Vector3(1, 0, 1),
@@ -41,12 +45,7 @@
         new BABYLON.Vector3(-1, 0, -1)
       ];
 
-      const square = BABYLON.MeshBuilder.CreatePolygon('square', { shape: squarePoints, sideOrientation: BABYLON.Mesh.DOUBLESIDE });
-      square.rotation.x = Math.PI / 2; // Rotate to align with the ground
-
-      // Extrude the square into walls
-      const wallHeight = 2;
-      const walls = BABYLON.MeshBuilder.ExtrudePolygon('walls', { shape: squarePoints, depth: wallHeight });
+      const walls = BABYLON.MeshBuilder.ExtrudeShape('walls', { shape: wallShape, depth: wallHeight });
 
       // Run the Babylon.js engine
       engine.runRenderLoop(function () {
