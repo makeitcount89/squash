@@ -41,7 +41,7 @@
         new BABYLON.Vector3(-1, 0, -1)
       ];
 
-      const square = new BABYLON.MeshBuilder.CreatePolygon('square', { shape: squarePoints, sideOrientation: BABYLON.Mesh.DOUBLESIDE });
+      const square = BABYLON.MeshBuilder.CreatePolygon('square', { shape: squarePoints, sideOrientation: BABYLON.Mesh.DOUBLESIDE });
       square.rotation.x = Math.PI / 2; // Rotate to align with the ground
 
       // Extrude the square into walls
