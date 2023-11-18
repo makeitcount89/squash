@@ -26,7 +26,7 @@
       margin: 10px;
     }
 
-    input, select {
+    input {
       font-size: 24px;
       margin: 10px;
     }
@@ -42,15 +42,10 @@
   <input type="color" id="wallColor" value="#000000">
 
   <label for="wallTexture">Wall Texture:</label>
-  <select id="wallTexture">
-     <option value="https://www.babylonjs-playground.com/textures/ground.jpg">Stone</option>
-    <option value="https://www.babylonjs-playground.com/textures/brick.jpg">Brick</option>
-    <option value="https://www.babylonjs-playground.com/textures/wood.jpg">Wood</option>
-    <option value="https://www.babylonjs-playground.com/textures/render.jpg">Render</option>
-  </select>
+  <input type="text" id="wallTexture" placeholder="Texture URL" value="https://www.babylonjs-playground.com/textures/brick.jpg">
 
   <label for="wallHeight">Wall Height:</label>
-  <input type="number" id="wallHeight" value="15">
+  <input type="number" id="wallHeight" value="250">
 
   <label for="wallThickness">Wall Thickness:</label>
   <input type="number" id="wallThickness" value="0.2">
@@ -64,6 +59,8 @@
 
   <script>
     let img, context2D, babylonCanvas, detectedLines;
+    let touchStartX = 0;
+    let touchStartY = 0;
 
     function onOpenCvReady() {
       // OpenCV is ready
@@ -126,66 +123,26 @@
       const wallHeight = parseFloat(document.getElementById('wallHeight').value);
       const wallThickness = parseFloat(document.getElementById('wallThickness').value);
 
-      // Separate lines into horizontal and vertical
-      const horizontalLines = detectedLines.filter(line => line.y1 === line.y2);
-      const verticalLines = detectedLines.filter(line => line.x1 === line.x2);
-
-      // Find closest line to each edge
-      const leftLine = verticalLines.reduce((acc, line) => (line.x1 < acc.x1 ? line : acc), verticalLines[0]);
-      const rightLine = verticalLines.reduce((acc, line) => (line.x1 > acc.x1 ? line : acc), verticalLines[0]);
-      const topLine = horizontalLines.reduce((acc, line) => (line.y1 < acc.y1 ? line : acc), horizontalLines[0]);
-      const bottomLine = horizontalLines.reduce((acc, line) => (line.y1 > acc.y1 ? line : acc), horizontalLines[0]);
-
-      // Create solid walls for each external side
-      createBox(leftLine.x1, leftLine.y1, leftLine.x2, leftLine.y2, wallHeight, wallThickness, wallTexture, wallColor);
-      createBox(rightLine.x1, rightLine.y1, rightLine.x2, rightLine.y2, wallHeight, wallThickness, wallTexture, wallColor);
-      createBox(topLine.x1, topLine.y1, topLine.x2, topLine.y2, wallHeight, wallThickness, wallTexture, wallColor);
-      createBox(bottomLine.x1, bottomLine.y1, bottomLine.x2, bottomLine.y2, wallHeight, wallThickness, wallTexture, wallColor);
-
-      // Create dashed lines for other internal walls
       detectedLines.forEach(line => {
-        if (
-          line !== leftLine &&
-          line !== rightLine &&
-          line !== topLine &&
-          line !== bottomLine
-        ) {
-          const points = [
-            new BABYLON.Vector3(line.x1, 0, line.y1),
-            new BABYLON.Vector3(line.x1, wallHeight, line.y1),
-            new BABYLON.Vector3(line.x2, wallHeight, line.y2),
-            new BABYLON.Vector3(line.x2, 0, line.y2),
-            new BABYLON.Vector3(line.x1, 0, line.y1)
-          ];
+        const points = [
+          new BABYLON.Vector3(line.x1, 0, line.y1),
+          new BABYLON.Vector3(line.x1, wallHeight, line.y1),
+          new BABYLON.Vector3(line.x2, wallHeight, line.y2),
+          new BABYLON.Vector3(line.x2, 0, line.y2),
+          new BABYLON.Vector3(line.x1, 0, line.y1)
+        ];
 
-          const wallMesh = BABYLON.MeshBuilder.CreateDashedLines(null, { points, dashSize: lineThickness, updatable: true });
-          wallMesh.material = createMaterial(wallTexture, wallColor);
-          wallMesh.scaling.y = wallHeight;
+        const wallMesh = BABYLON.MeshBuilder.CreateDashedLines(null, { points, dashSize: lineThickness, updatable: true });
+        wallMesh.color = new BABYLON.Color3.FromHexString(wallColor);
+        
+        if (wallTexture) {
+          const wallMaterial = new BABYLON.StandardMaterial("wallMaterial", babylonCanvas._babylonScene);
+          wallMaterial.diffuseTexture = new BABYLON.Texture(wallTexture, babylonCanvas._babylonScene);
+          wallMesh.material = wallMaterial;
         }
+
+        wallMesh.scaling.y = wallThickness;
       });
-    }
-
-    // Function to create material with texture and color
-    function createMaterial(textureUrl, color) {
-      const material = new BABYLON.StandardMaterial("wallMaterial", babylonCanvas._babylonScene);
-      if (textureUrl) {
-        material.diffuseTexture = new BABYLON.Texture(textureUrl, babylonCanvas._babylonScene);
-      }
-      material.emissiveColor = new BABYLON.Color3.FromHexString(color);
-      return material;
-    }
-
-    // Function to create solid box
-    function createBox(x1, y1, x2, y2, height, thickness, texture, color) {
-      const centerX = (x1 + x2) / 2;
-      const centerY = (y1 + y2) / 2;
-      const width = Math.abs(x2 - x1);
-      const length = Math.abs(y2 - y1);
-
-      const box = BABYLON.MeshBuilder.CreateBox(null, { width, height, depth: thickness }, babylonCanvas._babylonScene);
-     //box.position = new BABYLON.Vector3(centerX, height / 2, centerY);
-      box.scaling.y = height;
-      box.material = createMaterial(texture, color);
     }
 
     // Load Babylon canvas on page load
@@ -195,12 +152,41 @@
       const scene = new BABYLON.Scene(engine);
 
       // Set up camera and light
-      const camera = new BABYLON.ArcRotateCamera('camera', -Math.PI / 2, Math.PI / 4, 5, new BABYLON.Vector3(0, 0, 0));
+      const camera = new BABYLON.FreeCamera('camera', new BABYLON.Vector3(0, 5, -10), scene);
+      camera.setTarget(BABYLON.Vector3.Zero());
       camera.attachControl(babylonCanvas, true);
       const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(1, 1, 0));
 
       // Set background color to a lighter gray
       scene.clearColor = new BABYLON.Color4(0.9, 0.9, 0.9, 1);
+
+      // Touch controls
+      babylonCanvas.addEventListener("touchstart", handleTouchStart, false);
+      babylonCanvas.addEventListener("touchmove", handleTouchMove, false);
+
+      function handleTouchStart(event) {
+        touchStartX = event.touches[0].clientX;
+        touchStartY = event.touches[0].clientY;
+      }
+
+      function handleTouchMove(event) {
+        if (event.touches.length === 2) {
+          const touchEndX = event.touches[1].clientX;
+          const touchEndY = event.touches[1].clientY;
+
+          const deltaX = touchEndX - touchStartX;
+          const deltaY = touchEndY - touchStartY;
+
+          // Adjust camera or perform other actions based on deltaX and deltaY
+          // For example, you can modify the camera position or perform scene transformations
+          // camera.position.x += deltaX * sensitivity;
+          // camera.position.z += deltaY * sensitivity;
+
+          // Optionally, update touchStartX and touchStartY for the next movement
+          touchStartX = touchEndX;
+          touchStartY = touchEndY;
+        }
+      }
 
       // Run the Babylon.js engine
       engine.runRenderLoop(function () {
@@ -226,7 +212,8 @@
         const newScene = new BABYLON.Scene(engine);
 
         // Set up camera and light for the new scene (you may need to adjust these parameters)
-        const camera = new BABYLON.ArcRotateCamera('camera', -Math.PI / 2, Math.PI / 4, 5, new BABYLON.Vector3(0, 0, 0));
+        const camera = new BABYLON.FreeCamera('camera', new BABYLON.Vector3(0, 5, -10), newScene);
+        camera.setTarget(BABYLON.Vector3.Zero());
         camera.attachControl(babylonCanvas, true);
         const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(1, 1, 0));
 
@@ -245,8 +232,7 @@
         // Show the new Babylon canvas
         babylonCanvas.style.display = 'block';
       }
-
-  
+    }
   </script>
 </body>
 
