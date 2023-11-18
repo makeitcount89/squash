@@ -32,12 +32,25 @@
   <input type="file" id="imageInput" accept="image/*" onchange="loadAndDetect()">
   <label for="lineThickness">Line Thickness:</label>
   <input type="number" id="lineThickness" value="50">
+  
+  <label for="wallColor">Wall Color:</label>
+  <input type="color" id="wallColor" value="#ffffff">
+
+  <label for="wallTexture">Wall Texture:</label>
+  <input type="text" id="wallTexture" placeholder="Texture URL">
+
+  <label for="wallHeight">Wall Height:</label>
+  <input type="number" id="wallHeight" value="2">
+
+  <label for="wallThickness">Wall Thickness:</label>
+  <input type="number" id="wallThickness" value="0.1">
+
   <button onclick="updateInputs()">Update Inputs</button>
   <button onclick="convertTo3D()">Convert to 3D</button>
   <button onclick="resetCanvas()">Reset</button>
   <canvas id="canvas2D" width="600" height="600"></canvas>
   <canvas id="canvas3D" width="1200" height="1200"></canvas>
-  
+
   <p id="coordinates"></p>
 
   <script>
@@ -106,20 +119,30 @@
       }
 
       const lineThickness = parseInt(document.getElementById('lineThickness').value);
+      const wallColor = document.getElementById('wallColor').value;
+      const wallTexture = document.getElementById('wallTexture').value;
+      const wallHeight = parseFloat(document.getElementById('wallHeight').value);
+      const wallThickness = parseFloat(document.getElementById('wallThickness').value);
 
-      // Render walls in 3D using the detected lines
       detectedLines.forEach(line => {
-        const height = 2; // Adjust the height of the walls as needed
         const points = [
           new BABYLON.Vector3(line.x1, 0, line.y1),
-          new BABYLON.Vector3(line.x1, height, line.y1),
-          new BABYLON.Vector3(line.x2, height, line.y2),
+          new BABYLON.Vector3(line.x1, wallHeight, line.y1),
+          new BABYLON.Vector3(line.x2, wallHeight, line.y2),
           new BABYLON.Vector3(line.x2, 0, line.y2),
-          new BABYLON.Vector3(line.x1, 0, line.y1) // Close the loop
+          new BABYLON.Vector3(line.x1, 0, line.y1)
         ];
 
         const wallMesh = BABYLON.MeshBuilder.CreateDashedLines(null, { points, dashSize: lineThickness, updatable: true });
-        wallMesh.color = new BABYLON.Color3(1, 1, 1);
+        wallMesh.color = new BABYLON.Color3.FromHexString(wallColor);
+        
+        if (wallTexture) {
+          const wallMaterial = new BABYLON.StandardMaterial("wallMaterial", babylonCanvas._babylonScene);
+          wallMaterial.diffuseTexture = new BABYLON.Texture(wallTexture, babylonCanvas._babylonScene);
+          wallMesh.material = wallMaterial;
+        }
+
+        wallMesh.scaling.y = wallThickness;
       });
     }
 
@@ -181,13 +204,13 @@
         babylonCanvas.style.display = 'block';
       }
 
-      // Reset other variables or perform additional cleanup as needed
+      //Reset other variables or perform additional cleanup as needed
 
-      // Clear the 2D canvas
-      context2D.clearRect(0, 0, context2D.canvas.width, context2D.canvas.height);
+      //Clear the 2D canvas
+      //context2D.clearRect(0, 0, context2D.canvas.width, context2D.canvas.height);
 
       // Reset detectedLines or other relevant variables
-      detectedLines = null;
+      //detectedLines = null;
 
       // Update or reset other UI elements as needed
     }
