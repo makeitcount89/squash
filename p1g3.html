@@ -141,11 +141,12 @@
         scene.render();
       });
     };
-   function resetCanvas() {
+ function resetCanvas() {
   if (babylonCanvas) {
     // Dispose the Babylon engine
-    babylonCanvas._babylonEngine.stopRenderLoop();
-    babylonCanvas._babylonEngine.dispose();
+    const engine = babylonCanvas._babylonEngine;
+    engine.stopRenderLoop();
+    engine.dispose();
     babylonCanvas = null;
   }
 
@@ -164,6 +165,7 @@
 
   // Update or reset other UI elements as needed
 }
+
 
 
   </script>
