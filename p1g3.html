@@ -141,29 +141,29 @@
         scene.render();
       });
     };
-    
     function resetCanvas() {
-      if (babylonCanvas) {
-        // Close Babylon canvas
-        babylonCanvas.dispose();
-        babylonCanvas = null;
-      }
+  if (babylonCanvas) {
+    // Dispose the Babylon engine and canvas
+    babylonCanvas._babylonEngine.dispose();
+    babylonCanvas = null;
+  }
 
-      // Reset other variables or perform additional cleanup as needed
+  // Reset other variables or perform additional cleanup as needed
 
-      // Clear the 2D canvas
-      context2D.clearRect(0, 0, context2D.canvas.width, context2D.canvas.height);
+  // Clear the 2D canvas
+  context2D.clearRect(0, 0, context2D.canvas.width, context2D.canvas.height);
 
-      // Reset other input fields or variables
+  // Reset other input fields or variables
 
-      // Reset the image input
-      document.getElementById('imageInput').value = '';
+  // Reset the image input
+  document.getElementById('imageInput').value = '';
 
-      // Reset detectedLines or other relevant variables
-      detectedLines = null;
+  // Reset detectedLines or other relevant variables
+  detectedLines = null;
 
-      // Update or reset other UI elements as needed
-    }
+  // Update or reset other UI elements as needed
+}
+
   </script>
 </body>
 
