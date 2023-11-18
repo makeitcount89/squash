@@ -130,6 +130,29 @@
       }
 
       const lineThickness = parseInt(document.getElementById('lineThickness').value);
+      const wallHeight = parseInt(document.getElementById('wallHeight').value);
+
+      // Create an array to hold the paths for extrusion
+      const paths = [];
+
+      // Create paths based on detected lines
+      detectedLines.forEach(line => {
+        paths.push([
+          new BABYLON.Vector3(line.x1, 0, line.y1),
+          new BABYLON.Vector3(line.x2, 0, line.y2)
+        ]);
+      });
+
+      // Create a shape from the paths
+      const shape = BABYLON.Curve3.CreateCatmullRomSpline(paths, 10);
+
+      // Extrude the shape to create walls
+      const walls = BABYLON.MeshBuilder.ExtrudeShape('walls', { shape, depth: wallHeight }, babylonCanvas._babylonScene);
+
+      // Set up material for the walls
+      const wallMaterial = new BABYLON.StandardMaterial('wallMaterial', babylonCanvas._babylonScene);
+      wallMaterial.diffuseColor = new BABYLON.Color3(1, 1, 1);
+      walls.material = wallMaterial;
 
       // Render lines in 3D using the detected lines
       detectedLines.forEach(line => {
