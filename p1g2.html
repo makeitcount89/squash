@@ -32,8 +32,6 @@
   <input type="file" id="imageInput" accept="image/*" onchange="loadAndDetect()">
   <label for="lineThickness">Line Thickness:</label>
   <input type="number" id="lineThickness" value="50">
-  <label for="wallHeight">Wall Height:</label>
-  <input type="number" id="wallHeight" value="270">
   <button onclick="updateInputs()">Update Inputs</button>
   <button onclick="convertTo3D()">Convert to 3D</button>
   <canvas id="canvas2D" width="600" height="600"></canvas>
@@ -93,10 +91,9 @@
     }
 
     function updateInputs() {
-      // Clear Babylon canvas
+      // Clear existing meshes on Babylon canvas
       const scene = babylonCanvas._babylonScene;
       scene.meshes.forEach(mesh => mesh.dispose());
-      scene.render(); // Render to clear the canvas visually
     }
 
     function convertTo3D() {
@@ -106,25 +103,19 @@
       }
 
       const lineThickness = parseInt(document.getElementById('lineThickness').value);
-      const wallHeight = parseInt(document.getElementById('wallHeight').value) || 270;
 
-      // Render walls in 3D using the detected lines
+      // Render lines in 3D using the detected lines
       detectedLines.forEach(line => {
         const points = [
           new BABYLON.Vector3(line.x1, 0, line.y1),
           new BABYLON.Vector3(line.x2, 0, line.y2)
         ];
 
-        const shape = points.map(point => new BABYLON.Vector2(point.x, point.z));
-        const path = [new BABYLON.Vector3(0, 0, 0), new BABYLON.Vector3(0, wallHeight, 0)];
-
-        const wallMesh = BABYLON.MeshBuilder.ExtrudeShape(null, { shape, path, sideOrientation: BABYLON.Mesh.DOUBLESIDE });
-        
-        const material = new BABYLON.StandardMaterial('material', babylonCanvas._babylonScene);
-        material.emissiveColor = new BABYLON.Color3(1, 0, 0); // Red color, you can customize it
-        wallMesh.material = material;
-
-        wallMesh.scaling.y = lineThickness;
+        const lineMesh = BABYLON.MeshBuilder.CreateLines(null, { points });
+        lineMesh.color = new BABYLON.Color3(1, 1, 1);
+        lineMesh.enableEdgesRendering();
+        lineMesh.edgesWidth = lineThickness;
+        lineMesh.edgesColor = new BABYLON.Color4(0, 0, 0, 1);
       });
     }
 
