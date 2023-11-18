@@ -32,10 +32,14 @@
   <input type="file" id="imageInput" accept="image/*" onchange="loadAndDetect()">
   <label for="lineThickness">Line Thickness:</label>
   <input type="number" id="lineThickness" value="50">
+  <label for="wallHeight">Wall Height:</label>
+  <input type="number" id="wallHeight" value="200">
   <button onclick="updateInputs()">Update Inputs</button>
   <button onclick="convertTo3D()">Convert to 3D</button>
+  <button onclick="resetCanvas()">Reset</button>
   <canvas id="canvas2D" width="600" height="600"></canvas>
   <canvas id="canvas3D" width="1200" height="1200"></canvas>
+
   <p id="coordinates"></p>
 
   <script>
@@ -104,6 +108,7 @@
       }
 
       const lineThickness = parseInt(document.getElementById('lineThickness').value);
+      const wallHeight = parseInt(document.getElementById('wallHeight').value);
 
       // Render lines in 3D using the detected lines
       detectedLines.forEach(line => {
@@ -117,6 +122,10 @@
         lineMesh.enableEdgesRendering();
         lineMesh.edgesWidth = lineThickness;
         lineMesh.edgesColor = new BABYLON.Color4(0, 0, 0, 1);
+
+        // Extrude lines into walls
+        const wallHeightVector = new BABYLON.Vector3(0, wallHeight, 0);
+        const wall = BABYLON.MeshBuilder.ExtrudePolygon('wall', { shape: points, depth: wallHeightVector });
       });
     }
 
@@ -139,6 +148,30 @@
         scene.render();
       });
     };
+
+    function resetCanvas() {
+      if (babylonCanvas) {
+        // Dispose the Babylon engine
+        babylonCanvas._babylonEngine.stopRenderLoop();
+        babylonCanvas._babylonEngine.dispose();
+        babylonCanvas = null;
+      }
+
+      // Reset other variables or perform additional cleanup as needed
+
+      // Clear the 2D canvas
+      context2D.clearRect(0, 0, context2D.canvas.width, context2D.canvas.height);
+
+      // Reset other input fields or variables
+
+      // Reset the image input
+      document.getElementById('imageInput').value = '';
+
+      // Reset detectedLines or other relevant variables
+      detectedLines = null;
+
+      // Update or reset other UI elements as needed
+    }
   </script>
 </body>
 
