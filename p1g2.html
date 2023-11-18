@@ -25,17 +25,23 @@
       padding: 10px;
       margin: 5px;
     }
+
+    #selectFloorPlan {
+      font-size: 24px;
+      padding: 30px;
+    }
   </style>
 </head>
 
 <body>
+  <label for="imageInput" id="selectFloorPlan">Select Floor Plan</label>
   <input type="file" id="imageInput" accept="image/*" onchange="loadAndDetect()">
   <label for="lineThickness">Line Thickness:</label>
   <input type="number" id="lineThickness" value="50">
   <label for="wallHeight">Wall Height:</label>
   <input type="number" id="wallHeight" value="270">
-  <button onclick="updateInputs()">Update Inputs</button>
   <button onclick="convertTo3D()">Convert to 3D</button>
+  <button onclick="resetCanvas()">Reset</button>
   <canvas id="canvas2D" width="600" height="600"></canvas>
   <canvas id="canvas3D" width="1200" height="1200"></canvas>
   <p id="coordinates"></p>
@@ -92,46 +98,29 @@
       linesP.delete();
     }
 
-  function updateInputs() {
-  // Dispose the current Babylon engine
-  const engine = babylonCanvas._babylonEngine;
-  engine.dispose();
+    function resetCanvas() {
+      // Dispose the current Babylon engine
+      const engine = babylonCanvas._babylonEngine;
+      engine.dispose();
 
-  // Recreate the Babylon engine and canvas
-  babylonCanvas = document.getElementById('canvas3D');
-  const newEngine = new BABYLON.Engine(babylonCanvas, true);
-  const scene = new BABYLON.Scene(newEngine);
+      // Recreate the Babylon engine and canvas
+      babylonCanvas = document.getElementById('canvas3D');
+      const newEngine = new BABYLON.Engine(babylonCanvas, true);
+      const scene = new BABYLON.Scene(newEngine);
 
-  // Set up camera and light
-  const camera = new BABYLON.ArcRotateCamera('camera', -Math.PI / 2, Math.PI / 4, 5, new BABYLON.Vector3(0, 0, 0));
-  camera.attachControl(babylonCanvas, true);
-  const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(1, 1, 0));
+      // Set up camera and light
+      const camera = new BABYLON.ArcRotateCamera('camera', -Math.PI / 2, Math.PI / 4, 5, new BABYLON.Vector3(0, 0, 0));
+      camera.attachControl(babylonCanvas, true);
+      const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(1, 1, 0));
 
-  // Set background color to a lighter gray
-  scene.clearColor = new BABYLON.Color4(0.9, 0.9, 0.9, 1);
+      // Set background color to a lighter gray
+      scene.clearColor = new BABYLON.Color4(0.9, 0.9, 0.9, 1);
 
-  // Render lines in 3D using the detected lines
-  detectedLines.forEach(line => {
-    const lineThickness = parseInt(document.getElementById('lineThickness').value);
-    const points = [
-      new BABYLON.Vector3(line.x1, 0, line.y1),
-      new BABYLON.Vector3(line.x2, 0, line.y2)
-    ];
-
-    const lineMesh = BABYLON.MeshBuilder.CreateLines(null, { points });
-    lineMesh.color = new BABYLON.Color3(1, 1, 1);
-    lineMesh.enableEdgesRendering();
-    lineMesh.edgesWidth = lineThickness;
-    lineMesh.edgesColor = new BABYLON.Color4(0, 0, 0, 1);
-  });
-
-  // Run the new Babylon.js engine
-  newEngine.runRenderLoop(() => {
-    scene.render();
-  });
-}
-
-
+      // Run the new Babylon.js engine
+      newEngine.runRenderLoop(() => {
+        scene.render();
+      });
+    }
 
     function convertTo3D() {
       if (!detectedLines) {
