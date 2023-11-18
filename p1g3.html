@@ -18,36 +18,6 @@
   <canvas id="renderCanvas"></canvas>
 
   <script>
-    // Your JavaScript code here
-
-    const inputText = `
-      Line 1: (85, 82) to (514, 82) - Thickness: 5, Height: 10
-      Line 2: (103, 495) to (103, 104) - Thickness: 5, Height: 10
-      Line 3: (82, 514) to (82, 85) - Thickness: 5, Height: 10
-      Line 4: (517, 514) to (517, 85) - Thickness: 5, Height: 10
-      Line 5: (104, 103) to (495, 103) - Thickness: 5, Height: 10
-      Line 6: (85, 517) to (514, 517) - Thickness: 5, Height: 10
-      Line 7: (104, 496) to (495, 496) - Thickness: 5, Height: 10
-      Line 8: (496, 495) to (496, 104) - Thickness: 5, Height: 10
-    `;
-
-    const lines = inputText.trim().split('\n').map(line => {
-      const match = line.match(/\((\d+), (\d+)\) to \((\d+), (\d+)\) - Thickness: (\d+), Height: (\d+)/);
-      if (match) {
-        const [, x1, y1, x2, y2, thickness, height] = match;
-        return {
-          points: [
-            new BABYLON.Vector3(parseFloat(x1), parseFloat(y1), 0),
-            new BABYLON.Vector3(parseFloat(x2), parseFloat(y2), 0)
-          ],
-          thickness: parseFloat(thickness),
-          height: parseFloat(height)
-        };
-      } else {
-        return null;
-      }
-    }).filter(line => line !== null);
-
     // Create Babylon.js engine
     const canvas = document.getElementById('renderCanvas');
     const engine = new BABYLON.Engine(canvas, true);
@@ -59,28 +29,13 @@
     const camera = new BABYLON.ArcRotateCamera('camera', -Math.PI / 2, Math.PI / 2, 5, new BABYLON.Vector3(0, 0, 0), scene);
     camera.attachControl(canvas, true);
 
-    // Create lines in the scene based on the parsed data
-    lines.forEach(lineData => {
-      const points = lineData.points;
-      const thickness = lineData.thickness;
-      const height = lineData.height;
+    // Create a cube
+    const cube = BABYLON.MeshBuilder.CreateBox('cube', { size: 1 }, scene);
 
-      // Create a ribbon mesh for each line
-      const ribbon = BABYLON.MeshBuilder.CreateRibbon(
-        'ribbon',
-        { pathArray: [points], sideOrientation: BABYLON.Mesh.DOUBLESIDE },
-        scene
-      );
-
-      // Apply material to the ribbon
-      const material = new BABYLON.StandardMaterial('material', scene);
-      material.emissiveColor = new BABYLON.Color3(1, 0, 0); // Red color, you can customize it
-      ribbon.material = material;
-
-      // Set thickness and height
-      ribbon.scaling.y = thickness / 10; // Adjust as needed
-      ribbon.scaling.z = height / 10; // Adjust as needed
-    });
+    // Apply a material to the cube
+    const material = new BABYLON.StandardMaterial('material', scene);
+    material.emissiveColor = new BABYLON.Color3(1, 0, 0); // Red color, you can customize it
+    cube.material = material;
 
     // Run the Babylon.js engine
     engine.runRenderLoop(() => {
