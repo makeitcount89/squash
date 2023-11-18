@@ -123,11 +123,11 @@
 
       detectedLines.forEach(line => {
         const points = [
-          new BABYLON.Vector3(line.x1, 0, line.y1),
-          new BABYLON.Vector3(line.x1, wallHeight, line.y1),
-          new BABYLON.Vector3(line.x2, wallHeight, line.y2),
-          new BABYLON.Vector3(line.x2, 0, line.y2),
-          new BABYLON.Vector3(line.x1, 0, line.y1)
+          new BABYLON.Vector3(line.x1, 0, -line.y1),
+          new BABYLON.Vector3(line.x1, wallHeight, -line.y1),
+          new BABYLON.Vector3(line.x2, wallHeight, -line.y2),
+          new BABYLON.Vector3(line.x2, 0, -line.y2),
+          new BABYLON.Vector3(line.x1, 0, -line.y1)
         ];
 
         const wallMesh = BABYLON.MeshBuilder.CreateDashedLines(null, { points, dashSize: lineThickness, updatable: true });
