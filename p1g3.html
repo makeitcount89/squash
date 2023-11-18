@@ -93,13 +93,6 @@
     }
 
     function updateInputs() {
-      // Display coordinates on the screen
-      const coordinatesElement = document.getElementById('coordinates');
-      coordinatesElement.innerHTML = '<strong>Detected Lines:</strong><br>';
-      detectedLines.forEach((line, index) => {
-        coordinatesElement.innerHTML += `Line ${index + 1}: (${line.x1}, ${line.y1}) to (${line.x2}, ${line.y2})<br>`;
-      });
-
       // Clear existing meshes on Babylon canvas
       const scene = babylonCanvas._babylonScene;
       scene.meshes.forEach(mesh => mesh.dispose());
