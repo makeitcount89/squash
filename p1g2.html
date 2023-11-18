@@ -25,24 +25,17 @@
       padding: 10px;
       margin: 5px;
     }
-
-    #selectImage {
-      font-size: 24px;
-      padding: 30px;
-      cursor: pointer;
-    }
   </style>
 </head>
 
 <body>
-  <label for="imageInput" id="selectImage">Select Image</label>
-  <input type="file" id="imageInput" accept="image/*" style="display: none;" onchange="loadAndDetect()">
+  <input type="file" id="imageInput" accept="image/*" onchange="loadAndDetect()">
   <label for="lineThickness">Line Thickness:</label>
   <input type="number" id="lineThickness" value="50">
   <label for="wallHeight">Wall Height:</label>
   <input type="number" id="wallHeight" value="270">
+  <button onclick="updateInputs()">Update Inputs</button>
   <button onclick="convertTo3D()">Convert to 3D</button>
-  <button onclick="resetCanvas()">Reset</button>
   <canvas id="canvas2D" width="600" height="600"></canvas>
   <canvas id="canvas3D" width="1200" height="1200"></canvas>
   <p id="coordinates"></p>
@@ -73,96 +66,4 @@
       }
 
       const canvas2D = document.getElementById('canvas2D');
-      const src = cv.imread(canvas2D);
-      const dst = new cv.Mat();
-
-      cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY);
-      cv.Canny(src, dst, 50, 100, 3, false);
-
-      // Convert the detected lines to Babylon.js format
-      detectedLines = [];
-      const linesP = new cv.Mat();
-      cv.HoughLinesP(dst, linesP, 1, Math.PI / 180, 50, 50, 10);
-
-      for (let i = 0; i < linesP.rows; i++) {
-        const line = linesP.data32S.subarray(i * 4, i * 4 + 4);
-        detectedLines.push({
-          x1: line[0],
-          y1: line[1],
-          x2: line[2],
-          y2: line[3]
-        });
-      }
-
-      src.delete();
-      dst.delete();
-      linesP.delete();
-    }
-
-    function resetCanvas() {
-      // Dispose the current Babylon engine
-      const engine = babylonCanvas._babylonEngine;
-      engine.dispose();
-
-      // Recreate the Babylon engine and canvas
-      babylonCanvas = document.getElementById('canvas3D');
-      const newEngine = new BABYLON.Engine(babylonCanvas, true);
-      const scene = new BABYLON.Scene(newEngine);
-
-      // Set up camera and light
-      const camera = new BABYLON.ArcRotateCamera('camera', -Math.PI / 2, Math.PI / 4, 5, new BABYLON.Vector3(0, 0, 0));
-      camera.attachControl(babylonCanvas, true);
-      const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(1, 1, 0));
-
-      // Set background color to a lighter gray
-      scene.clearColor = new BABYLON.Color4(0.9, 0.9, 0.9, 1);
-
-      });
-    }
-
-    function convertTo3D() {
-      if (!detectedLines) {
-        alert('Please detect lines first.');
-        return;
-      }
-
-      const lineThickness = parseInt(document.getElementById('lineThickness').value);
-
-      // Render lines in 3D using the detected lines
-      detectedLines.forEach(line => {
-        const points = [
-          new BABYLON.Vector3(line.x1, 0, line.y1),
-          new BABYLON.Vector3(line.x2, 0, line.y2)
-        ];
-
-        const lineMesh = BABYLON.MeshBuilder.CreateLines(null, { points });
-        lineMesh.color = new BABYLON.Color3(1, 1, 1);
-        lineMesh.enableEdgesRendering();
-        lineMesh.edgesWidth = lineThickness;
-        lineMesh.edgesColor = new BABYLON.Color4(0, 0, 0, 1);
-      });
-    }
-
-    // Load Babylon canvas on page load
-    window.onload = function () {
-      babylonCanvas = document.getElementById('canvas3D');
-      const engine = new BABYLON.Engine(babylonCanvas, true);
-      const scene = new BABYLON.Scene(engine);
-
-      // Set up camera and light
-      const camera = new BABYLON.ArcRotateCamera('camera', -Math.PI / 2, Math.PI / 4, 5, new BABYLON.Vector3(0, 0, 0));
-      camera.attachControl(babylonCanvas, true);
-      const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(1, 1, 0));
-
-      // Set background color to a lighter gray
-      scene.clearColor = new BABYLON.Color4(0.9, 0.9, 0.9, 1);
-
-      // Run the Babylon.js engine
-      engine.runRenderLoop(function () {
-        scene.render();
-      });
-    };
-  </script>
-</body>
-
-</html>
+      const src = cv.imread(canvas2D
