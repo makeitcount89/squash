@@ -32,6 +32,8 @@
   <input type="file" id="imageInput" accept="image/*" onchange="loadAndDetect()">
   <label for="lineThickness">Line Thickness:</label>
   <input type="number" id="lineThickness" value="50">
+  <label for="wallHeight">Wall Height:</label>
+  <input type="number" id="wallHeight" value="270">
   <button onclick="updateInputs()">Update Inputs</button>
   <button onclick="convertTo3D()">Convert to 3D</button>
   <canvas id="canvas2D" width="600" height="600"></canvas>
@@ -94,6 +96,8 @@
       // Clear existing meshes on Babylon canvas
       const scene = babylonCanvas._babylonScene;
       scene.meshes.forEach(mesh => mesh.dispose());
+      // Reset detected lines
+      detectedLines = [];
     }
 
     function convertTo3D() {
