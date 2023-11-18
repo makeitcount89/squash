@@ -112,47 +112,72 @@
       linesP.delete();
     }
 
-    function convertTo3D() {
-      if (!detectedLines) {
-        alert('Please detect lines first.');
-        return;
-      }
+   function convertTo3D() {
+  if (!detectedLines) {
+    alert('Please detect lines first.');
+    return;
+  }
 
-      const lineThickness = parseInt(document.getElementById('lineThickness').value);
-      const wallColor = document.getElementById('wallColor').value;
-      const wallHeight = parseFloat(document.getElementById('wallHeight').value);
-      const wallThickness = parseFloat(document.getElementById('wallThickness').value);
-      const brickTexture = "https://www.babylonjs-playground.com/textures/brick.jpg"; // URL to a brick texture
-      const transparentTexture = "https://www.babylonjs-playground.com/textures/grass.png"; // URL to a transparent texture
+  const lineThickness = parseInt(document.getElementById('lineThickness').value);
+  const wallColor = document.getElementById('wallColor').value;
+  const wallHeight = parseFloat(document.getElementById('wallHeight').value);
+  const wallThickness = parseFloat(document.getElementById('wallThickness').value);
+  const brickTexture = "https://www.babylonjs-playground.com/textures/brick.jpg"; // URL to a brick texture
+  const transparentTexture = "https://www.babylonjs-playground.com/textures/grass.png"; // URL to a transparent texture
 
-      detectedLines.forEach(line => {
-        const points = [
-          new BABYLON.Vector3(line.x1, 0, line.y1),
-          new BABYLON.Vector3(line.x1, wallHeight, line.y1),
-          new BABYLON.Vector3(line.x2, wallHeight, line.y2),
-          new BABYLON.Vector3(line.x2, 0, line.y2),
-          new BABYLON.Vector3(line.x1, 0, line.y1)
-        ];
+  // Create Babylon canvas if not already created
+  if (!babylonCanvas) {
+    babylonCanvas = document.getElementById('canvas3D');
+    const engine = new BABYLON.Engine(babylonCanvas, true);
+    const scene = new BABYLON.Scene(engine);
 
-        const wallMesh = BABYLON.MeshBuilder.CreateDashedLines(null, { points, dashSize: lineThickness, updatable: true });
-        wallMesh.color = new BABYLON.Color3.FromHexString(wallColor);
+    // Set up camera and light
+    const camera = new BABYLON.ArcRotateCamera('camera', -Math.PI / 2, Math.PI / 4, 5, new BABYLON.Vector3(0, 0, 0));
+    camera.attachControl(babylonCanvas, true);
+    const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(1, 1, 0));
 
-        // Apply texture based on user selection
-        const wallTexture = document.getElementById('wallTexture').value;
-        const material = new BABYLON.StandardMaterial("wallMaterial", babylonCanvas._babylonScene);
-        
-        if (wallTexture === 'brick') {
-          material.diffuseTexture = new BABYLON.Texture(brickTexture, babylonCanvas._babylonScene);
-        } else if (wallTexture === 'transparent') {
-          material.diffuseTexture = new BABYLON.Texture(transparentTexture, babylonCanvas._babylonScene);
-          material.alpha = 0.5; // Set transparency
-        }
-        
-        wallMesh.material = material;
-        
-        wallMesh.scaling.y = wallThickness;
-      });
+    // Set background color to a lighter gray
+    scene.clearColor = new BABYLON.Color4(0.9, 0.9, 0.9, 1);
+
+    // Run the Babylon.js engine
+    engine.runRenderLoop(function () {
+      scene.render();
+    });
+
+    // Update the babylonCanvas and babylonScene variables
+    babylonCanvas._babylonEngine = engine;
+    babylonCanvas._babylonScene = scene;
+  }
+
+  detectedLines.forEach(line => {
+    const points = [
+      new BABYLON.Vector3(line.x1, 0, line.y1),
+      new BABYLON.Vector3(line.x1, wallHeight, line.y1),
+      new BABYLON.Vector3(line.x2, wallHeight, line.y2),
+      new BABYLON.Vector3(line.x2, 0, line.y2),
+      new BABYLON.Vector3(line.x1, 0, line.y1)
+    ];
+
+    const wallMesh = BABYLON.MeshBuilder.CreateDashedLines(null, { points, dashSize: lineThickness, updatable: true });
+    wallMesh.color = new BABYLON.Color3.FromHexString(wallColor);
+
+    // Apply texture based on user selection
+    const wallTexture = document.getElementById('wallTexture').value;
+    const material = new BABYLON.StandardMaterial("wallMaterial", babylonCanvas._babylonScene);
+    
+    if (wallTexture === 'brick') {
+      material.diffuseTexture = new BABYLON.Texture(brickTexture, babylonCanvas._babylonScene);
+    } else if (wallTexture === 'transparent') {
+      material.diffuseTexture = new BABYLON.Texture(transparentTexture, babylonCanvas._babylonScene);
+      material.alpha = 0.5; // Set transparency
     }
+    
+    wallMesh.material = material;
+    
+    wallMesh.scaling.y = wallThickness;
+  });
+}
+
 
     function resetCanvas() {
       if (babylonCanvas) {
