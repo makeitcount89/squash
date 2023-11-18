@@ -25,17 +25,24 @@
       padding: 10px;
       margin: 5px;
     }
+
+    #selectImage {
+      font-size: 24px;
+      padding: 30px;
+      cursor: pointer;
+    }
   </style>
 </head>
 
 <body>
-  <input type="file" id="imageInput" accept="image/*" onchange="loadAndDetect()">
+  <label for="imageInput" id="selectImage">Select Image</label>
+  <input type="file" id="imageInput" accept="image/*" style="display: none;" onchange="loadAndDetect()">
   <label for="lineThickness">Line Thickness:</label>
   <input type="number" id="lineThickness" value="50">
-  <label for="lineHeight">Line Height (3D):</label>
-  <input type="number" id="lineHeight" value="10">
-  <button onclick="updateInputs()">Update Inputs</button>
+  <label for="wallHeight">Wall Height:</label>
+  <input type="number" id="wallHeight" value="270">
   <button onclick="convertTo3D()">Convert to 3D</button>
+  <button onclick="resetCanvas()">Reset</button>
   <canvas id="canvas2D" width="600" height="600"></canvas>
   <canvas id="canvas3D" width="1200" height="1200"></canvas>
   <p id="coordinates"></p>
@@ -92,42 +99,15 @@
       linesP.delete();
     }
 
-    function updateInputs() {
-      // Clear existing meshes on Babylon canvas
-      const scene = babylonCanvas._babylonScene;
-      scene.meshes.forEach(mesh => mesh.dispose());
-    }
+    function resetCanvas() {
+      // Dispose the current Babylon engine
+      const engine = babylonCanvas._babylonEngine;
+      engine.dispose();
 
-    function convertTo3D() {
-      if (!detectedLines) {
-        alert('Please detect lines first.');
-        return;
-      }
-
-      const lineThickness = parseInt(document.getElementById('lineThickness').value);
-      const lineHeight = parseInt(document.getElementById('lineHeight').value);
-
-      // Render lines in 3D using the detected lines
-      detectedLines.forEach(line => {
-        const points = [
-          new BABYLON.Vector3(line.x1, line.y1, 0),
-          new BABYLON.Vector3(line.x2, line.y2, 0)
-        ];
-
-        const lineMesh = BABYLON.MeshBuilder.CreateLines(null, { points });
-        lineMesh.color = new BABYLON.Color3(1, 1, 1);
-        lineMesh.enableEdgesRendering();
-        lineMesh.edgesWidth = lineThickness;
-        lineMesh.edgesColor = new BABYLON.Color4(0, 0, 0, 1);
-        lineMesh.position.y = lineHeight;
-      });
-    }
-
-    // Load Babylon canvas on page load
-    window.onload = function () {
+      // Recreate the Babylon engine and canvas
       babylonCanvas = document.getElementById('canvas3D');
-      const engine = new BABYLON.Engine(babylonCanvas, true);
-      const scene = new BABYLON.Scene(engine);
+      const newEngine = new BABYLON.Engine(babylonCanvas, true);
+      const scene = new BABYLON.Scene(newEngine);
 
       // Set up camera and light
       const camera = new BABYLON.ArcRotateCamera('camera', -Math.PI / 2, Math.PI / 4, 5, new BABYLON.Vector3(0, 0, 0));
@@ -137,11 +117,77 @@
       // Set background color to a lighter gray
       scene.clearColor = new BABYLON.Color4(0.9, 0.9, 0.9, 1);
 
-      // Run the Babylon.js engine
-      engine.runRenderLoop(function () {
-        scene.render();
       });
-    };
+    }
+
+    function convertTo3D() {
+  if (!detectedLines) {
+    alert('Please detect lines first.');
+    return;
+  }
+
+  const lineThickness = parseInt(document.getElementById('lineThickness').value);
+  const wallHeight = parseInt(document.getElementById('wallHeight').value);
+
+  // Dispose the current Babylon engine
+  const engine = babylonCanvas._babylonEngine;
+  engine.dispose();
+
+  // Recreate the Babylon engine and canvas
+  babylonCanvas = document.getElementById('canvas3D');
+  const newEngine = new BABYLON.Engine(babylonCanvas, true);
+  const scene = new BABYLON.Scene(newEngine);
+
+  // Set up camera and light
+  const camera = new BABYLON.ArcRotateCamera('camera', -Math.PI / 2, Math.PI / 4, 5, new BABYLON.Vector3(0, 0, 0));
+  camera.attachControl(babylonCanvas, true);
+  const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(1, 1, 0));
+
+  // Set background color to a lighter gray
+  scene.clearColor = new BABYLON.Color4(0.9, 0.9, 0.9, 1);
+
+  // Create an array to hold the paths for extrusion
+  const paths = [];
+
+  // Create paths based on detected lines
+  detectedLines.forEach(line => {
+    paths.push([
+      new BABYLON.Vector3(line.x1, 0, line.y1),
+      new BABYLON.Vector3(line.x2, 0, line.y2)
+    ]);
+  });
+
+  // Create a shape from the paths
+  const shape = BABYLON.Curve3.CreateCatmullRomSpline(paths, 10);
+
+  // Extrude the shape to create walls
+  const walls = BABYLON.MeshBuilder.ExtrudeShape('walls', { shape, depth: wallHeight }, scene);
+
+  // Set up material for the walls
+  const wallMaterial = new BABYLON.StandardMaterial('wallMaterial', scene);
+  wallMaterial.diffuseColor = new BABYLON.Color3(1, 1, 1);
+  walls.material = wallMaterial;
+
+  // Render lines in 3D using the detected lines
+  detectedLines.forEach(line => {
+    const points = [
+      new BABYLON.Vector3(line.x1, 0, line.y1),
+      new BABYLON.Vector3(line.x2, 0, line.y2)
+    ];
+
+    const lineMesh = BABYLON.MeshBuilder.CreateLines(null, { points });
+    lineMesh.color = new BABYLON.Color3(1, 1, 1);
+    lineMesh.enableEdgesRendering();
+    lineMesh.edgesWidth = lineThickness;
+    lineMesh.edgesColor = new BABYLON.Color4(0, 0, 0, 1);
+  });
+
+  // Run the new Babylon.js engine
+  newEngine.runRenderLoop(() => {
+    scene.render();
+  });
+}
+
   </script>
 </body>
 
