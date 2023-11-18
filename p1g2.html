@@ -18,6 +18,8 @@
 
     body {
       font-size: 24px;
+      margin: 0;
+      overflow: hidden;
     }
 
     button {
@@ -53,7 +55,7 @@
   <button onclick="convertTo3D()">Convert to 3D</button>
   <button onclick="resetCanvas()">Reset</button>
   <canvas id="canvas2D" width="600" height="600"></canvas>
-  <canvas id="canvas3D" width="1200" height="1200"></canvas>
+  <canvas id="canvas3D"></canvas>
 
   <p id="coordinates"></p>
 
@@ -109,49 +111,75 @@
       linesP.delete();
     }
 
-function convertTo3D() {
-  if (!detectedLines) {
-    alert('Please detect lines first.');
-    return;
-  }
+    function convertTo3D() {
+      if (!detectedLines) {
+        alert('Please detect lines first.');
+        return;
+      }
 
-  const lineThickness = parseInt(document.getElementById('lineThickness').value);
-  const wallColor = document.getElementById('wallColor').value;
-  const wallTexture = document.getElementById('wallTexture').value;
-  const wallHeight = parseFloat(document.getElementById('wallHeight').value);
-  const wallThickness = parseFloat(document.getElementById('wallThickness').value);
+      const lineThickness = parseInt(document.getElementById('lineThickness').value);
+      const wallColor = document.getElementById('wallColor').value;
+      const wallTexture = document.getElementById('wallTexture').value;
+      const wallHeight = parseFloat(document.getElementById('wallHeight').value);
+      const wallThickness = parseFloat(document.getElementById('wallThickness').value);
 
-  // Calculate the center position based on detected lines
-  const centerX = detectedLines.reduce((sum, line) => sum + (line.x1 + line.x2) / 2, 0) / detectedLines.length;
-  const centerY = detectedLines.reduce((sum, line) => sum + (line.y1 + line.y2) / 2, 0) / detectedLines.length;
+      // Calculate the center position based on detected lines
+      const centerX = detectedLines.reduce((sum, line) => sum + (line.x1 + line.x2) / 2, 0) / detectedLines.length;
+      const centerY = detectedLines.reduce((sum, line) => sum + (line.y1 + line.y2) / 2, 0) / detectedLines.length;
 
-  // Set the camera target to the center position
-  babylonCanvas._babylonScene.activeCamera.setTarget(new BABYLON.Vector3(centerX, wallHeight / 2, centerY));
+      babylonCanvas = document.getElementById('canvas3D');
+      const engine = new BABYLON.Engine(babylonCanvas, true);
+      const scene = new BABYLON.Scene(engine);
 
-  detectedLines.forEach(line => {
-    const points = [
-      new BABYLON.Vector3(line.x1 - centerX, 0, line.y1 - centerY),
-      new BABYLON.Vector3(line.x1 - centerX, wallHeight, line.y1 - centerY),
-      new BABYLON.Vector3(line.x2 - centerX, wallHeight, line.y2 - centerY),
-      new BABYLON.Vector3(line.x2 - centerX, 0, line.y2 - centerY),
-      new BABYLON.Vector3(line.x1 - centerX, 0, line.y1 - centerY)
-    ];
+      // Set up camera and light
+      const camera = new BABYLON.FreeCamera('camera', new BABYLON.Vector3(0, 5, -10), scene);
+      camera.setTarget(BABYLON.Vector3.Zero());
+      camera.attachControl(babylonCanvas, true);
 
-    const wallMesh = BABYLON.MeshBuilder.CreateDashedLines(null, { points, dashSize: lineThickness, updatable: true });
-    wallMesh.position = new BABYLON.Vector3(centerX, 0, centerY);
-    wallMesh.color = new BABYLON.Color3.FromHexString(wallColor);
-    
-    if (wallTexture) {
-      const wallMaterial = new BABYLON.StandardMaterial("wallMaterial", babylonCanvas._babylonScene);
-      wallMaterial.diffuseTexture = new BABYLON.Texture(wallTexture, babylonCanvas._babylonScene);
-      wallMesh.material = wallMaterial;
+      // Set camera position to look at the calculated center
+      camera.position = new BABYLON.Vector3(centerX, 5, centerY);
+
+      const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(1, 1, 0));
+
+      // Set background color to a lighter gray
+      scene.clearColor = new BABYLON.Color4(0.9, 0.9, 0.9, 1);
+
+      // Enable zoom
+      camera.wheelPrecision = 10;
+
+      detectedLines.forEach(line => {
+        const points = [
+          new BABYLON.Vector3(line.x1 - centerX, 0, line.y1 - centerY),
+          new BABYLON.Vector3(line.x1 - centerX, wallHeight, line.y1 - centerY),
+          new BABYLON.Vector3(line.x2 - centerX, wallHeight, line.y2 - centerY),
+          new BABYLON.Vector3(line.x2 - centerX, 0, line.y2 - centerY),
+          new BABYLON.Vector3(line.x1 - centerX, 0, line.y1 - centerY)
+        ];
+
+        const wallMesh = BABYLON.MeshBuilder.CreateDashedLines(null, { points, dashSize: lineThickness, updatable: true });
+        wallMesh.color = new BABYLON.Color3.FromHexString(wallColor);
+
+        if (wallTexture) {
+          const wallMaterial = new BABYLON.StandardMaterial("wallMaterial", scene);
+          wallMaterial.diffuseTexture = new BABYLON.Texture(wallTexture, scene);
+          wallMesh.material = wallMaterial;
+        }
+
+        wallMesh.scaling.y = wallThickness;
+      });
+
+      // Run the Babylon.js engine
+      engine.runRenderLoop(function () {
+        scene.render();
+      });
+
+      // Handle window resize
+      window.addEventListener('resize', function () {
+        babylonCanvas.width = window.innerWidth;
+        babylonCanvas.height = window.innerHeight;
+        engine.resize();
+      });
     }
-
-    wallMesh.scaling.y = wallThickness;
-  });
-}
-
-
 
     function resetCanvas() {
       if (babylonCanvas) {
@@ -171,12 +199,16 @@ function convertTo3D() {
         const newScene = new BABYLON.Scene(engine);
 
         // Set up camera and light for the new scene (you may need to adjust these parameters)
-        const camera = new BABYLON.ArcRotateCamera('camera', -Math.PI / 2, Math.PI / 4, 5, new BABYLON.Vector3(0, 0, 0));
+        const camera = new BABYLON.FreeCamera('camera', new BABYLON.Vector3(0, 5, -10), newScene);
+        camera.setTarget(BABYLON.Vector3.Zero());
         camera.attachControl(babylonCanvas, true);
         const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(1, 1, 0));
 
         // Set background color to a lighter gray
         newScene.clearColor = new BABYLON.Color4(0.9, 0.9, 0.9, 1);
+
+        // Enable zoom
+        camera.wheelPrecision = 10;
 
         // Run the Babylon.js engine for the new scene
         engine.runRenderLoop(function () {
