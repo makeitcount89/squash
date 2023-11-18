@@ -148,31 +148,26 @@
         return;
       }
 
-      const lineThickness = parseFloat(document.getElementById('lineThickness').value);
-      const lineHeight = parseFloat(document.getElementById('lineHeight').value);
+      const lineThickness = parseInt(document.getElementById('lineThickness').value);
+      const lineHeight = parseInt(document.getElementById('lineHeight').value);
 
       // Convert to Babylon.js-compatible format
       babylonFormat = lines.map(line => {
-        const points = [
-          new BABYLON.Vector3(line.x1, line.y1, 0),
-          new BABYLON.Vector3(line.x2, line.y2, 0)
-        ];
-
-        const lineMesh = BABYLON.MeshBuilder.CreateLines(null, { points });
-        lineMesh.color = new BABYLON.Color3(1, 1, 1);
-        lineMesh.enableEdgesRendering();
-        lineMesh.edgesWidth = lineThickness;
-        lineMesh.edgesColor = new BABYLON.Color4(0, 0, 0, 1);
-        lineMesh.position.y = lineHeight;
-
-        return lineMesh;
+        return {
+          points: [
+            new BABYLON.Vector3(line.x1, line.y1, 0),
+            new BABYLON.Vector3(line.x2, line.y2, 0)
+          ],
+          thickness: lineThickness,
+          height: lineHeight
+        };
       });
 
-      // Display converted coordinates on the screen
+      // Display coordinates on the screen
       const coordinatesElement = document.getElementById('coordinates');
       coordinatesElement.innerHTML += '<br><strong>Converted to Babylon Format:</strong><br>';
       babylonFormat.forEach((line, index) => {
-        coordinatesElement.innerHTML += `Line ${index + 1}: (${line.points[0].x}, ${line.points[0].y}) to (${line.points[1].x}, ${line.points[1].y}) - Thickness: ${lineThickness}, Height: ${lineHeight}<br>`;
+        coordinatesElement.innerHTML += `Line ${index + 1}: (${line.points[0].x}, ${line.points[0].y}) to (${line.points[1].x}, ${line.points[1].y}) - Thickness: ${line.thickness}, Height: ${line.height}<br>`;
       });
 
       // Store the converted Babylon format for later use
@@ -198,17 +193,24 @@
         // Set background color to a lighter gray
         scene.clearColor = new BABYLON.Color4(0.9, 0.9, 0.9, 1);
 
+        // Parse input text and create lines
+        const lines3D = window.babylonFormat.map(line => {
+          const points = line.points.map(point => new BABYLON.Vector3(point.x, point.y, point.z));
+
+          const lineMesh = BABYLON.MeshBuilder.CreateLines(null, { points });
+          lineMesh.color = new BABYLON.Color3(1, 1, 1);
+          lineMesh.enableEdgesRendering();
+          lineMesh.edgesWidth = line.thickness;
+          lineMesh.edgesColor = new BABYLON.Color4(0, 0, 0, 1);
+          lineMesh.position.y = line.height;
+
+          return lineMesh;
+        });
+
         engine.runRenderLoop(function () {
           scene.render();
         });
       }
-
-      // Clear existing meshes
-      const scene = babylonCanvas._babylonScene;
-      scene.meshes.forEach(mesh => mesh.dispose());
-
-      // Render lines in 3D using the stored Babylon format
-      window.babylonFormat.forEach(lineMesh => scene.addMesh(lineMesh));
 
       // Clear the stored Babylon format
       window.babylonFormat = null;
