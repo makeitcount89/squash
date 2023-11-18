@@ -142,17 +142,12 @@
       });
     };
 
-    function resetCanvas() {
+function resetCanvas() {
   if (babylonCanvas) {
     // Hide the Babylon canvas
     babylonCanvas.style.display = 'none';
 
-    // Dispose the Babylon scene and engine
-    const scene = babylonCanvas._babylonScene;
-    scene.dispose();
-    babylonCanvas._babylonEngine.dispose();
-
-    // Create a new Babylon canvas and engine
+    // Create a new Babylon canvas element
     const newCanvas = document.createElement('canvas');
     newCanvas.width = babylonCanvas.width;
     newCanvas.height = babylonCanvas.height;
@@ -200,6 +195,7 @@
 
   // Update or reset other UI elements as needed
 }
+
 
 
 
