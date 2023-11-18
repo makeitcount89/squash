@@ -50,7 +50,7 @@
   </select>
 
   <label for="wallHeight">Wall Height:</label>
-  <input type="number" id="wallHeight" value="600">
+  <input type="number" id="wallHeight" value="250">
 
   <label for="wallThickness">Wall Thickness:</label>
   <input type="number" id="wallThickness" value="0.2">
@@ -130,13 +130,13 @@
       const horizontalLines = detectedLines.filter(line => line.y1 === line.y2);
       const verticalLines = detectedLines.filter(line => line.x1 === line.x2);
 
-      // Find outermost lines
-      const leftLine = horizontalLines.reduce((acc, line) => (line.x1 < acc.x1 ? line : acc), horizontalLines[0]);
-      const rightLine = horizontalLines.reduce((acc, line) => (line.x1 > acc.x1 ? line : acc), horizontalLines[0]);
-      const topLine = verticalLines.reduce((acc, line) => (line.y1 < acc.y1 ? line : acc), verticalLines[0]);
-      const bottomLine = verticalLines.reduce((acc, line) => (line.y1 > acc.y1 ? line : acc), verticalLines[0]);
+      // Find closest line to each edge
+      const leftLine = verticalLines.reduce((acc, line) => (line.x1 < acc.x1 ? line : acc), verticalLines[0]);
+      const rightLine = verticalLines.reduce((acc, line) => (line.x1 > acc.x1 ? line : acc), verticalLines[0]);
+      const topLine = horizontalLines.reduce((acc, line) => (line.y1 < acc.y1 ? line : acc), horizontalLines[0]);
+      const bottomLine = horizontalLines.reduce((acc, line) => (line.y1 > acc.y1 ? line : acc), horizontalLines[0]);
 
-      // Create boxes for outermost lines
+      // Create solid walls for each external side
       createBox(leftLine.x1, leftLine.y1, leftLine.x2, leftLine.y2, wallHeight, wallThickness, wallTexture, wallColor);
       createBox(rightLine.x1, rightLine.y1, rightLine.x2, rightLine.y2, wallHeight, wallThickness, wallTexture, wallColor);
       createBox(topLine.x1, topLine.y1, topLine.x2, topLine.y2, wallHeight, wallThickness, wallTexture, wallColor);
@@ -144,7 +144,12 @@
 
       // Create dashed lines for other internal walls
       detectedLines.forEach(line => {
-        if (line !== leftLine && line !== rightLine && line !== topLine && line !== bottomLine) {
+        if (
+          line !== leftLine &&
+          line !== rightLine &&
+          line !== topLine &&
+          line !== bottomLine
+        ) {
           const points = [
             new BABYLON.Vector3(line.x1, 0, line.y1),
             new BABYLON.Vector3(line.x1, wallHeight, line.y1),
@@ -241,10 +246,10 @@
       }
 
       // Clear the 2D canvas
-      context2D.clearRect(0, 0, context2D.canvas.width, context2D.canvas.height);
+      //context2D.clearRect(0, 0, context2D.canvas.width, context2D.canvas.height);
 
       // Reset detectedLines or other relevant variables
-      detectedLines = null;
+      //detectedLines = null;
     }
   </script>
 </body>
