@@ -42,7 +42,10 @@
   <input type="color" id="wallColor" value="#ffffff">
 
   <label for="wallTexture">Wall Texture:</label>
-  <input type="text" id="wallTexture" placeholder="Texture URL">
+  <select id="wallTexture">
+    <option value="brick">Brick</option>
+    <option value="transparent">Transparent</option>
+  </select>
 
   <label for="wallHeight">Wall Height:</label>
   <input type="number" id="wallHeight" value="600">
@@ -110,47 +113,46 @@
     }
 
     function convertTo3D() {
-  if (!detectedLines) {
-    alert('Please detect lines first.');
-    return;
-  }
+      if (!detectedLines) {
+        alert('Please detect lines first.');
+        return;
+      }
 
-  const lineThickness = parseInt(document.getElementById('lineThickness').value);
-  const wallColor = document.getElementById('wallColor').value;
-  const wallHeight = parseFloat(document.getElementById('wallHeight').value);
-  const wallThickness = parseFloat(document.getElementById('wallThickness').value);
-  const brickTexture = "https://www.babylonjs-playground.com/textures/brick.jpg"; // URL to a brick texture
-  const transparentTexture = "https://www.babylonjs-playground.com/textures/grass.png"; // URL to a transparent texture
+      const lineThickness = parseInt(document.getElementById('lineThickness').value);
+      const wallColor = document.getElementById('wallColor').value;
+      const wallHeight = parseFloat(document.getElementById('wallHeight').value);
+      const wallThickness = parseFloat(document.getElementById('wallThickness').value);
+      const brickTexture = "https://www.babylonjs-playground.com/textures/brick.jpg"; // URL to a brick texture
+      const transparentTexture = "https://www.babylonjs-playground.com/textures/grass.png"; // URL to a transparent texture
 
-  detectedLines.forEach(line => {
-    const points = [
-      new BABYLON.Vector3(line.x1, 0, line.y1),
-      new BABYLON.Vector3(line.x1, wallHeight, line.y1),
-      new BABYLON.Vector3(line.x2, wallHeight, line.y2),
-      new BABYLON.Vector3(line.x2, 0, line.y2),
-      new BABYLON.Vector3(line.x1, 0, line.y1)
-    ];
+      detectedLines.forEach(line => {
+        const points = [
+          new BABYLON.Vector3(line.x1, 0, line.y1),
+          new BABYLON.Vector3(line.x1, wallHeight, line.y1),
+          new BABYLON.Vector3(line.x2, wallHeight, line.y2),
+          new BABYLON.Vector3(line.x2, 0, line.y2),
+          new BABYLON.Vector3(line.x1, 0, line.y1)
+        ];
 
-    const wallMesh = BABYLON.MeshBuilder.CreateDashedLines(null, { points, dashSize: lineThickness, updatable: true });
-    wallMesh.color = new BABYLON.Color3.FromHexString(wallColor);
+        const wallMesh = BABYLON.MeshBuilder.CreateDashedLines(null, { points, dashSize: lineThickness, updatable: true });
+        wallMesh.color = new BABYLON.Color3.FromHexString(wallColor);
 
-    // Apply texture based on user selection
-    const wallTexture = document.getElementById('wallTexture').value;
-    const material = new BABYLON.StandardMaterial("wallMaterial", babylonCanvas._babylonScene);
-    
-    if (wallTexture === 'brick') {
-      material.diffuseTexture = new BABYLON.Texture(brickTexture, babylonCanvas._babylonScene);
-    } else if (wallTexture === 'transparent') {
-      material.diffuseTexture = new BABYLON.Texture(transparentTexture, babylonCanvas._babylonScene);
-      material.alpha = 0.5; // Set transparency
+        // Apply texture based on user selection
+        const wallTexture = document.getElementById('wallTexture').value;
+        const material = new BABYLON.StandardMaterial("wallMaterial", babylonCanvas._babylonScene);
+        
+        if (wallTexture === 'brick') {
+          material.diffuseTexture = new BABYLON.Texture(brickTexture, babylonCanvas._babylonScene);
+        } else if (wallTexture === 'transparent') {
+          material.diffuseTexture = new BABYLON.Texture(transparentTexture, babylonCanvas._babylonScene);
+          material.alpha = 0.5; // Set transparency
+        }
+        
+        wallMesh.material = material;
+        
+        wallMesh.scaling.y = wallThickness;
+      });
     }
-    
-    wallMesh.material = material;
-    
-    wallMesh.scaling.y = wallThickness;
-  });
-}
-
 
     function resetCanvas() {
       if (babylonCanvas) {
