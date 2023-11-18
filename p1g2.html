@@ -30,27 +30,18 @@
     camera.attachControl(canvas, true);
 
     // Define your line data
-    const lineData = {
-      path: [
-        new BABYLON.Vector3(0, 0, 0),
-        new BABYLON.Vector3(1, 1, 1)
-      ],
-      thickness: 0.1
-    };
+    const points = [
+      new BABYLON.Vector3(0, 0, 0),
+      new BABYLON.Vector3(1, 1, 1)
+    ];
 
-    // Create a Path3D
-    const path3D = new BABYLON.Path3D(lineData.path);
-
-    // Create a ribbon mesh for the line
-    const ribbon = path3D.createRibbon('ribbon', 20, scene, false, BABYLON.Mesh.DOUBLESIDE);
+    // Create a red line
+    const line = BABYLON.Mesh.CreateLines('line', points, scene);
     
-    // Apply material to the ribbon
+    // Apply material to the line
     const material = new BABYLON.StandardMaterial('material', scene);
     material.emissiveColor = new BABYLON.Color3(1, 0, 0); // Red color, you can customize it
-    ribbon.material = material;
-
-    // Set thickness
-    ribbon.scaling.y = lineData.thickness;
+    line.material = material;
 
     // Run the Babylon.js engine
     engine.runRenderLoop(() => {
