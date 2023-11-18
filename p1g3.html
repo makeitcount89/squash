@@ -141,7 +141,8 @@
         scene.render();
       });
     };
-function resetCanvas() {
+
+    function resetCanvas() {
   if (babylonCanvas) {
     // Hide the Babylon canvas
     babylonCanvas.style.display = 'none';
@@ -157,12 +158,15 @@ function resetCanvas() {
     newCanvas.height = babylonCanvas.height;
     babylonCanvas.parentNode.replaceChild(newCanvas, babylonCanvas);
 
-    const engine = new BABYLON.Engine(newCanvas, true);
+    babylonCanvas = newCanvas;
+
+    // Create a new Babylon engine and scene
+    const engine = new BABYLON.Engine(babylonCanvas, true);
     const newScene = new BABYLON.Scene(engine);
 
     // Set up camera and light for the new scene (you may need to adjust these parameters)
     const camera = new BABYLON.ArcRotateCamera('camera', -Math.PI / 2, Math.PI / 4, 5, new BABYLON.Vector3(0, 0, 0));
-    camera.attachControl(newCanvas, true);
+    camera.attachControl(babylonCanvas, true);
     const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(1, 1, 0));
 
     // Set background color to a lighter gray
@@ -174,7 +178,6 @@ function resetCanvas() {
     });
 
     // Update the babylonCanvas and babylonScene variables
-    babylonCanvas = newCanvas;
     babylonCanvas._babylonEngine = engine;
     babylonCanvas._babylonScene = newScene;
 
@@ -197,6 +200,7 @@ function resetCanvas() {
 
   // Update or reset other UI elements as needed
 }
+
 
 
 
