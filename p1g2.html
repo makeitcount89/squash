@@ -3,181 +3,64 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Image Processing and 3D Rendering</title>
-  <!-- Include OpenCV.js -->
-  <script async src="https://docs.opencv.org/master/opencv.js" onload="onOpenCvReady();" type="text/javascript"></script>
-  <!-- Include Babylon.js -->
+  <title>3D Babylon Image</title>
+  <!-- Include Babylon.js library -->
   <script src="https://cdn.babylonjs.com/babylon.js"></script>
   <style>
-    #canvas2D, #canvas3D {
-      border: 1px solid #000;
-      margin-top: 20px;
-    }
-
-    body {
-      font-size: 18px;
-    }
-
-    button {
-      font-size: 18px;
-      padding: 10px;
-      margin: 5px;
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
     }
   </style>
 </head>
 <body>
-  <input type="file" id="imageInput" accept="image/*">
-  <button onclick="loadImage()">Load Image</button>
-  <button onclick="detectLines()">Detect Lines</button>
-  <label for="lineThickness">Line Thickness:</label>
-  <input type="number" id="lineThickness" value="5">
-  <label for="lineHeight">Line Height (3D):</label>
-  <input type="number" id="lineHeight" value="10">
-  <button onclick="generateBabylonFormat()">Generate Babylon Format</button>
-  <button onclick="render3D()">Render 3D</button>
-  <canvas id="canvas2D" width="600" height="600"></canvas>
-  <canvas id="canvas3D" width="1200" height="1200"></canvas>
-  <p id="coordinates"></p>
+  <canvas id="renderCanvas"></canvas>
 
   <script>
-    let img, context2D, babylonCanvas, lines, babylonFormat;
+    // Create Babylon.js engine
+    const canvas = document.getElementById('renderCanvas');
+    const engine = new BABYLON.Engine(canvas, true);
 
-    function onOpenCvReady() {
-      // OpenCV is ready
-    }
+    // Create a scene
+    const scene = new BABYLON.Scene(engine);
 
-    function loadImage() {
-      const input = document.getElementById('imageInput');
-      img = new Image();
-      img.onload = function () {
-        context2D = document.getElementById('canvas2D').getContext('2d');
-        context2D.clearRect(0, 0, context2D.canvas.width, context2D.canvas.height);
-        context2D.drawImage(img, 0, 0, context2D.canvas.width, context2D.canvas.height);
-      };
-      img.src = URL.createObjectURL(input.files[0]);
-    }
+    // Create a camera
+    const camera = new BABYLON.ArcRotateCamera('camera', -Math.PI / 2, Math.PI / 2, 5, new BABYLON.Vector3(0, 0, 0), scene);
+    camera.attachControl(canvas, true);
 
-    function detectLines() {
-      if (!img) {
-        alert('Please load an image first.');
-        return;
-      }
+    // Define your line data
+    const lineData = {
+      path: [
+        new BABYLON.Vector3(0, 0, 0),
+        new BABYLON.Vector3(1, 1, 1)
+      ],
+      thickness: 0.1
+    };
 
-      const canvas2D = document.getElementById('canvas2D');
-      const src = cv.imread(canvas2D);
-      const dst = new cv.Mat();
+    // Create a Path3D
+    const path3D = new BABYLON.Path3D(lineData.path);
 
-      cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY);
-      cv.Canny(src, dst, 50, 100, 3, false);
+    // Create a ribbon mesh for the line
+    const ribbon = path3D.createRibbon('ribbon', 20, scene, false, BABYLON.Mesh.DOUBLESIDE);
+    
+    // Apply material to the ribbon
+    const material = new BABYLON.StandardMaterial('material', scene);
+    material.emissiveColor = new BABYLON.Color3(1, 0, 0); // Red color, you can customize it
+    ribbon.material = material;
 
-      // Display the result on the 2D canvas
-      cv.imshow(canvas2D, dst);
+    // Set thickness
+    ribbon.scaling.y = lineData.thickness;
 
-      // Convert the detected lines to Babylon.js format
-      lines = [];
-      const linesP = new cv.Mat();
-      cv.HoughLinesP(dst, linesP, 1, Math.PI / 180, 50, 50, 10);
+    // Run the Babylon.js engine
+    engine.runRenderLoop(() => {
+      scene.render();
+    });
 
-      for (let i = 0; i < linesP.rows; i++) {
-        const line = linesP.data32S.subarray(i * 4, i * 4 + 4);
-        lines.push({
-          x1: line[0],
-          y1: line[1],
-          x2: line[2],
-          y2: line[3]
-        });
-      }
-
-      // Display coordinates
-      displayCoordinates();
-
-      src.delete();
-      dst.delete();
-      linesP.delete();
-    }
-
-    function displayCoordinates() {
-      const coordinatesElement = document.getElementById('coordinates');
-      coordinatesElement.innerHTML = '<strong>Coordinates:</strong><br>';
-
-      lines.forEach((line, index) => {
-        coordinatesElement.innerHTML += `Line ${index + 1}: (${line.x1}, ${line.y1}) to (${line.x2}, ${line.y2})<br>`;
-      });
-    }
-
-    function generateBabylonFormat() {
-      if (!lines) {
-        alert('Please detect lines first.');
-        return;
-      }
-
-      const lineThickness = parseInt(document.getElementById('lineThickness').value);
-      const lineHeight = parseInt(document.getElementById('lineHeight').value);
-
-      // Generate Babylon.js-compatible format
-      babylonFormat = lines.map(line => {
-        return {
-          points: [
-            new BABYLON.Vector3(line.x1, line.y1, 0),
-            new BABYLON.Vector3(line.x2, line.y2, 0)
-          ],
-          thickness: lineThickness,
-          height: lineHeight
-        };
-      });
-
-      // Display coordinates on the screen
-      const coordinatesElement = document.getElementById('coordinates');
-      coordinatesElement.innerHTML += '<br><strong>Combined Coordinates:</strong><br>';
-      babylonFormat.forEach((line, index) => {
-        coordinatesElement.innerHTML += `Line ${index + 1}: (${line.points[0].x}, ${line.points[0].y}) to (${line.points[1].x}, ${line.points[1].y}) - Thickness: ${line.thickness}, Height: ${line.height}<br>`;
-      });
-
-      // Store the generated Babylon format for later use
-      window.babylonFormat = babylonFormat;
-      alert('Babylon format generated and stored. You can now render 3D.');
-    }
-
-    function render3D() {
-      if (!window.babylonFormat) {
-        alert('Please generate Babylon format first.');
-        return;
-      }
-
-      if (!babylonCanvas) {
-        babylonCanvas = document.getElementById('canvas3D');
-        const engine = new BABYLON.Engine(babylonCanvas, true);
-        const scene = new BABYLON.Scene(engine);
-
-        // Set up camera and light
-        const camera = new BABYLON.ArcRotateCamera('camera', -Math.PI / 2, Math.PI / 4, 5, new BABYLON.Vector3(0, 0, 0));
-        camera.attachControl(babylonCanvas, true);
-        const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(1, 1, 0));
-
-        // Set background color to a lighter gray
-        scene.clearColor = new BABYLON.Color4(0.9, 0.9, 0.9, 1);
-
-        engine.runRenderLoop(function () {
-          scene.render();
-        });
-      }
-
-      // Clear existing meshes
-      const scene = babylonCanvas._babylonScene;
-      scene.meshes.forEach(mesh => mesh.dispose());
-
-      // Render lines in 3D using the stored Babylon format
-      window.babylonFormat.forEach(line => {
-        const points = line.points.map(point => new BABYLON.Vector3(point.x, point.y, point.z));
-
-        const tube = BABYLON.MeshBuilder.CreateTube(null, { path: points, radius: line.thickness, cap: BABYLON.Mesh.CAP_ALL });
-        tube.position.y = line.height;
-        tube.color = new BABYLON.Color3(1, 1, 1);
-      });
-
-      // Clear the stored Babylon format
-      window.babylonFormat = null;
-    }
+    // Handle window resize
+    window.addEventListener('resize', () => {
+      engine.resize();
+    });
   </script>
 </body>
 </html>
