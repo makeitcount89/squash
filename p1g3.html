@@ -17,13 +17,18 @@
     }
 
     body {
-      font-size: 18px;
+      font-size: 24px;
     }
 
     button {
-      font-size: 18px;
-      padding: 10px;
-      margin: 5px;
+      font-size: 24px;
+      padding: 15px;
+      margin: 10px;
+    }
+
+    input {
+      font-size: 24px;
+      margin: 10px;
     }
   </style>
 </head>
@@ -32,12 +37,24 @@
   <input type="file" id="imageInput" accept="image/*" onchange="loadAndDetect()">
   <label for="lineThickness">Line Thickness:</label>
   <input type="number" id="lineThickness" value="50">
-  <button onclick="updateInputs()">Update Inputs</button>
+  
+  <label for="wallColor">Wall Color:</label>
+  <input type="color" id="wallColor" value="#ffffff">
+
+  <label for="wallTexture">Wall Texture:</label>
+  <input type="text" id="wallTexture" placeholder="Texture URL">
+
+  <label for="wallHeight">Wall Height:</label>
+  <input type="number" id="wallHeight" value="600">
+
+  <label for="wallThickness">Wall Thickness:</label>
+  <input type="number" id="wallThickness" value="0.2">
+
   <button onclick="convertTo3D()">Convert to 3D</button>
   <button onclick="resetCanvas()">Reset</button>
   <canvas id="canvas2D" width="600" height="600"></canvas>
   <canvas id="canvas3D" width="1200" height="1200"></canvas>
-  
+
   <p id="coordinates"></p>
 
   <script>
@@ -92,13 +109,6 @@
       linesP.delete();
     }
 
-    function updateInputs() {
-      // Clear Babylon canvas
-      const scene = babylonCanvas._babylonScene;
-      scene.meshes.forEach(mesh => mesh.dispose());
-      scene.render(); // Render to clear the canvas visually
-    }
-
     function convertTo3D() {
       if (!detectedLines) {
         alert('Please detect lines first.');
@@ -106,19 +116,30 @@
       }
 
       const lineThickness = parseInt(document.getElementById('lineThickness').value);
+      const wallColor = document.getElementById('wallColor').value;
+      const wallTexture = document.getElementById('wallTexture').value;
+      const wallHeight = parseFloat(document.getElementById('wallHeight').value);
+      const wallThickness = parseFloat(document.getElementById('wallThickness').value);
 
-      // Render lines in 3D using the detected lines
       detectedLines.forEach(line => {
         const points = [
           new BABYLON.Vector3(line.x1, 0, line.y1),
-          new BABYLON.Vector3(line.x2, 0, line.y2)
+          new BABYLON.Vector3(line.x1, wallHeight, line.y1),
+          new BABYLON.Vector3(line.x2, wallHeight, line.y2),
+          new BABYLON.Vector3(line.x2, 0, line.y2),
+          new BABYLON.Vector3(line.x1, 0, line.y1)
         ];
 
-        const lineMesh = BABYLON.MeshBuilder.CreateLines(null, { points });
-        lineMesh.color = new BABYLON.Color3(1, 1, 1);
-        lineMesh.enableEdgesRendering();
-        lineMesh.edgesWidth = lineThickness;
-        lineMesh.edgesColor = new BABYLON.Color4(0, 0, 0, 1);
+        const wallMesh = BABYLON.MeshBuilder.CreateDashedLines(null, { points, dashSize: lineThickness, updatable: true });
+        wallMesh.color = new BABYLON.Color3.FromHexString(wallColor);
+        
+        if (wallTexture) {
+          const wallMaterial = new BABYLON.StandardMaterial("wallMaterial", babylonCanvas._babylonScene);
+          wallMaterial.diffuseTexture = new BABYLON.Texture(wallTexture, babylonCanvas._babylonScene);
+          wallMesh.material = wallMaterial;
+        }
+
+        wallMesh.scaling.y = wallThickness;
       });
     }
 
@@ -142,61 +163,50 @@
       });
     };
 
-function resetCanvas() {
-  if (babylonCanvas) {
-    // Hide the Babylon canvas
-    babylonCanvas.style.display = 'none';
+    function resetCanvas() {
+      if (babylonCanvas) {
+        // Hide the Babylon canvas
+        babylonCanvas.style.display = 'none';
 
-    // Create a new Babylon canvas element
-    const newCanvas = document.createElement('canvas');
-    newCanvas.width = babylonCanvas.width;
-    newCanvas.height = babylonCanvas.height;
-    babylonCanvas.parentNode.replaceChild(newCanvas, babylonCanvas);
+        // Create a new Babylon canvas element
+        const newCanvas = document.createElement('canvas');
+        newCanvas.width = babylonCanvas.width;
+        newCanvas.height = babylonCanvas.height;
+        babylonCanvas.parentNode.replaceChild(newCanvas, babylonCanvas);
 
-    babylonCanvas = newCanvas;
+        babylonCanvas = newCanvas;
 
-    // Create a new Babylon engine and scene
-    const engine = new BABYLON.Engine(babylonCanvas, true);
-    const newScene = new BABYLON.Scene(engine);
+        // Create a new Babylon engine and scene
+        const engine = new BABYLON.Engine(babylonCanvas, true);
+        const newScene = new BABYLON.Scene(engine);
 
-    // Set up camera and light for the new scene (you may need to adjust these parameters)
-    const camera = new BABYLON.ArcRotateCamera('camera', -Math.PI / 2, Math.PI / 4, 5, new BABYLON.Vector3(0, 0, 0));
-    camera.attachControl(babylonCanvas, true);
-    const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(1, 1, 0));
+        // Set up camera and light for the new scene (you may need to adjust these parameters)
+        const camera = new BABYLON.ArcRotateCamera('camera', -Math.PI / 2, Math.PI / 4, 5, new BABYLON.Vector3(0, 0, 0));
+        camera.attachControl(babylonCanvas, true);
+        const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(1, 1, 0));
 
-    // Set background color to a lighter gray
-    newScene.clearColor = new BABYLON.Color4(0.9, 0.9, 0.9, 1);
+        // Set background color to a lighter gray
+        newScene.clearColor = new BABYLON.Color4(0.9, 0.9, 0.9, 1);
 
-    // Run the Babylon.js engine for the new scene
-    engine.runRenderLoop(function () {
-      newScene.render();
-    });
+        // Run the Babylon.js engine for the new scene
+        engine.runRenderLoop(function () {
+          newScene.render();
+        });
 
-    // Update the babylonCanvas and babylonScene variables
-    babylonCanvas._babylonEngine = engine;
-    babylonCanvas._babylonScene = newScene;
+        // Update the babylonCanvas and babylonScene variables
+        babylonCanvas._babylonEngine = engine;
+        babylonCanvas._babylonScene = newScene;
 
-    // Show the new Babylon canvas
-    babylonCanvas.style.display = 'block';
-  }
+        // Show the new Babylon canvas
+        babylonCanvas.style.display = 'block';
+      }
 
-  // Reset other variables or perform additional cleanup as needed
+      // Clear the 2D canvas
+      context2D.clearRect(0, 0, context2D.canvas.width, context2D.canvas.height);
 
-  // Clear the 2D canvas
- // context2D.clearRect(0, 0, context2D.canvas.width, context2D.canvas.height);
-
-  // Reset detectedLines or other relevant variables
- // detectedLines = null;
-
-  // Update or reset other UI elements as needed
-}
-
-
-
-
-
-
-
+      // Reset detectedLines or other relevant variables
+      detectedLines = null;
+    }
   </script>
 </body>
 
