@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,8 +9,7 @@
   <!-- Include Babylon.js -->
   <script src="https://cdn.babylonjs.com/babylon.js"></script>
   <style>
-    #canvas2D,
-    #canvas3D {
+    #canvas2D, #canvas3D {
       border: 1px solid #000;
       margin-top: 20px;
     }
@@ -27,7 +25,6 @@
     }
   </style>
 </head>
-
 <body>
   <input type="file" id="imageInput" accept="image/*">
   <button onclick="loadImage()">Load Image</button>
@@ -37,8 +34,8 @@
   <label for="lineHeight">Line Height (3D):</label>
   <input type="number" id="lineHeight" value="10">
   <button onclick="generateBabylonFormat()">Generate Babylon Format</button>
-  <button onclick="convertToBabylonFormat()">Converted to Babylon Format</button>
   <button onclick="render3D()">Render 3D</button>
+  <button onclick="convertToBabylonFormat()">Convert to Babylon Format</button>
   <canvas id="canvas2D" width="600" height="600"></canvas>
   <canvas id="canvas3D" width="1200" height="1200"></canvas>
   <p id="coordinates"></p>
@@ -142,35 +139,9 @@
       alert('Babylon format generated and stored. You can now render 3D.');
     }
 
-    function convertToBabylonFormat() {
-      if (!lines) {
-        alert('Please detect lines first.');
-        return;
-      }
-
-      // Convert to Babylon.js-compatible format
-      babylonFormat = lines.map(line => {
-        return {
-          points: [
-            new BABYLON.Vector3(line.points[0].x, line.points[0].y, 0),
-            new BABYLON.Vector3(line.points[1].x, line.points[1].y, 0)
-          ],
-          thickness: line.thickness,
-          height: line.height
-        };
-      });
-
-      // Display coordinates on the screen
-      const coordinatesElement = document.getElementById('coordinates');
-      coordinatesElement.innerHTML += '<br><strong>Converted to Babylon Format:</strong><br>';
-      babylonFormat.forEach((line, index) => {
-        coordinatesElement.innerHTML += `Line ${index + 1}: (${line.points[0].x}, ${line.points[0].y}) to (${line.points[1].x}, ${line.points[1].y}) - Thickness: ${line.thickness}, Height: ${line.height}<br>`;
-      });
-    }
-
     function render3D() {
       if (!window.babylonFormat) {
-        alert('Please generate or convert Babylon format first.');
+        alert('Please generate Babylon format first.');
         return;
       }
 
@@ -211,7 +182,32 @@
       // Clear the stored Babylon format
       window.babylonFormat = null;
     }
+
+    function convertToBabylonFormat() {
+      if (!lines) {
+        alert('Please detect lines first.');
+        return;
+      }
+
+      // Convert to Babylon.js-compatible format
+      babylonFormat = lines.map(line => {
+        return {
+          points: [
+            new BABYLON.Vector3(line.x1, line.y1, 0),
+            new BABYLON.Vector3(line.x2, line.y2, 0)
+          ],
+          thickness: lineThickness,
+          height: lineHeight
+        };
+      });
+
+      // Display coordinates on the screen
+      const coordinatesElement = document.getElementById('coordinates');
+      coordinatesElement.innerHTML += '<br><strong>Converted to Babylon Format:</strong><br>';
+      babylonFormat.forEach((line, index) => {
+        coordinatesElement.innerHTML += `Line ${index + 1}: (${line.points[0].x}, ${line.points[0].y}) to (${line.points[1].x}, ${line.points[1].y}) - Thickness: ${line.thickness}, Height: ${line.height}<br>`;
+      });
+    }
   </script>
 </body>
-
 </html>
