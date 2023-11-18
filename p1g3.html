@@ -126,43 +126,35 @@
       const wallHeight = parseFloat(document.getElementById('wallHeight').value);
       const wallThickness = parseFloat(document.getElementById('wallThickness').value);
 
-      // External walls as solid boxes, others as dashed lines
+      // Separate lines into horizontal and vertical
+      const horizontalLines = detectedLines.filter(line => line.y1 === line.y2);
+      const verticalLines = detectedLines.filter(line => line.x1 === line.x2);
+
+      // Find outermost lines
+      const leftLine = horizontalLines.reduce((acc, line) => (line.x1 < acc.x1 ? line : acc), horizontalLines[0]);
+      const rightLine = horizontalLines.reduce((acc, line) => (line.x1 > acc.x1 ? line : acc), horizontalLines[0]);
+      const topLine = verticalLines.reduce((acc, line) => (line.y1 < acc.y1 ? line : acc), verticalLines[0]);
+      const bottomLine = verticalLines.reduce((acc, line) => (line.y1 > acc.y1 ? line : acc), verticalLines[0]);
+
+      // Create boxes for outermost lines
+      createBox(leftLine.x1, leftLine.y1, leftLine.x2, leftLine.y2, wallHeight, wallThickness, wallTexture, wallColor);
+      createBox(rightLine.x1, rightLine.y1, rightLine.x2, rightLine.y2, wallHeight, wallThickness, wallTexture, wallColor);
+      createBox(topLine.x1, topLine.y1, topLine.x2, topLine.y2, wallHeight, wallThickness, wallTexture, wallColor);
+      createBox(bottomLine.x1, bottomLine.y1, bottomLine.x2, bottomLine.y2, wallHeight, wallThickness, wallTexture, wallColor);
+
+      // Create dashed lines for other internal walls
       detectedLines.forEach(line => {
-        const points = [
-          new BABYLON.Vector3(line.x1, 0, line.y1),
-          new BABYLON.Vector3(line.x1, wallHeight, line.y1),
-          new BABYLON.Vector3(line.x2, wallHeight, line.y2),
-          new BABYLON.Vector3(line.x2, 0, line.y2),
-          new BABYLON.Vector3(line.x1, 0, line.y1)
-        ];
+        if (line !== leftLine && line !== rightLine && line !== topLine && line !== bottomLine) {
+          const points = [
+            new BABYLON.Vector3(line.x1, 0, line.y1),
+            new BABYLON.Vector3(line.x1, wallHeight, line.y1),
+            new BABYLON.Vector3(line.x2, wallHeight, line.y2),
+            new BABYLON.Vector3(line.x2, 0, line.y2),
+            new BABYLON.Vector3(line.x1, 0, line.y1)
+          ];
 
-        // Check if the line is near the edge (adjust the threshold as needed)
-        const nearEdgeThreshold = 20;
-        const isExternal = (
-          line.x1 < nearEdgeThreshold ||
-          line.x2 < nearEdgeThreshold ||
-          line.x1 > img.width - nearEdgeThreshold ||
-          line.x2 > img.width - nearEdgeThreshold ||
-          line.y1 < nearEdgeThreshold ||
-          line.y2 < nearEdgeThreshold ||
-          line.y1 > img.height - nearEdgeThreshold ||
-          line.y2 > img.height - nearEdgeThreshold
-        );
-
-        if (isExternal) {
-          // Create solid box for external walls
-          const wallMesh = BABYLON.MeshBuilder.CreateBox(null, { width: Math.abs(line.x2 - line.x1), height: wallHeight, depth: wallThickness });
-          wallMesh.position = new BABYLON.Vector3((line.x1 + line.x2) / 2, wallHeight / 2, (line.y1 + line.y2) / 2);
-          wallMesh.material = createMaterial(wallTexture, wallColor);
-        } else {
-          // Create dashed lines for internal walls
           const wallMesh = BABYLON.MeshBuilder.CreateDashedLines(null, { points, dashSize: lineThickness, updatable: true });
-          wallMesh.color = new BABYLON.Color3.FromHexString(wallColor);
-
-          if (wallTexture) {
-            wallMesh.material = createMaterial(wallTexture, wallColor);
-          }
-
+          wallMesh.material = createMaterial(wallTexture, wallColor);
           wallMesh.scaling.y = wallThickness;
         }
       });
@@ -176,6 +168,18 @@
       }
       material.emissiveColor = new BABYLON.Color3.FromHexString(color);
       return material;
+    }
+
+    // Function to create solid box
+    function createBox(x1, y1, x2, y2, height, thickness, texture, color) {
+      const centerX = (x1 + x2) / 2;
+      const centerY = (y1 + y2) / 2;
+      const width = Math.abs(x2 - x1);
+      const length = Math.abs(y2 - y1);
+
+      const box = BABYLON.MeshBuilder.CreateBox(null, { width, height, depth: thickness }, babylonCanvas._babylonScene);
+      box.position = new BABYLON.Vector3(centerX, height / 2, centerY);
+      box.material = createMaterial(texture, color);
     }
 
     // Load Babylon canvas on page load
