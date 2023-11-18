@@ -40,12 +40,13 @@
         new BABYLON.Vector3(-1, 0, 1),
         new BABYLON.Vector3(-1, 0, -1)
       ];
-      const square = BABYLON.MeshBuilder.CreateLines('square', { points: squarePoints });
+
+      const square = new BABYLON.MeshBuilder.CreatePolygon('square', { shape: squarePoints, sideOrientation: BABYLON.Mesh.DOUBLESIDE });
+      square.rotation.x = Math.PI / 2; // Rotate to align with the ground
 
       // Extrude the square into walls
       const wallHeight = 2;
-      const wallHeightVector = new BABYLON.Vector3(0, wallHeight, 0);
-      const walls = BABYLON.MeshBuilder.ExtrudePolygon('walls', { shape: squarePoints, depth: wallHeightVector });
+      const walls = BABYLON.MeshBuilder.ExtrudePolygon('walls', { shape: squarePoints, depth: wallHeight });
 
       // Run the Babylon.js engine
       engine.runRenderLoop(function () {
