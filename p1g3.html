@@ -32,13 +32,12 @@
   <input type="file" id="imageInput" accept="image/*" onchange="loadAndDetect()">
   <label for="lineThickness">Line Thickness:</label>
   <input type="number" id="lineThickness" value="50">
-  <label for="wallHeight">Wall Height:</label>
-  <input type="number" id="wallHeight" value="270">
   <button onclick="updateInputs()">Update Inputs</button>
   <button onclick="convertTo3D()">Convert to 3D</button>
   <button onclick="resetCanvas()">Reset</button>
   <canvas id="canvas2D" width="600" height="600"></canvas>
   <canvas id="canvas3D" width="1200" height="1200"></canvas>
+  
   <p id="coordinates"></p>
 
   <script>
@@ -67,63 +66,104 @@
       }
 
       const canvas2D = document.getElementById('canvas2D');
-      cv.imshow(canvas2D, cv.imread(img));
-      let src = cv.imread(canvas2D);
-      let dst = new cv.Mat();
+      const src = cv.imread(canvas2D);
+      const dst = new cv.Mat();
+
       cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY);
       cv.Canny(src, dst, 50, 100, 3, false);
-      cv.imshow(canvas2D, dst);
+
+      // Convert the detected lines to Babylon.js format
+      detectedLines = [];
+      const linesP = new cv.Mat();
+      cv.HoughLinesP(dst, linesP, 1, Math.PI / 180, 50, 50, 10);
+
+      for (let i = 0; i < linesP.rows; i++) {
+        const line = linesP.data32S.subarray(i * 4, i * 4 + 4);
+        detectedLines.push({
+          x1: line[0],
+          y1: line[1],
+          x2: line[2],
+          y2: line[3]
+        });
+      }
+
       src.delete();
       dst.delete();
-    }
-
-    function resetCanvas() {
-      if (babylonCanvas) {
-        babylonCanvas.dispose();
-      }
-      img = null;
-      context2D.clearRect(0, 0, context2D.canvas.width, context2D.canvas.height);
-      detectedLines = null; // Clear any other stored values
+      linesP.delete();
     }
 
     function updateInputs() {
-      // Update input-related logic
-      const lineThickness = document.getElementById('lineThickness').value;
-      const wallHeight = document.getElementById('wallHeight').value;
-
-      // Example: Use updated values for further processing
-      console.log('Line Thickness:', lineThickness);
-      console.log('Wall Height:', wallHeight);
+      // Clear Babylon canvas
+      const scene = babylonCanvas._babylonScene;
+      scene.meshes.forEach(mesh => mesh.dispose());
+      scene.render(); // Render to clear the canvas visually
     }
 
     function convertTo3D() {
-      // Convert detected lines to 3D using Babylon.js or other 3D library
       if (!detectedLines) {
-        alert('Please detect lines before converting to 3D.');
+        alert('Please detect lines first.');
         return;
       }
 
-      // Example Babylon.js 3D conversion logic
-      const canvas3D = document.getElementById('canvas3D');
-      const engine = new BABYLON.Engine(canvas3D, true);
-      const scene = new BABYLON.Scene(engine);
+      const lineThickness = parseInt(document.getElementById('lineThickness').value);
 
-      // Dummy cube
-      const box = BABYLON.MeshBuilder.CreateBox('box', { size: 2 }, scene);
+      // Render lines in 3D using the detected lines
+      detectedLines.forEach(line => {
+        const points = [
+          new BABYLON.Vector3(line.x1, 0, line.y1),
+          new BABYLON.Vector3(line.x2, 0, line.y2)
+        ];
 
-      // Camera and light
-      const camera = new BABYLON.FreeCamera('camera', new BABYLON.Vector3(0, 5, -10), scene);
-      camera.setTarget(BABYLON.Vector3.Zero());
-      camera.attachControl(canvas3D, false);
-      const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(0, 1, 0), scene);
-
-      engine.runRenderLoop(() => {
-        scene.render();
+        const lineMesh = BABYLON.MeshBuilder.CreateLines(null, { points });
+        lineMesh.color = new BABYLON.Color3(1, 1, 1);
+        lineMesh.enableEdgesRendering();
+        lineMesh.edgesWidth = lineThickness;
+        lineMesh.edgesColor = new BABYLON.Color4(0, 0, 0, 1);
       });
-
-      babylonCanvas = { engine, scene, box, camera, light };
     }
 
+    // Load Babylon canvas on page load
+    window.onload = function () {
+      babylonCanvas = document.getElementById('canvas3D');
+      const engine = new BABYLON.Engine(babylonCanvas, true);
+      const scene = new BABYLON.Scene(engine);
+
+      // Set up camera and light
+      const camera = new BABYLON.ArcRotateCamera('camera', -Math.PI / 2, Math.PI / 4, 5, new BABYLON.Vector3(0, 0, 0));
+      camera.attachControl(babylonCanvas, true);
+      const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(1, 1, 0));
+
+      // Set background color to a lighter gray
+      scene.clearColor = new BABYLON.Color4(0.9, 0.9, 0.9, 1);
+
+      // Run the Babylon.js engine
+      engine.runRenderLoop(function () {
+        scene.render();
+      });
+    };
+    
+    function resetCanvas() {
+      if (babylonCanvas) {
+        // Close Babylon canvas
+        babylonCanvas.dispose();
+        babylonCanvas = null;
+      }
+
+      // Reset other variables or perform additional cleanup as needed
+
+      // Clear the 2D canvas
+      context2D.clearRect(0, 0, context2D.canvas.width, context2D.canvas.height);
+
+      // Reset other input fields or variables
+
+      // Reset the image input
+      document.getElementById('imageInput').value = '';
+
+      // Reset detectedLines or other relevant variables
+      detectedLines = null;
+
+      // Update or reset other UI elements as needed
+    }
   </script>
 </body>
 
