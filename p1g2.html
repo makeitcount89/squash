@@ -28,14 +28,22 @@
 
     #selectImage {
       font-size: 24px;
-      padding: 30px;
+      padding: 20px;
       cursor: pointer;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      margin-bottom: 10px;
     }
   </style>
 </head>
 
 <body>
-  <label for="imageInput" id="selectImage">Select Image</label>
+  <label for="imageInput" id="selectImage" onclick="document.getElementById('imageInput').click()">Select Image</label>
   <input type="file" id="imageInput" accept="image/*" style="display: none;" onchange="loadAndDetect()">
   <label for="lineThickness">Line Thickness:</label>
   <input type="number" id="lineThickness" value="50">
@@ -116,10 +124,6 @@
 
       // Set background color to a lighter gray
       scene.clearColor = new BABYLON.Color4(0.9, 0.9, 0.9, 1);
-
-      // Run the new Babylon.js engine
-      newEngine.runRenderLoop(() => {
-        scene.render();
       });
     }
 
