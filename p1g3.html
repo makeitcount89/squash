@@ -143,14 +143,17 @@
     };
 function resetCanvas() {
   if (babylonCanvas) {
-    // Hide the Babylon canvas
-    babylonCanvas.style.display = 'none';
-
     // Dispose the Babylon scene
     const scene = babylonCanvas._babylonScene;
     scene.dispose();
 
-    // Create a new Babylon scene
+    // Dispose the Babylon engine
+    babylonCanvas._babylonEngine.dispose();
+
+    // Clear the Babylon canvas
+    babylonCanvas.innerHTML = '';
+
+    // Create a new Babylon engine and scene
     const engine = new BABYLON.Engine(babylonCanvas, true);
     const newScene = new BABYLON.Scene(engine);
 
@@ -170,9 +173,6 @@ function resetCanvas() {
     // Update the babylonCanvas and babylonScene variables
     babylonCanvas._babylonEngine = engine;
     babylonCanvas._babylonScene = newScene;
-
-    // Show the Babylon canvas again
-    babylonCanvas.style.display = 'block';
   }
 
   // Reset other variables or perform additional cleanup as needed
