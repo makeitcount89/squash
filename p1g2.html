@@ -29,19 +29,40 @@
     const camera = new BABYLON.ArcRotateCamera('camera', -Math.PI / 2, Math.PI / 2, 5, new BABYLON.Vector3(0, 0, 0), scene);
     camera.attachControl(canvas, true);
 
-    // Define your line data
-    const points = [
-      new BABYLON.Vector3(0, 0, 0),
-      new BABYLON.Vector3(1, 1, 1)
-    ];
+    // Your original input text
+    const inputText = `
+      Line 1: (0, 0) to (1, 1) - Thickness: 0.1, Height: 1
+      Line 2: (1, 1) to (2, 2) - Thickness: 0.2, Height: 2
+    `;
 
-    // Create a red line
-    const line = BABYLON.Mesh.CreateLines('line', points, scene);
-    
-    // Apply material to the line
-    const material = new BABYLON.StandardMaterial('material', scene);
-    material.emissiveColor = new BABYLON.Color3(1, 0, 0); // Red color, you can customize it
-    line.material = material;
+    // Parse input text and create lines
+    const lines = inputText.trim().split('\n').map(line => {
+      const match = line.match(/\((\d+), (\d+)\) to \((\d+), (\d+)\) - Thickness: (\d+\.\d+), Height: (\d+)/);
+      if (match) {
+        const [, x1, y1, x2, y2, thickness, height] = match;
+        const points = [
+          new BABYLON.Vector3(parseFloat(x1), parseFloat(y1), 0),
+          new BABYLON.Vector3(parseFloat(x2), parseFloat(y2), 0)
+        ];
+
+        const ribbon = BABYLON.MeshBuilder.CreateRibbon(
+          'ribbon',
+          { pathArray: [points], sideOrientation: BABYLON.Mesh.DOUBLESIDE },
+          scene
+        );
+
+        const material = new BABYLON.StandardMaterial('material', scene);
+        material.emissiveColor = new BABYLON.Color3(1, 0, 0); // Red color, you can customize it
+        ribbon.material = material;
+
+        ribbon.scaling.y = parseFloat(thickness);
+        ribbon.scaling.z = parseFloat(height);
+
+        return ribbon;
+      } else {
+        return null;
+      }
+    }).filter(line => line !== null);
 
     // Run the Babylon.js engine
     engine.runRenderLoop(() => {
