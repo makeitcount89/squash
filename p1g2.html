@@ -92,12 +92,12 @@
       linesP.delete();
     }
 
-   function updateInputs() {
-  // Dispose the current Babylon canvas and engine
+  function updateInputs() {
+  // Dispose the current Babylon engine
   const engine = babylonCanvas._babylonEngine;
   engine.dispose();
 
-  // Create a new Babylon canvas and engine
+  // Recreate the Babylon engine and canvas
   babylonCanvas = document.getElementById('canvas3D');
   const newEngine = new BABYLON.Engine(babylonCanvas, true);
   const scene = new BABYLON.Scene(newEngine);
@@ -130,6 +130,7 @@
     scene.render();
   });
 }
+
 
 
     function convertTo3D() {
