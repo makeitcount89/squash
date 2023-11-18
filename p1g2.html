@@ -43,7 +43,7 @@
   <p id="coordinates"></p>
 
   <script>
-    let img, context2D, babylonCanvas, detectedLines;
+    let img, context2D, babylonCanvas, detectedLines, babylonLines = [];
 
     function onOpenCvReady() {
       // OpenCV is ready
@@ -97,8 +97,12 @@
     function updateInputs() {
       // Clear Babylon canvas
       const scene = babylonCanvas._babylonScene;
-      scene.meshes.forEach(mesh => mesh.dispose());
-      scene.render(); // Render to clear the canvas visually
+
+      // Dispose existing 3D elements
+      babylonLines.forEach(lineMesh => lineMesh.dispose());
+
+      // Clear the canvas visually
+      scene.render();
     }
 
     function convertTo3D() {
@@ -109,6 +113,10 @@
 
       const lineThickness = parseInt(document.getElementById('lineThickness').value);
       const wallHeight = parseInt(document.getElementById('wallHeight').value);
+
+      // Clear existing Babylon lines
+      babylonLines.forEach(lineMesh => lineMesh.dispose());
+      babylonLines = [];
 
       // Render lines in 3D using the detected lines
       detectedLines.forEach(line => {
@@ -126,6 +134,9 @@
         // Extrude lines into walls
         const wallHeightVector = new BABYLON.Vector3(0, wallHeight, 0);
         const wall = BABYLON.MeshBuilder.ExtrudePolygon('wall', { shape: points, depth: wallHeightVector });
+
+        // Keep track of created Babylon lines
+        babylonLines.push(lineMesh);
       });
     }
 
@@ -169,6 +180,10 @@
 
       // Reset detectedLines or other relevant variables
       detectedLines = null;
+
+      // Dispose Babylon lines
+      babylonLines.forEach(lineMesh => lineMesh.dispose());
+      babylonLines = [];
 
       // Update or reset other UI elements as needed
     }
