@@ -91,9 +91,10 @@
     }
 
     function updateInputs() {
-      // Clear existing meshes on Babylon canvas
+      // Clear Babylon canvas
       const scene = babylonCanvas._babylonScene;
       scene.meshes.forEach(mesh => mesh.dispose());
+      scene.render(); // Render to clear the canvas visually
     }
 
     function convertTo3D() {
