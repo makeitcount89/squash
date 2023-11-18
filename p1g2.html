@@ -165,11 +165,14 @@
         lineMesh.edgesColor = new BABYLON.Color4(0, 0, 0, 1);
         lineMesh.position.y = lineHeight;
 
-        // Display converted coordinates
-        const coordinatesElement = document.getElementById('coordinates');
-        coordinatesElement.innerHTML += `<strong>Converted to Babylon Format:</strong><br>Line ${lines.indexOf(line) + 1}: (${points[0].x}, ${points[0].y}) to (${points[1].x}, ${points[1].y}) - Thickness: ${lineThickness}, Height: ${lineHeight}<br>`;
-
         return lineMesh;
+      });
+
+      // Display converted coordinates on the screen
+      const coordinatesElement = document.getElementById('coordinates');
+      coordinatesElement.innerHTML += '<br><strong>Converted to Babylon Format:</strong><br>';
+      babylonFormat.forEach((line, index) => {
+        coordinatesElement.innerHTML += `Line ${index + 1}: (${line.points[0].x}, ${line.points[0].y}) to (${line.points[1].x}, ${line.points[1].y}) - Thickness: ${lineThickness}, Height: ${lineHeight}<br>`;
       });
 
       // Store the converted Babylon format for later use
