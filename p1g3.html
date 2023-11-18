@@ -105,6 +105,25 @@
       });
     }
 
+    function convertToBabylonFormat(inputText) {
+      return inputText.trim().split('\n').map(line => {
+        const match = line.match(/\((\d+), (\d+)\) to \((\d+), (\d+)\) - Thickness: (\d+), Height: (\d+)/);
+        if (match) {
+          const [, x1, y1, x2, y2, thickness, height] = match;
+          return {
+            points: [
+              new BABYLON.Vector3(parseFloat(x1), parseFloat(y1), 0),
+              new BABYLON.Vector3(parseFloat(x2), parseFloat(y2), 0)
+            ],
+            thickness: parseFloat(thickness),
+            height: parseFloat(height)
+          };
+        } else {
+          return null;
+        }
+      }).filter(line => line !== null);
+    }
+
     function generateBabylonFormat() {
       if (!lines) {
         alert('Please detect lines first.');
@@ -114,26 +133,17 @@
       const lineThickness = parseInt(document.getElementById('lineThickness').value);
       const lineHeight = parseInt(document.getElementById('lineHeight').value);
 
-      // Generate Babylon.js-compatible format
-      babylonFormat = lines.map(line => {
-        return {
-          points: [
-            new BABYLON.Vector3(line.x1, line.y1, 0),
-            new BABYLON.Vector3(line.x2, line.y2, 0)
-          ],
-          thickness: lineThickness,
-          height: lineHeight
-        };
-      });
+      // Convert Babylon coordinates to Babylon.js-compatible format
+      babylonFormat = convertToBabylonFormat(document.getElementById('coordinates').innerText);
 
       // Display coordinates on the screen
       const coordinatesElement = document.getElementById('coordinates');
-      coordinatesElement.innerHTML += '<br><strong>Combined Coordinates:</strong><br>';
+      coordinatesElement.innerHTML += '<br><strong>Converted to Babylon Format:</strong><br>';
       babylonFormat.forEach((line, index) => {
         coordinatesElement.innerHTML += `Line ${index + 1}: (${line.points[0].x}, ${line.points[0].y}) to (${line.points[1].x}, ${line.points[1].y}) - Thickness: ${line.thickness}, Height: ${line.height}<br>`;
       });
 
-      // Store the generated Babylon format for later use
+      // Store the converted Babylon format for later use
       window.babylonFormat = babylonFormat;
       alert('Babylon format generated and stored. You can now render 3D.');
     }
