@@ -122,23 +122,33 @@
       const wallThickness = parseFloat(document.getElementById('wallThickness').value);
 
       detectedLines.forEach(line => {
+        const length = Math.sqrt((line.x2 - line.x1) ** 2 + (line.y2 - line.y1) ** 2);
+        const angle = Math.atan2(line.y2 - line.y1, line.x2 - line.x1);
+
         const points = [
           new BABYLON.Vector3(line.x1, 0, line.y1),
-          new BABYLON.Vector3(line.x1, wallHeight, line.y1),
-          new BABYLON.Vector3(line.x2, wallHeight, line.y2),
           new BABYLON.Vector3(line.x2, 0, line.y2),
+          new BABYLON.Vector3(line.x2, wallHeight, line.y2),
+          new BABYLON.Vector3(line.x1, wallHeight, line.y1),
         ];
 
-        const wallMesh = BABYLON.MeshBuilder.CreatePolygon(null, { shape: points, updatable: true });
+        const wallMesh = BABYLON.MeshBuilder.CreateBox(null, {
+          width: length,
+          height: wallHeight,
+          depth: wallThickness,
+        });
+        wallMesh.position.x = (line.x1 + line.x2) / 2;
+        wallMesh.position.y = wallHeight / 2;
+        wallMesh.position.z = (line.y1 + line.y2) / 2;
+        wallMesh.rotation.y = -angle;
+
         wallMesh.color = new BABYLON.Color3.FromHexString(wallColor);
-        
+
         if (wallTexture) {
           const wallMaterial = new BABYLON.StandardMaterial("wallMaterial", babylonCanvas._babylonScene);
           wallMaterial.diffuseTexture = new BABYLON.Texture(wallTexture, babylonCanvas._babylonScene);
           wallMesh.material = wallMaterial;
         }
-
-        wallMesh.scaling.y = wallThickness;
       });
     }
 
@@ -201,10 +211,10 @@
       }
 
       // Clear the 2D canvas
-      context2D.clearRect(0, 0, context2D.canvas.width, context2D.canvas.height);
+      //context2D.clearRect(0, 0, context2D.canvas.width, context2D.canvas.height);
 
       // Reset detectedLines or other relevant variables
-      detectedLines = null;
+      //detectedLines = null;
     }
   </script>
 </body>
