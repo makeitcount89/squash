@@ -101,6 +101,9 @@
         return;
       }
 
+      const lineThickness = parseInt(document.getElementById('lineThickness').value);
+      const lineHeight = parseInt(document.getElementById('lineHeight').value);
+
       // Generate Babylon.js-compatible format
       babylonFormat = lines.map(line => {
         return {
@@ -108,8 +111,8 @@
             new BABYLON.Vector3(line.x1, line.y1, 0),
             new BABYLON.Vector3(line.x2, line.y2, 0)
           ],
-          thickness: parseInt(document.getElementById('lineThickness').value),
-          height: parseInt(document.getElementById('lineHeight').value)
+          thickness: lineThickness,
+          height: lineHeight
         };
       });
 
@@ -117,7 +120,7 @@
       const coordinatesElement = document.getElementById('coordinates');
       coordinatesElement.innerHTML += '<br><strong>Combined Coordinates:</strong><br>';
       babylonFormat.forEach((line, index) => {
-        coordinatesElement.innerHTML += `Line ${index + 1}: (${line.points[0].x}, ${line.points[0].y}) to (${line.points[1].x}, ${line.points[1].y})<br>`;
+        coordinatesElement.innerHTML += `Line ${index + 1}: (${line.points[0].x}, ${line.points[0].y}) to (${line.points[1].x}, ${line.points[1].y}) - Thickness: ${line.thickness}, Height: ${line.height}<br>`;
       });
 
       // Store the generated Babylon format for later use
