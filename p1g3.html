@@ -26,7 +26,7 @@
       margin: 10px;
     }
 
-    input {
+    input, select {
       font-size: 24px;
       margin: 10px;
     }
@@ -42,7 +42,12 @@
   <input type="color" id="wallColor" value="#000000">
 
   <label for="wallTexture">Wall Texture:</label>
-  <input type="text" id="wallTexture" placeholder="Texture URL" value="https://www.babylonjs-playground.com/textures/brick.jpg">
+  <select id="wallTexture">
+    <option value="https://www.babylonjs-playground.com/textures/brick.jpg">Brick</option>
+    <option value="https://www.babylonjs-playground.com/textures/stone.jpg">Stone</option>
+    <option value="https://www.babylonjs-playground.com/textures/wood.jpg">Wood</option>
+    <option value="https://www.babylonjs-playground.com/textures/wood.jpg">Render</option>
+  </select>
 
   <label for="wallHeight">Wall Height:</label>
   <input type="number" id="wallHeight" value="600">
@@ -144,7 +149,7 @@
 
         wallMesh.color = new BABYLON.Color3.FromHexString(wallColor);
 
-        if (wallTexture) {
+        if (wallTexture && (line.x1 === 0 || line.y1 === 0 || line.x2 === context2D.canvas.width || line.y2 === context2D.canvas.height)) {
           const wallMaterial = new BABYLON.StandardMaterial("wallMaterial", babylonCanvas._babylonScene);
           wallMaterial.diffuseTexture = new BABYLON.Texture(wallTexture, babylonCanvas._babylonScene);
           wallMesh.material = wallMaterial;
@@ -211,10 +216,10 @@
       }
 
       // Clear the 2D canvas
-      //context2D.clearRect(0, 0, context2D.canvas.width, context2D.canvas.height);
+      context2D.clearRect(0, 0, context2D.canvas.width, context2D.canvas.height);
 
       // Reset detectedLines or other relevant variables
-      //detectedLines = null;
+      detectedLines = null;
     }
   </script>
 </body>
