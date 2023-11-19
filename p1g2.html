@@ -198,7 +198,8 @@
       camera.attachControl(babylonCanvas, true);
       const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(1, 1, 0));
 
-      camera.rotation.y += Math.PI / 2; // Rotate by 90 degrees
+     camera.setTarget(BABYLON.Vector3.Zero());
+
 
 
       // Set background color to a lighter gray
