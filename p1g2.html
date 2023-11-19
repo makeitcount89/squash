@@ -114,7 +114,7 @@
       linesP.delete();
     }
 
-   function convertTo3D() {
+function convertTo3D() {
   if (!detectedLines) {
     alert('Please detect lines first.');
     return;
@@ -136,6 +136,11 @@
   camera.position = new BABYLON.Vector3(avgCenter.x, cameraHeight, -avgCenter.y);
   camera.target = new BABYLON.Vector3(avgCenter.x, 0, -avgCenter.y);
 
+  // Create a parent box to center the object
+  const parentBox = BABYLON.MeshBuilder.CreateBox("parentBox", { size: 1 }); // Create a unit cube
+  parentBox.position = new BABYLON.Vector3(avgCenter.x, 0, -avgCenter.y); // Set the position based on the center point
+  parentBox.isVisible = false; // Hide the parent box
+
   detectedLines.forEach(line => {
     const lineThickness = parseFloat(document.getElementById('lineThickness').value);
     const wallColor = document.getElementById('wallColor').value;
@@ -144,17 +149,18 @@
     const wallThickness = parseFloat(document.getElementById('wallThickness').value);
 
     const points = [
-      new BABYLON.Vector3(line.x1, 0, -line.y1),
-      new BABYLON.Vector3(line.x1, wallHeight, -line.y1),
-      new BABYLON.Vector3(line.x2, wallHeight, -line.y2),
-      new BABYLON.Vector3(line.x2, 0, -line.y2),
-      new BABYLON.Vector3(line.x1, 0, -line.y1)
+      new BABYLON.Vector3(line.x1 - avgCenter.x, 0, -line.y1 + avgCenter.y),
+      new BABYLON.Vector3(line.x1 - avgCenter.x, wallHeight, -line.y1 + avgCenter.y),
+      new BABYLON.Vector3(line.x2 - avgCenter.x, wallHeight, -line.y2 + avgCenter.y),
+      new BABYLON.Vector3(line.x2 - avgCenter.x, 0, -line.y2 + avgCenter.y),
+      new BABYLON.Vector3(line.x1 - avgCenter.x, 0, -line.y1 + avgCenter.y)
     ];
 
     if (selectedTexture === "stone") {
       // Create walls with stone texture using CreateBox
       const wallMesh = BABYLON.MeshBuilder.CreateBox(null, { height: wallHeight, width: Math.abs(line.x2 - line.x1), depth: wallThickness });
-      wallMesh.position = new BABYLON.Vector3((line.x1 + line.x2) / 2, wallHeight / 2, -(line.y1 + line.y2) / 2);
+      wallMesh.position = new BABYLON.Vector3((line.x1 + line.x2) / 2 - avgCenter.x, wallHeight / 2, -(line.y1 + line.y2) / 2 + avgCenter.y);
+      wallMesh.setParent(parentBox);
     } else {
       // Create walls with dashed lines using CreateDashedLines
       const wallMesh = BABYLON.MeshBuilder.CreateDashedLines(null, { points, dashSize: lineThickness, updatable: true });
@@ -167,11 +173,6 @@
       }
 
       wallMesh.scaling.y = wallThickness;
-
-      // Center the wall mesh using the parent box
-      const parentBox = BABYLON.MeshBuilder.CreateBox("parentBox", { size: 1 }); // Create a unit cube
-      parentBox.position = new BABYLON.Vector3(avgCenter.x, 0, -avgCenter.y); // Set the position based on the center point
-      parentBox.isVisible = false; // Hide the parent box
 
       // Parent the wall mesh to the parent box
       wallMesh.setParent(parentBox);
