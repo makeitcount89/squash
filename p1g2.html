@@ -1,214 +1,61 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Image Processing and 3D Rendering</title>
-  <!-- Include OpenCV.js -->
-  <script async src="https://docs.opencv.org/master/opencv.js" onload="onOpenCvReady();" type="text/javascript"></script>
+  <title>Babylon.js Chair Import</title>
   <!-- Include Babylon.js -->
   <script src="https://cdn.babylonjs.com/babylon.js"></script>
+  <!-- Include Babylon.js Loader for glTF -->
+  <script src="https://preview.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
   <style>
-    #canvas2D,
-    #canvas3D {
-      border: 1px solid #000;
-      margin-top: 20px;
-    }
-
     body {
-      font-size: 24px;
-    }
-
-    button {
-      font-size: 24px;
-      padding: 15px;
-      margin: 10px;
-    }
-
-    input {
-      font-size: 24px;
-      margin: 10px;
+      margin: 0;
+      overflow: hidden;
     }
   </style>
 </head>
 
 <body>
-  <input type="file" id="imageInput" accept="image/*" onchange="loadAndDetect()">
-  <label for="lineThickness">Line Thickness:</label>
-  <input type="number" id="lineThickness" value="50">
-  
-  <label for="wallColor">Wall Color:</label>
-  <input type="color" id="wallColor" value="#000000">
-
-  <label for="wallTexture">Wall Texture:</label>
-  <input type="text" id="wallTexture" placeholder="Texture URL" value="https://www.babylonjs-playground.com/textures/brick.jpg">
-
-  <label for="wallHeight">Wall Height:</label>
-  <input type="number" id="wallHeight" value="600">
-
-  <label for="wallThickness">Wall Thickness:</label>
-  <input type="number" id="wallThickness" value="0.2">
-
-  <button onclick="convertTo3D()">Convert to 3D</button>
-  <button onclick="resetCanvas()">Reset</button>
-  <canvas id="canvas2D" width="600" height="600"></canvas>
-  <canvas id="canvas3D" width="1200" height="1200"></canvas>
-
-  <p id="coordinates"></p>
+  <input type="file" id="chairInput" accept=".gltf, .glb" onchange="loadChair()">
+  <canvas id="renderCanvas"></canvas>
 
   <script>
-    let img, context2D, babylonCanvas, detectedLines;
+    var canvas = document.getElementById("renderCanvas");
+    var engine = new BABYLON.Engine(canvas, true);
 
-    function onOpenCvReady() {
-      // OpenCV is ready
-    }
+    var createScene = function () {
+      var scene = new BABYLON.Scene(engine);
+      var camera = new BABYLON.ArcRotateCamera("camera", -Math.PI / 2, Math.PI / 4, 4, BABYLON.Vector3.Zero(), scene);
+      camera.attachControl(canvas, true);
 
-    function loadAndDetect() {
-      const input = document.getElementById('imageInput');
-      img = new Image();
-      img.onload = function () {
-        context2D = document.getElementById('canvas2D').getContext('2d');
-        context2D.clearRect(0, 0, context2D.canvas.width, context2D.canvas.height);
-        context2D.drawImage(img, 0, 0, context2D.canvas.width, context2D.canvas.height);
-        detectLines();
-      };
-      img.src = URL.createObjectURL(input.files[0]);
-    }
+      var light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
+      light.intensity = 0.7;
 
-    function detectLines() {
-      if (!img) {
-        alert('Please load an image first.');
-        return;
-      }
-
-      const canvas2D = document.getElementById('canvas2D');
-      const src = cv.imread(canvas2D);
-      const dst = new cv.Mat();
-
-      cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY);
-      cv.Canny(src, dst, 50, 100, 3, false);
-
-      // Convert the detected lines to Babylon.js format
-      detectedLines = [];
-      const linesP = new cv.Mat();
-      cv.HoughLinesP(dst, linesP, 1, Math.PI / 180, 50, 50, 10);
-
-      for (let i = 0; i < linesP.rows; i++) {
-        const line = linesP.data32S.subarray(i * 4, i * 4 + 4);
-        detectedLines.push({
-          x1: line[0],
-          y1: line[1],
-          x2: line[2],
-          y2: line[3]
-        });
-      }
-
-      src.delete();
-      dst.delete();
-      linesP.delete();
-    }
-
-    function convertTo3D() {
-      if (!detectedLines) {
-        alert('Please detect lines first.');
-        return;
-      }
-
-      const lineThickness = parseInt(document.getElementById('lineThickness').value);
-      const wallColor = document.getElementById('wallColor').value;
-      const wallTexture = document.getElementById('wallTexture').value;
-      const wallHeight = parseFloat(document.getElementById('wallHeight').value);
-      const wallThickness = parseFloat(document.getElementById('wallThickness').value);
-
-      detectedLines.forEach(line => {
-        const points = [
-          new BABYLON.Vector3(line.x1, 0, line.y1),
-          new BABYLON.Vector3(line.x1, wallHeight, line.y1),
-          new BABYLON.Vector3(line.x2, wallHeight, line.y2),
-          new BABYLON.Vector3(line.x2, 0, line.y2),
-          new BABYLON.Vector3(line.x1, 0, line.y1)
-        ];
-
-        const wallMesh = BABYLON.MeshBuilder.CreateDashedLines(null, { points, dashSize: lineThickness, updatable: true });
-        wallMesh.color = new BABYLON.Color3.FromHexString(wallColor);
-        
-        if (wallTexture) {
-          const wallMaterial = new BABYLON.StandardMaterial("wallMaterial", babylonCanvas._babylonScene);
-          wallMaterial.diffuseTexture = new BABYLON.Texture(wallTexture, babylonCanvas._babylonScene);
-          wallMesh.material = wallMaterial;
-        }
-
-        wallMesh.scaling.y = wallThickness;
-      });
-    }
-
-    // Load Babylon canvas on page load
-    window.onload = function () {
-      babylonCanvas = document.getElementById('canvas3D');
-      const engine = new BABYLON.Engine(babylonCanvas, true);
-      const scene = new BABYLON.Scene(engine);
-
-      // Set up camera and light
-      const camera = new BABYLON.UniversalCamera('camera', new BABYLON.Vector3(0, 5, -10), scene);
-      camera.setTarget(BABYLON.Vector3.Zero());
-      camera.attachControl(babylonCanvas, true);
-      const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(1, 1, 0));
-
-      // Set background color to a lighter gray
-      scene.clearColor = new BABYLON.Color4(0.9, 0.9, 0.9, 1);
-
-      // Run the Babylon.js engine
-      engine.runRenderLoop(function () {
-        scene.render();
-      });
+      return scene;
     };
 
-    function resetCanvas() {
-      if (babylonCanvas) {
-        // Hide the Babylon canvas
-        babylonCanvas.style.display = 'none';
+    var scene = createScene();
 
-        // Create a new Babylon canvas element
-        const newCanvas = document.createElement('canvas');
-        newCanvas.width = babylonCanvas.width;
-        newCanvas.height = babylonCanvas.height;
-        babylonCanvas.parentNode.replaceChild(newCanvas, babylonCanvas);
-
-        babylonCanvas = newCanvas;
-
-        // Create a new Babylon engine and scene
-        const engine = new BABYLON.Engine(babylonCanvas, true);
-        const newScene = new BABYLON.Scene(engine);
-
-        // Set up camera and light for the new scene (you may need to adjust these parameters)
-        const camera = new BABYLON.UniversalCamera('camera', new BABYLON.Vector3(0, 5, -10), newScene);
-        camera.setTarget(BABYLON.Vector3.Zero());
-        camera.attachControl(babylonCanvas, true);
-        const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(1, 1, 0));
-
-        // Set background color to a lighter gray
-        newScene.clearColor = new BABYLON.Color4(0.9, 0.9, 0.9, 1);
-
-        // Run the Babylon.js engine for the new scene
-        engine.runRenderLoop(function () {
-          newScene.render();
+    function loadChair() {
+      var chairModelUrl = 'https://skfb.ly/oMJtV'; // Replace with the Sketchfab chair model URL
+      BABYLON.SceneLoader.ImportMesh("", chairModelUrl, "", scene, function (meshes) {
+        // Adjust position, scaling, or other properties as needed
+        meshes.forEach(mesh => {
+          mesh.position = new BABYLON.Vector3(0, 0, 0);
+          mesh.scaling = new BABYLON.Vector3(0.1, 0.1, 0.1);
         });
-
-        // Update the babylonCanvas and babylonScene variables
-        babylonCanvas._babylonEngine = engine;
-        babylonCanvas._babylonScene = newScene;
-
-        // Show the new Babylon canvas
-        babylonCanvas.style.display = 'block';
-      }
-
-      // Clear the 2D canvas
-      context2D.clearRect(0, 0, context2D.canvas.width, context2D.canvas.height);
-
-      // Reset detectedLines or other relevant variables
-      detectedLines = null;
+      });
     }
+
+    engine.runRenderLoop(function () {
+      scene.render();
+    });
+
+    window.addEventListener("resize", function () {
+      engine.resize();
+    });
   </script>
 </body>
 
