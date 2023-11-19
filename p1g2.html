@@ -182,13 +182,14 @@
 
         wallMesh.scaling.y = wallThickness;
       });
+    
 
       // Call normalizeToUnitCube here if needed
       // Rotate the camera to face the object
   camera.rotation.y = Math.PI; // Rotate by 180 degrees
   // Decrease the camera's radius to zoom out by 10%
   camera.radius *= 0.5;
-    }
+    
 
     // Load Babylon canvas on page load
   window.onload = function () {
