@@ -14,11 +14,17 @@
       margin: 0;
       overflow: hidden;
     }
+
+    button {
+      font-size: 18px;
+      padding: 10px;
+      margin: 10px;
+    }
   </style>
 </head>
 
 <body>
-  <input type="file" id="chairInput" accept=".gltf, .glb" onchange="loadChair()">
+  <button onclick="loadChair()">Load Chair from Sketchfab</button>
   <canvas id="renderCanvas"></canvas>
 
   <script>
