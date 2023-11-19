@@ -130,86 +130,64 @@
       linesP.delete();
     }
 
-    function convertTo3D() {
-      if (!detectedLines) {
-        alert('Please detect lines first.');
-        return;
-      }
+ function convertTo3D() {
+  if (!detectedLines) {
+    alert('Please detect lines first.');
+    return;
+  }
 
-      const boundingInfo = totalBoundingInfo(babylonCanvas._babylonScene.meshes);
+  // Create a parent mesh to hold all the lines
+  const parentMesh = new BABYLON.Mesh("parentMesh", babylonCanvas._babylonScene);
 
-      const center = boundingInfo.boundingBox.centerWorld;
-      const extendSize = boundingInfo.boundingBox.extendSize;
+  detectedLines.forEach(line => {
+    const lineThickness = parseFloat(document.getElementById('lineThickness').value);
+    const wallColor = document.getElementById('wallColor').value;
+    const wallTexture = document.getElementById('wallTexture').value;
+    const wallHeight = parseFloat(document.getElementById('wallHeight').value);
+    const wallThickness = parseFloat(document.getElementById('wallThickness').value);
 
-      const boundingBoxMaxDimension = Math.max(extendSize.x, extendSize.y, extendSize.z);
+    const points = [
+      new BABYLON.Vector3(line.x1, 0, -line.y1),
+      new BABYLON.Vector3(line.x1, wallHeight, -line.y1),
+      new BABYLON.Vector3(line.x2, wallHeight, -line.y2),
+      new BABYLON.Vector3(line.x2, 0, -line.y2),
+      new BABYLON.Vector3(line.x1, 0, -line.y1)
+    ];
 
-      const parentBox = BABYLON.MeshBuilder.CreateBox("parentBox", { size: boundingBoxMaxDimension });
-      parentBox.position = new BABYLON.Vector3(center.x, center.y, center.z);
-      parentBox.isVisible = false;
+    const wallMesh = BABYLON.MeshBuilder.CreateDashedLines(null, { points, dashSize: lineThickness, updatable: true });
+    wallMesh.color = new BABYLON.Color3.FromHexString(wallColor);
 
-      for (const mesh of babylonCanvas._babylonScene.meshes) {
-        mesh.setParent(parentBox);
-      }
-
-      parentBox.position = new BABYLON.Vector3.Zero();
-      parentBox.normalizeToUnitCube(true);
-      parentBox.computeWorldMatrix(true);
-
-      const camera = babylonCanvas._babylonScene.activeCamera;
-      camera.minZ = 0;
-      camera.position = new BABYLON.Vector3(0, boundingBoxMaxDimension * 1.5, 0);
-      camera.target = new BABYLON.Vector3(center.x, center.y, center.z);
-
-      for (const line of detectedLines) {
-        const lineThickness = parseFloat(document.getElementById('lineThickness').value);
-        const wallColor = document.getElementById('wallColor').value;
-        const wallTexture = document.getElementById('wallTexture').value;
-        const wallHeight = parseFloat(document.getElementById('wallHeight').value);
-        const wallThickness = parseFloat(document.getElementById('wallThickness').value);
-
-        const points = [
-          new BABYLON.Vector3(line.x1, 0, -line.y1),
-          new BABYLON.Vector3(line.x1, wallHeight, -line.y1),
-          new BABYLON.Vector3(line.x2, wallHeight, -line.y2),
-          new BABYLON.Vector3(line.x2, 0, -line.y2),
-          new BABYLON.Vector3(line.x1, 0, -line.y1)
-        ];
-
-        const wallMesh = BABYLON.MeshBuilder.CreateDashedLines(null, { points, dashSize: lineThickness, updatable: true });
-        wallMesh.color = new BABYLON.Color3.FromHexString(wallColor);
-
-        if (wallTexture) {
-          const wallMaterial = new BABYLON.StandardMaterial("wallMaterial", babylonCanvas._babylonScene);
-          wallMaterial.diffuseTexture = new BABYLON.Texture(wallTexture, babylonCanvas._babylonScene);
-          wallMesh.material = wallMaterial;
-        }
-
-        wallMesh.scaling.y = wallThickness;
-      }
+    if (wallTexture) {
+      const wallMaterial = new BABYLON.StandardMaterial("wallMaterial", babylonCanvas._babylonScene);
+      wallMaterial.diffuseTexture = new BABYLON.Texture(wallTexture, babylonCanvas._babylonScene);
+      wallMesh.material = wallMaterial;
     }
 
-    // Load Babylon canvas on page load
-    window.onload = function () {
-      babylonCanvas = document.getElementById('canvas3D');
-      const engine = new BABYLON.Engine(babylonCanvas, true);
-      const scene = new BABYLON.Scene(engine);
+    wallMesh.scaling.y = wallThickness;
 
-      // Set up camera and light
-      const camera = new BABYLON.UniversalCamera('camera', new BABYLON.Vector3(0, 5, -10), scene);
-      camera.setTarget(BABYLON.Vector3.Zero());
-      camera.attachControl(babylonCanvas, true);
-      const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(1, 1, 0));
+    // Parent each wall mesh to the parent mesh
+    wallMesh.setParent(parentMesh);
+  });
 
-      camera.rotation.y += Math.PI; // Rotate by 180 degrees
+  // Set up the parent mesh bounding box
+  parentMesh.computeWorldMatrix(true);
+  const boundingBox = parentMesh.getBoundingInfo().boundingBox;
 
-      // Set background color to a lighter gray
-      scene.clearColor = new BABYLON.Color4(0.9, 0.9, 0.9, 1);
+  // Create a parent box
+  const parentBox = BABYLON.MeshBuilder.CreateBox("parentBox", { size: 1 });
+  parentBox.position = boundingBox.center;
+  parentBox.scaling = boundingBox.maximumWorld.subtract(boundingBox.minimumWorld).scale(1 / 2);
 
-      // Run the Babylon.js engine
-      engine.runRenderLoop(function () {
-        scene.render();
-      });
-    };
+  // Normalize the parent mesh to a unit cube
+  parentMesh.scaling = parentMesh.scaling.divide(parentBox.scaling);
+  parentMesh.position = parentMesh.getBoundingInfo().boundingBox.centerWorld;
+
+  // Set the camera position directly above the object looking at the center
+  const cameraHeight = parseFloat(document.getElementById('wallHeight').value) * 1.5; // Adjust the multiplier as needed
+  const camera = babylonCanvas._babylonScene.activeCamera;
+  camera.position = new BABYLON.Vector3(parentMesh.position.x, cameraHeight, parentMesh.position.z);
+  camera.setTarget(parentMesh.position);
+}
 
     function resetCanvas() {
       if (babylonCanvas) {
