@@ -131,60 +131,65 @@
     }
 
     function convertTo3D() {
-      if (!detectedLines) {
-        alert('Please detect lines first.');
-        return;
-      }
+  if (!detectedLines) {
+    alert('Please detect lines first.');
+    return;
+  }
 
-      // Determine the bounding box of the 3D object
-      let minX = Number.MAX_VALUE;
-      let minY = Number.MAX_VALUE;
-      let maxX = Number.MIN_VALUE;
-      let maxY = Number.MIN_VALUE;
+  // Determine the bounding box of the 3D object
+  let minX = Number.MAX_VALUE;
+  let minY = Number.MAX_VALUE;
+  let maxX = Number.MIN_VALUE;
+  let maxY = Number.MIN_VALUE;
 
-      detectedLines.forEach(line => {
-        minX = Math.min(minX, line.x1, line.x2);
-        minY = Math.min(minY, -line.y1, -line.y2);
-        maxX = Math.max(maxX, line.x1, line.x2);
-        maxY = Math.max(maxY, -line.y1, -line.y2);
-      });
+  detectedLines.forEach(line => {
+    minX = Math.min(minX, line.x1, line.x2);
+    minY = Math.min(minY, -line.y1, -line.y2);
+    maxX = Math.max(maxX, line.x1, line.x2);
+    maxY = Math.max(maxY, -line.y1, -line.y2);
+  });
 
-      // Calculate the center and dimensions of the bounding box
-      const centerX = (minX + maxX) / 2;
-      const centerY = (minY + maxY) / 2;
-      const width = maxX - minX;
-      const height = maxY - minY;
+  // Calculate the center and dimensions of the bounding box
+  const centerX = (minX + maxX) / 2;
+  const centerY = (minY + maxY) / 2;
+  const width = maxX - minX;
+  const height = maxY - minY;
 
-      detectedLines.forEach(line => {
-        const lineThickness = parseFloat(document.getElementById('lineThickness').value);
-        const wallColor = document.getElementById('wallColor').value;
-        const wallTexture = document.getElementById('wallTexture').value;
-        const wallHeight = parseFloat(document.getElementById('wallHeight').value);
-        const wallThickness = parseFloat(document.getElementById('wallThickness').value);
+  // Set the camera target to the center of the object
+  const camera = babylonCanvas._babylonScene.activeCamera;
+  camera.setTarget(new BABYLON.Vector3(centerX, 0, -centerY));
 
-        // Center and normalize the object
-        const points = [
-          new BABYLON.Vector3(line.x1 - centerX, 0, -line.y1 + centerY),
-          new BABYLON.Vector3(line.x1 - centerX, wallHeight, -line.y1 + centerY),
-          new BABYLON.Vector3(line.x2 - centerX, wallHeight, -line.y2 + centerY),
-          new BABYLON.Vector3(line.x2 - centerX, 0, -line.y2 + centerY),
-          new BABYLON.Vector3(line.x1 - centerX, 0, -line.y1 + centerY)
-        ];
+  detectedLines.forEach(line => {
+    const lineThickness = parseFloat(document.getElementById('lineThickness').value);
+    const wallColor = document.getElementById('wallColor').value;
+    const wallTexture = document.getElementById('wallTexture').value;
+    const wallHeight = parseFloat(document.getElementById('wallHeight').value);
+    const wallThickness = parseFloat(document.getElementById('wallThickness').value);
 
-        const wallMesh = BABYLON.MeshBuilder.CreateDashedLines(null, { points, dashSize: lineThickness, updatable: true });
-        wallMesh.color = new BABYLON.Color3.FromHexString(wallColor);
+    // Center and normalize the object
+    const points = [
+      new BABYLON.Vector3(line.x1 - centerX, 0, -line.y1 + centerY),
+      new BABYLON.Vector3(line.x1 - centerX, wallHeight, -line.y1 + centerY),
+      new BABYLON.Vector3(line.x2 - centerX, wallHeight, -line.y2 + centerY),
+      new BABYLON.Vector3(line.x2 - centerX, 0, -line.y2 + centerY),
+      new BABYLON.Vector3(line.x1 - centerX, 0, -line.y1 + centerY)
+    ];
 
-        if (wallTexture) {
-          const wallMaterial = new BABYLON.StandardMaterial("wallMaterial", babylonCanvas._babylonScene);
-          wallMaterial.diffuseTexture = new BABYLON.Texture(wallTexture, babylonCanvas._babylonScene);
-          wallMesh.material = wallMaterial;
-        }
+    const wallMesh = BABYLON.MeshBuilder.CreateDashedLines(null, { points, dashSize: lineThickness, updatable: true });
+    wallMesh.color = new BABYLON.Color3.FromHexString(wallColor);
 
-        wallMesh.scaling.y = wallThickness;
-      });
-
-      // Call normalizeToUnitCube here if needed
+    if (wallTexture) {
+      const wallMaterial = new BABYLON.StandardMaterial("wallMaterial", babylonCanvas._babylonScene);
+      wallMaterial.diffuseTexture = new BABYLON.Texture(wallTexture, babylonCanvas._babylonScene);
+      wallMesh.material = wallMaterial;
     }
+
+    wallMesh.scaling.y = wallThickness;
+  });
+
+  // Call normalizeToUnitCube here if needed
+}
+
 
     // Load Babylon canvas on page load
     window.onload = function () {
