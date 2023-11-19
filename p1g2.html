@@ -187,7 +187,8 @@
 const camera = scene.getCameraByName('camera')
       // Call normalizeToUnitCube here if needed
       // Rotate the camera to face the object
-  camera.rotation.y = Math.PI; // Rotate by 180 degrees
+  camera.rotation.y = Math.PI + (Math.PI / 180) * (180 + 20); // Rotate by 180 degrees + 20 degrees
+      
   // Decrease the camera's radius to zoom out by 10%
   camera.radius *= 0.5;
         
@@ -206,7 +207,8 @@ const camera = scene.getCameraByName('camera')
   camera.attachControl(babylonCanvas, true);
 
   // Rotate the camera to face the object
-  camera.rotation.y = Math.PI; // Rotate by 180 degrees
+  camera.rotation.y = Math.PI + (Math.PI / 180) * (180 + 20); // Rotate by 180 degrees + 20 degrees
+
   // Decrease the camera's radius to zoom out by 10%
   camera.radius *= 0.5;
     
