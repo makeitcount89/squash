@@ -10,11 +10,30 @@
   <!-- Include Babylon.js -->
   <script src="https://cdn.babylonjs.com/babylon.js"></script>
   <style>
-    /* Your existing styles here */
+    #canvas2D,
+    #canvas3D {
+      border: 1px solid #000;
+      margin-top: 20px;
+    }
+
+    body {
+      font-size: 24px;
+    }
 
     label {
       display: block;
       margin-top: 10px;
+    }
+
+    button {
+      font-size: 24px;
+      padding: 15px;
+      margin: 10px;
+    }
+
+    input {
+      font-size: 24px;
+      margin: 10px;
     }
   </style>
 </head>
@@ -22,21 +41,18 @@
 <body>
   <input type="file" id="imageInput" accept="image/*" onchange="loadAndDetect()">
   <label for="lineThreshold">Line Threshold:</label>
-  <input type="range" id="lineThreshold" min="1" max="300" value="275" onchange="updateLineThreshold(this.value)">
-  <span id="lineThresholdValue">275</span>
+  <input type="range" id="lineThreshold" min="1" max="255" value="50" onchange="updateLineThreshold(this.value)">
+  <span id="lineThresholdValue">50</span>
 
   <label for="lineThickness">Line Thickness:</label>
-  <input type="range" id="lineThickness" min="1" max="100" value="10" onchange="updateLineThickness(this.value)">
-  <span id="lineThicknessValue">10</span>
+  <input type="range" id="lineThickness" min="1" max="100" value="50" onchange="updateLineThickness(this.value)">
+  <span id="lineThicknessValue">50</span>
 
   <label for="wallColor">Wall Color:</label>
   <input type="color" id="wallColor" value="#000000">
 
   <label for="wallTexture">Wall Texture:</label>
-  <select id="wallTexture">
-    <option value="">No Texture</option>
-    <option value="stone">Stone</option>
-  </select>
+  <input type="text" id="wallTexture" placeholder="Texture URL" value="https://www.babylonjs-playground.com/textures/brick.jpg">
 
   <label for="wallHeight">Wall Height:</label>
   <input type="number" id="wallHeight" value="250">
@@ -97,7 +113,7 @@
       // Convert the detected lines to Babylon.js format
       detectedLines = [];
       const linesP = new cv.Mat();
-      cv.HoughLinesP(dst, linesP, 1, Math.PI / 180, 100, 50, 100);
+      cv.HoughLinesP(dst, linesP, 1, Math.PI / 180, 100, 50, 10);
 
       for (let i = 0; i < linesP.rows; i++) {
         const line = linesP.data32S.subarray(i * 4, i * 4 + 4);
@@ -114,46 +130,61 @@
       linesP.delete();
     }
 
-function convertTo3D() {
-  if (!detectedLines) {
-    alert('Please detect lines first.');
-    return;
-  }
+    function convertTo3D() {
+      if (!detectedLines) {
+        alert('Please detect lines first.');
+        return;
+      }
 
-  const boundingInfo = totalBoundingInfo(babylonCanvas._babylonScene.meshes);
+      const boundingInfo = totalBoundingInfo(babylonCanvas._babylonScene.meshes);
 
-  const center = boundingInfo.boundingBox.centerWorld;
-  const extendSize = boundingInfo.boundingBox.extendSize;
+      const center = boundingInfo.boundingBox.centerWorld;
+      const extendSize = boundingInfo.boundingBox.extendSize;
 
-  const boundingBoxMaxDimension = Math.max(extendSize.x, extendSize.y, extendSize.z);
+      const boundingBoxMaxDimension = Math.max(extendSize.x, extendSize.y, extendSize.z);
 
-  const parentBox = BABYLON.MeshBuilder.CreateBox("parentBox", { size: boundingBoxMaxDimension });
-  parentBox.position = new BABYLON.Vector3(center.x, center.y, center.z);
-  parentBox.isVisible = false;
+      const parentBox = BABYLON.MeshBuilder.CreateBox("parentBox", { size: boundingBoxMaxDimension });
+      parentBox.position = new BABYLON.Vector3(center.x, center.y, center.z);
+      parentBox.isVisible = false;
 
-  for (const mesh of babylonCanvas._babylonScene.meshes) {
-    mesh.setParent(parentBox);
-  }
+      for (const mesh of babylonCanvas._babylonScene.meshes) {
+        mesh.setParent(parentBox);
+      }
 
-  parentBox.position = new BABYLON.Vector3.Zero();
-  parentBox.normalizeToUnitCube(true);
-  parentBox.computeWorldMatrix(true);
+      parentBox.position = new BABYLON.Vector3.Zero();
+      parentBox.normalizeToUnitCube(true);
+      parentBox.computeWorldMatrix(true);
 
-  const camera = babylonCanvas._babylonScene.activeCamera;
-  camera.minZ = 0;
-  camera.position = new BABYLON.Vector3(0, boundingBoxMaxDimension * 1.5, 0);
-  camera.target = new BABYLON.Vector3(center.x, center.y, center.z);
-}
+      const camera = babylonCanvas._babylonScene.activeCamera;
+      camera.minZ = 0;
+      camera.position = new BABYLON.Vector3(0, boundingBoxMaxDimension * 1.5, 0);
+      camera.target = new BABYLON.Vector3(center.x, center.y, center.z);
 
+      for (const line of detectedLines) {
+        const lineThickness = parseFloat(document.getElementById('lineThickness').value);
+        const wallColor = document.getElementById('wallColor').value;
+        const wallTexture = document.getElementById('wallTexture').value;
+        const wallHeight = parseFloat(document.getElementById('wallHeight').value);
+        const wallThickness = parseFloat(document.getElementById('wallThickness').value);
 
+        const points = [
+          new BABYLON.Vector3(line.x1, 0, -line.y1),
+          new BABYLON.Vector3(line.x1, wallHeight, -line.y1),
+          new BABYLON.Vector3(line.x2, wallHeight, -line.y2),
+          new BABYLON.Vector3(line.x2, 0, -line.y2),
+          new BABYLON.Vector3(line.x1, 0, -line.y1)
+        ];
 
-    function getTextureURL(textureName) {
-      switch (textureName) {
-        case "stone":
-          return "https://www.babylonjs-playground.com/textures/stone.jpg";
-        // Add more cases for other textures if needed
-        default:
-          return "";
+        const wallMesh = BABYLON.MeshBuilder.CreateDashedLines(null, { points, dashSize: lineThickness, updatable: true });
+        wallMesh.color = new BABYLON.Color3.FromHexString(wallColor);
+
+        if (wallTexture) {
+          const wallMaterial = new BABYLON.StandardMaterial("wallMaterial", babylonCanvas._babylonScene);
+          wallMaterial.diffuseTexture = new BABYLON.Texture(wallTexture, babylonCanvas._babylonScene);
+          wallMesh.material = wallMaterial;
+        }
+
+        wallMesh.scaling.y = wallThickness;
       }
     }
 
