@@ -120,45 +120,63 @@
         return;
       }
 
-      detectedLines.forEach(line => {
-        const lineThickness = parseFloat(document.getElementById('lineThickness').value);
-        const wallColor = document.getElementById('wallColor').value;
-        const selectedTexture = document.getElementById('wallTexture').value;
-        const wallHeight = parseFloat(document.getElementById('wallHeight').value);
-        const wallThickness = parseFloat(document.getElementById('wallThickness').value);
+      const lineThickness = parseFloat(document.getElementById('lineThickness').value);
+      const wallColor = document.getElementById('wallColor').value;
+      const selectedTexture = document.getElementById('wallTexture').value;
+      const wallHeight = parseFloat(document.getElementById('wallHeight').value);
+      const wallThickness = parseFloat(document.getElementById('wallThickness').value);
 
-        const points = [
-          new BABYLON.Vector3(line.x1, 0, -line.y1),
-          new BABYLON.Vector3(line.x1, wallHeight, -line.y1),
-          new BABYLON.Vector3(line.x2, wallHeight, -line.y2),
-          new BABYLON.Vector3(line.x2, 0, -line.y2),
-          new BABYLON.Vector3(line.x1, 0, -line.y1)
-        ];
+      // Check if there are at least two lines for creating the box
+      if (detectedLines.length < 2) {
+        alert('Need at least two lines to create a box.');
+        return;
+      }
 
-        if (selectedTexture === "stone") {
-          // Create walls with stone texture using CreateBox
-          const wallMesh = BABYLON.MeshBuilder.CreateBox(null, { height: wallHeight, width: Math.abs(line.x2 - line.x1), depth: wallThickness });
-          wallMesh.position = new BABYLON.Vector3((line.x1 + line.x2) / 2, wallHeight / 2, -(line.y1 + line.y2) / 2);
-        } else {
-          // Create walls with dashed lines using CreateDashedLines
-          const wallMesh = BABYLON.MeshBuilder.CreateDashedLines(null, { points, dashSize: lineThickness, updatable: true });
-          wallMesh.color = new BABYLON.Color3.FromHexString(wallColor);
+      // Set a distance threshold for creating the box (adjust as needed)
+      const distanceThreshold = 50; // Set your desired threshold value here
 
-          if (selectedTexture) {
-            const wallMaterial = new BABYLON.StandardMaterial("wallMaterial", babylonCanvas._babylonScene);
-            wallMaterial.diffuseTexture = new BABYLON.Texture(getTextureURL(selectedTexture), babylonCanvas._babylonScene);
-            wallMesh.material = wallMaterial;
+      // Create walls only between close-together lines
+      for (let i = 0; i < detectedLines.length - 1; i++) {
+        const currentLine = detectedLines[i];
+        const nextLine = detectedLines[i + 1];
+
+        // Calculate the distance between the end points of adjacent lines
+        const distance = Math.sqrt(Math.pow(nextLine.x1 - currentLine.x2, 2) + Math.pow(nextLine.y1 - currentLine.y2, 2));
+
+        if (distance < distanceThreshold) {
+          const points = [
+            new BABYLON.Vector3(currentLine.x2, 0, -currentLine.y2),
+            new BABYLON.Vector3(currentLine.x2, wallHeight, -currentLine.y2),
+            new BABYLON.Vector3(nextLine.x1, wallHeight, -nextLine.y1),
+            new BABYLON.Vector3(nextLine.x1, 0, -nextLine.y1),
+            new BABYLON.Vector3(currentLine.x2, 0, -currentLine.y2)
+          ];
+
+          if (selectedTexture === "stone") {
+            // Create walls with stone texture using CreateBox
+            const wallMesh = BABYLON.MeshBuilder.CreateBox(null, { height: wallHeight, width: Math.abs(nextLine.x1 - currentLine.x2), depth: wallThickness });
+            wallMesh.position = new BABYLON.Vector3((currentLine.x2 + nextLine.x1) / 2, wallHeight / 2, -(currentLine.y2 + nextLine.y1) / 2);
+          } else {
+            // Create walls with dashed lines using CreateDashedLines
+            const wallMesh = BABYLON.MeshBuilder.CreateDashedLines(null, { points, dashSize: lineThickness, updatable: true });
+            wallMesh.color = new BABYLON.Color3.FromHexString(wallColor);
+
+            if (selectedTexture) {
+              const wallMaterial = new BABYLON.StandardMaterial("wallMaterial", babylonCanvas._babylonScene);
+              wallMaterial.diffuseTexture = new BABYLON.Texture(getTextureURL(selectedTexture), babylonCanvas._babylonScene);
+              wallMesh.material = wallMaterial;
+            }
+
+            wallMesh.scaling.y = wallThickness;
           }
-
-          wallMesh.scaling.y = wallThickness;
         }
-      });
+      }
     }
 
     function getTextureURL(textureName) {
       switch (textureName) {
         case "stone":
-          return "https://www.babylonjs-playground.com/textures/stone.jpg";
+          return "https://www.babylonjs-playground.com/textures/ground.jpg";
         // Add more cases for other textures if needed
         default:
           return "";
