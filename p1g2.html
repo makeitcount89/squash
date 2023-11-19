@@ -200,6 +200,7 @@
 
   // Rotate the camera to face the object
   camera.rotation.y = Math.PI; // Rotate by 180 degrees + 20 degrees
+  camera.position = new BABYLON.Vector3(0, 5, 10); // Adjust the third value as needed
     
 
   const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(1, 1, 0));
