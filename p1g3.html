@@ -92,7 +92,7 @@
       // Convert the detected lines to Babylon.js format
       detectedLines = [];
       const linesP = new cv.Mat();
-      cv.HoughLinesP(dst, linesP, 1, Math.PI / 180, 100, 50, 40);
+      cv.HoughLinesP(dst, linesP, 1, Math.PI / 180, 100, 50, 50);
 
       for (let i = 0; i < linesP.rows; i++) {
         const line = linesP.data32S.subarray(i * 4, i * 4 + 4);
