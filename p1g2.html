@@ -69,6 +69,7 @@
 
   <script>
     let img, context2D, babylonCanvas, detectedLines;
+    let babylonScene; // Added Babylon scene variable
 
     function onOpenCvReady() {
       // OpenCV is ready
@@ -130,65 +131,72 @@
       linesP.delete();
     }
 
-function convertTo3D() {
-  if (!detectedLines) {
-    alert('Please detect lines first.');
-    return;
-  }
+    function convertTo3D() {
+      if (!detectedLines) {
+        alert('Please detect lines first.');
+        return;
+      }
 
-  // Create a parent mesh to hold all the lines
-  const parentMesh = new BABYLON.Mesh("parentMesh", babylonCanvas._babylonScene);
+      // Create a parent mesh to hold all the lines
+      const parentMesh = new BABYLON.Mesh("parentMesh", babylonScene);
 
-  detectedLines.forEach(line => {
-    const lineThickness = parseFloat(document.getElementById('lineThickness').value);
-    const wallColor = document.getElementById('wallColor').value;
-    const wallTexture = document.getElementById('wallTexture').value;
-    const wallHeight = parseFloat(document.getElementById('wallHeight').value);
-    const wallThickness = parseFloat(document.getElementById('wallThickness').value);
+      detectedLines.forEach(line => {
+        const lineThickness = parseFloat(document.getElementById('lineThickness').value);
+        const wallColor = document.getElementById('wallColor').value;
+        const wallTexture = document.getElementById('wallTexture').value;
+        const wallHeight = parseFloat(document.getElementById('wallHeight').value);
+        const wallThickness = parseFloat(document.getElementById('wallThickness').value);
 
-    const points = [
-      new BABYLON.Vector3(line.x1, 0, -line.y1),
-      new BABYLON.Vector3(line.x1, wallHeight, -line.y1),
-      new BABYLON.Vector3(line.x2, wallHeight, -line.y2),
-      new BABYLON.Vector3(line.x2, 0, -line.y2),
-      new BABYLON.Vector3(line.x1, 0, -line.y1)
-    ];
+        const points = [
+          new BABYLON.Vector3(line.x1, 0, -line.y1),
+          new BABYLON.Vector3(line.x1, wallHeight, -line.y1),
+          new BABYLON.Vector3(line.x2, wallHeight, -line.y2),
+          new BABYLON.Vector3(line.x2, 0, -line.y2),
+          new BABYLON.Vector3(line.x1, 0, -line.y1)
+        ];
 
-    const wallMesh = BABYLON.MeshBuilder.CreateDashedLines(null, { points, dashSize: lineThickness, updatable: true });
-    wallMesh.color = new BABYLON.Color3.FromHexString(wallColor);
+        const wallMesh = BABYLON.MeshBuilder.CreateDashedLines(null, { points, dashSize: lineThickness, updatable: true });
+        wallMesh.color = new BABYLON.Color3.FromHexString(wallColor);
 
-    if (wallTexture) {
-      const wallMaterial = new BABYLON.StandardMaterial("wallMaterial", babylonCanvas._babylonScene);
-      wallMaterial.diffuseTexture = new BABYLON.Texture(wallTexture, babylonCanvas._babylonScene);
-      wallMesh.material = wallMaterial;
+        if (wallTexture) {
+          const wallMaterial = new BABYLON.StandardMaterial("wallMaterial", babylonScene);
+          wallMaterial.diffuseTexture = new BABYLON.Texture(wallTexture, babylonScene);
+          wallMesh.material = wallMaterial;
+        }
+
+        wallMesh.scaling.y = wallThickness;
+
+        // Parent each wall mesh to the parent mesh
+        wallMesh.setParent(parentMesh);
+      });
+
+      // Set up the parent mesh bounding box
+      parentMesh.computeWorldMatrix(true);
+      const boundingBox = parentMesh.getBoundingInfo().boundingBox;
+
+      // Create a parent box
+      const parentBox = BABYLON.MeshBuilder.CreateBox("parentBox", { size: 1 }, babylonScene);
+      parentBox.position = boundingBox.center;
+      parentBox.scaling = boundingBox.maximumWorld.subtract(boundingBox.minimumWorld).scale(1 / 2);
+
+      // Normalize the parent mesh to a unit cube
+      parentMesh.scaling = parentMesh.scaling.divide(parentBox.scaling);
+      parentMesh.position = parentMesh.getBoundingInfo().boundingBox.centerWorld;
+
+      // Set the camera position directly above the object looking at the center
+      const cameraHeight = parseFloat(document.getElementById('wallHeight').value) * 1.5; // Adjust the multiplier as needed
+      const camera = babylonScene.activeCamera;
+      camera.position = new BABYLON.Vector3(parentMesh.position.x, cameraHeight, parentMesh.position.z);
+      camera.setTarget(parentMesh.position);
+
+      // Set background color to a lighter gray
+      babylonScene.clearColor = new BABYLON.Color4(0.9, 0.9, 0.9, 1);
+
+      // Run the Babylon.js engine
+      babylonCanvas._babylonEngine.runRenderLoop(function () {
+        babylonScene.render();
+      });
     }
-
-    wallMesh.scaling.y = wallThickness;
-
-    // Parent each wall mesh to the parent mesh
-    wallMesh.setParent(parentMesh);
-  });
-
-  // Set up the parent mesh bounding box
-  parentMesh.computeWorldMatrix(true);
-  const boundingBox = parentMesh.getBoundingInfo().boundingBox;
-
-  // Create a parent box
-  const parentBox = BABYLON.MeshBuilder.CreateBox("parentBox", { size: 1 }, babylonCanvas._babylonScene);
-  parentBox.position = boundingBox.center;
-  parentBox.scaling = boundingBox.maximumWorld.subtract(boundingBox.minimumWorld).scale(1 / 2);
-
-  // Normalize the parent mesh to a unit cube
-  parentMesh.scaling = parentMesh.scaling.divide(parentBox.scaling);
-  parentMesh.position = parentMesh.getBoundingInfo().boundingBox.centerWorld;
-
-  // Set the camera position directly above the object looking at the center
-  const cameraHeight = parseFloat(document.getElementById('wallHeight').value) * 1.5; // Adjust the multiplier as needed
-  const camera = babylonCanvas._babylonScene.activeCamera;
-  camera.position = new BABYLON.Vector3(parentMesh.position.x, cameraHeight, parentMesh.position.z);
-  camera.setTarget(parentMesh.position);
-}
-
 
     function resetCanvas() {
       if (babylonCanvas) {
@@ -205,25 +213,25 @@ function convertTo3D() {
 
         // Create a new Babylon engine and scene
         const engine = new BABYLON.Engine(babylonCanvas, true);
-        const newScene = new BABYLON.Scene(engine);
+        babylonScene = new BABYLON.Scene(engine);
 
         // Set up camera and light for the new scene (you may need to adjust these parameters)
-        const camera = new BABYLON.UniversalCamera('camera', new BABYLON.Vector3(0, 5, -10), newScene);
+        const camera = new BABYLON.UniversalCamera('camera', new BABYLON.Vector3(0, 5, -10), babylonScene);
         camera.setTarget(BABYLON.Vector3.Zero());
         camera.attachControl(babylonCanvas, true);
         const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(1, 1, 0));
 
         // Set background color to a lighter gray
-        newScene.clearColor = new BABYLON.Color4(0.9, 0.9, 0.9, 1);
+        babylonScene.clearColor = new BABYLON.Color4(0.9, 0.9, 0.9, 1);
 
         // Run the Babylon.js engine for the new scene
         engine.runRenderLoop(function () {
-          newScene.render();
+          babylonScene.render();
         });
 
         // Update the babylonCanvas and babylonScene variables
         babylonCanvas._babylonEngine = engine;
-        babylonCanvas._babylonScene = newScene;
+        babylonCanvas._babylonScene = babylonScene;
 
         // Show the new Babylon canvas
         babylonCanvas.style.display = 'block';
