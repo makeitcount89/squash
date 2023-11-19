@@ -200,12 +200,38 @@
 
       camera.rotation.y += Math.PI / 2; // Rotate by 90 degrees
 
-
       // Set background color to a lighter gray
       scene.clearColor = new BABYLON.Color4(0.9, 0.9, 0.9, 1);
 
-      // Run the Babylon.js engine
+      // Add the event listeners after attaching the camera control
+      window.addEventListener("keydown", onKeyDown, false);
+      window.addEventListener("keyup", onKeyUp, false);
+
+      let keys = {};
+
+      function onKeyDown(event) {
+        keys[event.key] = true;
+      }
+
+      function onKeyUp(event) {
+        keys[event.key] = false;
+      }
+
+      // Update the render loop to handle keyboard input
       engine.runRenderLoop(function () {
+        if (keys["w"]) {
+          camera.position = camera.position.add(camera.getFrontPosition(0.1));
+        }
+        if (keys["s"]) {
+          camera.position = camera.position.subtract(camera.getFrontPosition(0.1));
+        }
+        if (keys["a"]) {
+          camera.position = camera.position.subtract(camera.getRightPosition(0.1));
+        }
+        if (keys["d"]) {
+          camera.position = camera.position.add(camera.getRightPosition(0.1));
+        }
+
         scene.render();
       });
     };
@@ -249,38 +275,6 @@
         babylonCanvas.style.display = 'block';
       }
     }
-    // Add this after the camera.attachControl line
-window.addEventListener("keydown", onKeyDown, false);
-window.addEventListener("keyup", onKeyUp, false);
-
-let keys = {};
-
-function onKeyDown(event) {
-    keys[event.key] = true;
-}
-
-function onKeyUp(event) {
-    keys[event.key] = false;
-}
-
-// Update the render loop to handle keyboard input
-engine.runRenderLoop(function () {
-    if (keys["w"]) {
-        camera.position = camera.position.add(camera.getFrontPosition(0.1));
-    }
-    if (keys["s"]) {
-        camera.position = camera.position.subtract(camera.getFrontPosition(0.1));
-    }
-    if (keys["a"]) {
-        camera.position = camera.position.subtract(camera.getRightPosition(0.1));
-    }
-    if (keys["d"]) {
-        camera.position = camera.position.add(camera.getRightPosition(0.1));
-    }
-
-    scene.render();
-});
-
   </script>
 </body>
 
