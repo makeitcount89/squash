@@ -10,11 +10,30 @@
   <!-- Include Babylon.js -->
   <script src="https://cdn.babylonjs.com/babylon.js"></script>
   <style>
-    /* Your existing styles here */
+    #canvas2D,
+    #canvas3D {
+      border: 1px solid #000;
+      margin-top: 20px;
+    }
+
+    body {
+      font-size: 24px;
+    }
 
     label {
       display: block;
       margin-top: 10px;
+    }
+
+    button {
+      font-size: 24px;
+      padding: 15px;
+      margin: 10px;
+    }
+
+    input {
+      font-size: 24px;
+      margin: 10px;
     }
   </style>
 </head>
@@ -22,21 +41,18 @@
 <body>
   <input type="file" id="imageInput" accept="image/*" onchange="loadAndDetect()">
   <label for="lineThreshold">Line Threshold:</label>
-  <input type="range" id="lineThreshold" min="1" max="300" value="275" onchange="updateLineThreshold(this.value)">
-  <span id="lineThresholdValue">275</span>
+  <input type="range" id="lineThreshold" min="1" max="255" value="50" onchange="updateLineThreshold(this.value)">
+  <span id="lineThresholdValue">50</span>
 
   <label for="lineThickness">Line Thickness:</label>
-  <input type="range" id="lineThickness" min="1" max="100" value="10" onchange="updateLineThickness(this.value)">
-  <span id="lineThicknessValue">10</span>
+  <input type="range" id="lineThickness" min="1" max="100" value="50" onchange="updateLineThickness(this.value)">
+  <span id="lineThicknessValue">50</span>
 
   <label for="wallColor">Wall Color:</label>
   <input type="color" id="wallColor" value="#000000">
 
   <label for="wallTexture">Wall Texture:</label>
-  <select id="wallTexture">
-    <option value="">No Texture</option>
-    <option value="stone">Stone</option>
-  </select>
+  <input type="text" id="wallTexture" placeholder="Texture URL" value="https://www.babylonjs-playground.com/textures/brick.jpg">
 
   <label for="wallHeight">Wall Height:</label>
   <input type="number" id="wallHeight" value="250">
@@ -97,7 +113,7 @@
       // Convert the detected lines to Babylon.js format
       detectedLines = [];
       const linesP = new cv.Mat();
-      cv.HoughLinesP(dst, linesP, 1, Math.PI / 180, 100, 50, 100);
+      cv.HoughLinesP(dst, linesP, 1, Math.PI / 180, 100, 50, 10);
 
       for (let i = 0; i < linesP.rows; i++) {
         const line = linesP.data32S.subarray(i * 4, i * 4 + 4);
@@ -120,67 +136,32 @@
         return;
       }
 
-      const lineThickness = parseFloat(document.getElementById('lineThickness').value);
-      const wallColor = document.getElementById('wallColor').value;
-      const selectedTexture = document.getElementById('wallTexture').value;
-      const wallHeight = parseFloat(document.getElementById('wallHeight').value);
-      const wallThickness = parseFloat(document.getElementById('wallThickness').value);
+      detectedLines.forEach(line => {
+        const lineThickness = parseFloat(document.getElementById('lineThickness').value);
+        const wallColor = document.getElementById('wallColor').value;
+        const wallTexture = document.getElementById('wallTexture').value;
+        const wallHeight = parseFloat(document.getElementById('wallHeight').value);
+        const wallThickness = parseFloat(document.getElementById('wallThickness').value);
 
-      // Check if there are at least two lines for creating the box
-      if (detectedLines.length < 2) {
-        alert('Need at least two lines to create a box.');
-        return;
-      }
+        const points = [
+          new BABYLON.Vector3(line.x1, 0, -line.y1),
+          new BABYLON.Vector3(line.x1, wallHeight, -line.y1),
+          new BABYLON.Vector3(line.x2, wallHeight, -line.y2),
+          new BABYLON.Vector3(line.x2, 0, -line.y2),
+          new BABYLON.Vector3(line.x1, 0, -line.y1)
+        ];
 
-      // Set a distance threshold for creating the box (adjust as needed)
-      const distanceThreshold = 200; // Set your desired threshold value here
+        const wallMesh = BABYLON.MeshBuilder.CreateDashedLines(null, { points, dashSize: lineThickness, updatable: true });
+        wallMesh.color = new BABYLON.Color3.FromHexString(wallColor);
 
-      // Create walls only between close-together lines
-      for (let i = 0; i < detectedLines.length - 1; i++) {
-        const currentLine = detectedLines[i];
-        const nextLine = detectedLines[i + 1];
-
-        // Calculate the distance between the end points of adjacent lines
-        const distance = Math.sqrt(Math.pow(nextLine.x1 - currentLine.x2, 2) + Math.pow(nextLine.y1 - currentLine.y2, 2));
-
-        if (distance < distanceThreshold) {
-          const points = [
-            new BABYLON.Vector3(currentLine.x2, 0, -currentLine.y2),
-            new BABYLON.Vector3(currentLine.x2, wallHeight, -currentLine.y2),
-            new BABYLON.Vector3(nextLine.x1, wallHeight, -nextLine.y1),
-            new BABYLON.Vector3(nextLine.x1, 0, -nextLine.y1),
-            new BABYLON.Vector3(currentLine.x2, 0, -currentLine.y2)
-          ];
-
-          if (selectedTexture === "stone") {
-            // Create walls with stone texture using CreateBox
-            const wallMesh = BABYLON.MeshBuilder.CreateBox(null, { height: wallHeight, width: Math.abs(nextLine.x1 - currentLine.x2), depth: wallThickness });
-            wallMesh.position = new BABYLON.Vector3((currentLine.x2 + nextLine.x1) / 2, wallHeight / 2, -(currentLine.y2 + nextLine.y1) / 2);
-          } else {
-            // Create walls with dashed lines using CreateDashedLines
-            const wallMesh = BABYLON.MeshBuilder.CreateDashedLines(null, { points, dashSize: lineThickness, updatable: true });
-            wallMesh.color = new BABYLON.Color3.FromHexString(wallColor);
-
-            if (selectedTexture) {
-              const wallMaterial = new BABYLON.StandardMaterial("wallMaterial", babylonCanvas._babylonScene);
-              wallMaterial.diffuseTexture = new BABYLON.Texture(getTextureURL(selectedTexture), babylonCanvas._babylonScene);
-              wallMesh.material = wallMaterial;
-            }
-
-            wallMesh.scaling.y = wallThickness;
-          }
+        if (wallTexture) {
+          const wallMaterial = new BABYLON.StandardMaterial("wallMaterial", babylonCanvas._babylonScene);
+          wallMaterial.diffuseTexture = new BABYLON.Texture(wallTexture, babylonCanvas._babylonScene);
+          wallMesh.material = wallMaterial;
         }
-      }
-    }
 
-    function getTextureURL(textureName) {
-      switch (textureName) {
-        case "stone":
-          return "https://www.babylonjs-playground.com/textures/ground.jpg";
-        // Add more cases for other textures if needed
-        default:
-          return "";
-      }
+        wallMesh.scaling.y = wallThickness;
+      });
     }
 
     // Load Babylon canvas on page load
