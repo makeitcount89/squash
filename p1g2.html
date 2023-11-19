@@ -194,14 +194,13 @@
   const scene = new BABYLON.Scene(engine);
 
   // Set up camera and light
-  const camera = new BABYLON.UniversalCamera('camera', new BABYLON.Vector3(0, 5, -10), scene);
+  const camera = new BABYLON.UniversalCamera('camera', new BABYLON.Vector3(0, 5, -20), scene);
   camera.setTarget(BABYLON.Vector3.Zero());
   camera.attachControl(babylonCanvas, true);
 
   // Rotate the camera to face the object
   camera.rotation.y = Math.PI; // Rotate by 180 degrees + 20 degrees
-  camera.position = new BABYLON.Vector3(0, 5, 10); // Adjust the third value as needed
-    
+  
 
   const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(1, 1, 0));
 
