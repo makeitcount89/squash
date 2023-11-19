@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Babylon.js Chair Example</title>
+    <title>Babylon.js Bed Example</title>
     <script src="https://cdn.babylonjs.com/babylon.js"></script>
 </head>
 <body>
@@ -17,8 +17,8 @@
             var createScene = function () {
                 var scene = new BABYLON.Scene(engine);
 
-                // Load chair model
-                BABYLON.SceneLoader.ImportMesh("", "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Chair/glTF/", "Chair.gltf", scene, function (meshes) {
+                // Load bed model
+                BABYLON.SceneLoader.ImportMesh("", "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Bed/glTF/", "Bed.gltf", scene, function (meshes) {
                     // Callback function
                     // 'meshes' is an array of loaded meshes
                 });
