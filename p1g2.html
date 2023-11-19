@@ -181,7 +181,7 @@
         }
 
         wallMesh.scaling.y = wallThickness;
-      });
+      
   const camera = new BABYLON.UniversalCamera('camera', new BABYLON.Vector3(0, 5, -10), scene);
 
       // Call normalizeToUnitCube here if needed
@@ -189,6 +189,7 @@
   camera.rotation.y = Math.PI; // Rotate by 180 degrees
   // Decrease the camera's radius to zoom out by 10%
   camera.radius *= 0.5;
+        });
     }
     
 
