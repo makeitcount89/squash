@@ -187,7 +187,15 @@
   const camera = babylonCanvas._babylonScene.activeCamera;
   camera.position = new BABYLON.Vector3(parentMesh.position.x, cameraHeight, parentMesh.position.z);
   camera.setTarget(parentMesh.position);
-}
+
+     // Set background color to a lighter gray
+  scene.clearColor = new BABYLON.Color4(0.9, 0.9, 0.9, 1);
+
+  // Run the Babylon.js engine
+  engine.runRenderLoop(function () {
+    scene.render();
+  });
+};
 
     function resetCanvas() {
       if (babylonCanvas) {
