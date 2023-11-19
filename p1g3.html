@@ -136,6 +136,25 @@
         return;
       }
 
+      // Determine the bounding box of the 3D object
+      let minX = Number.MAX_VALUE;
+      let minY = Number.MAX_VALUE;
+      let maxX = Number.MIN_VALUE;
+      let maxY = Number.MIN_VALUE;
+
+      detectedLines.forEach(line => {
+        minX = Math.min(minX, line.x1, line.x2);
+        minY = Math.min(minY, -line.y1, -line.y2);
+        maxX = Math.max(maxX, line.x1, line.x2);
+        maxY = Math.max(maxY, -line.y1, -line.y2);
+      });
+
+      // Calculate the center and dimensions of the bounding box
+      const centerX = (minX + maxX) / 2;
+      const centerY = (minY + maxY) / 2;
+      const width = maxX - minX;
+      const height = maxY - minY;
+
       detectedLines.forEach(line => {
         const lineThickness = parseFloat(document.getElementById('lineThickness').value);
         const wallColor = document.getElementById('wallColor').value;
@@ -143,12 +162,13 @@
         const wallHeight = parseFloat(document.getElementById('wallHeight').value);
         const wallThickness = parseFloat(document.getElementById('wallThickness').value);
 
+        // Center and normalize the object
         const points = [
-          new BABYLON.Vector3(line.x1, 0, -line.y1),
-          new BABYLON.Vector3(line.x1, wallHeight, -line.y1),
-          new BABYLON.Vector3(line.x2, wallHeight, -line.y2),
-          new BABYLON.Vector3(line.x2, 0, -line.y2),
-          new BABYLON.Vector3(line.x1, 0, -line.y1)
+          new BABYLON.Vector3(line.x1 - centerX, 0, -line.y1 + centerY),
+          new BABYLON.Vector3(line.x1 - centerX, wallHeight, -line.y1 + centerY),
+          new BABYLON.Vector3(line.x2 - centerX, wallHeight, -line.y2 + centerY),
+          new BABYLON.Vector3(line.x2 - centerX, 0, -line.y2 + centerY),
+          new BABYLON.Vector3(line.x1 - centerX, 0, -line.y1 + centerY)
         ];
 
         const wallMesh = BABYLON.MeshBuilder.CreateDashedLines(null, { points, dashSize: lineThickness, updatable: true });
@@ -162,6 +182,8 @@
 
         wallMesh.scaling.y = wallThickness;
       });
+
+      // Call normalizeToUnitCube here if needed
     }
 
     // Load Babylon canvas on page load
@@ -173,8 +195,11 @@
       // Set up camera and light
       const camera = new BABYLON.UniversalCamera('camera', new BABYLON.Vector3(0, 5, -10), scene);
       camera.setTarget(BABYLON.Vector3.Zero());
-      camera.attachControl(babylonCanvas, true);
+      camera.attachControl(babylonCanvas, true, false, null, false);
       const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(1, 1, 0));
+
+      camera.rotation.y += Math.PI / 2; // Rotate by 90 degrees
+
 
       // Set background color to a lighter gray
       scene.clearColor = new BABYLON.Color4(0.9, 0.9, 0.9, 1);
@@ -205,7 +230,7 @@
         // Set up camera and light for the new scene (you may need to adjust these parameters)
         const camera = new BABYLON.UniversalCamera('camera', new BABYLON.Vector3(0, 5, -10), newScene);
         camera.setTarget(BABYLON.Vector3.Zero());
-        camera.attachControl(babylonCanvas, true);
+        camera.attachControl(babylonCanvas, true, false, null, false);
         const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(1, 1, 0));
 
         // Set background color to a lighter gray
@@ -224,6 +249,38 @@
         babylonCanvas.style.display = 'block';
       }
     }
+    // Add this after the camera.attachControl line
+window.addEventListener("keydown", onKeyDown, false);
+window.addEventListener("keyup", onKeyUp, false);
+
+let keys = {};
+
+function onKeyDown(event) {
+    keys[event.key] = true;
+}
+
+function onKeyUp(event) {
+    keys[event.key] = false;
+}
+
+// Update the render loop to handle keyboard input
+engine.runRenderLoop(function () {
+    if (keys["w"]) {
+        camera.position = camera.position.add(camera.getFrontPosition(0.1));
+    }
+    if (keys["s"]) {
+        camera.position = camera.position.subtract(camera.getFrontPosition(0.1));
+    }
+    if (keys["a"]) {
+        camera.position = camera.position.subtract(camera.getRightPosition(0.1));
+    }
+    if (keys["d"]) {
+        camera.position = camera.position.add(camera.getRightPosition(0.1));
+    }
+
+    scene.render();
+});
+
   </script>
 </body>
 
