@@ -127,23 +127,18 @@
         const wallHeight = parseFloat(document.getElementById('wallHeight').value);
         const wallThickness = parseFloat(document.getElementById('wallThickness').value);
 
-        // Calculate the center point of the wall
-        const centerX = (line.x1 + line.x2) / 2;
-        const centerY = (line.y1 + line.y2) / 2;
-
-        // Offset the position based on the center point
         const points = [
-          new BABYLON.Vector3(line.x1 - centerX, 0, -(line.y1 - centerY)),
-          new BABYLON.Vector3(line.x1 - centerX, wallHeight, -(line.y1 - centerY)),
-          new BABYLON.Vector3(line.x2 - centerX, wallHeight, -(line.y2 - centerY)),
-          new BABYLON.Vector3(line.x2 - centerX, 0, -(line.y2 - centerY)),
-          new BABYLON.Vector3(line.x1 - centerX, 0, -(line.y1 - centerY))
+          new BABYLON.Vector3(line.x1, 0, -line.y1),
+          new BABYLON.Vector3(line.x1, wallHeight, -line.y1),
+          new BABYLON.Vector3(line.x2, wallHeight, -line.y2),
+          new BABYLON.Vector3(line.x2, 0, -line.y2),
+          new BABYLON.Vector3(line.x1, 0, -line.y1)
         ];
 
         if (selectedTexture === "stone") {
           // Create walls with stone texture using CreateBox
           const wallMesh = BABYLON.MeshBuilder.CreateBox(null, { height: wallHeight, width: Math.abs(line.x2 - line.x1), depth: wallThickness });
-          wallMesh.position = new BABYLON.Vector3(centerX, wallHeight / 2, -centerY);
+          wallMesh.position = new BABYLON.Vector3((line.x1 + line.x2) / 2, wallHeight / 2, -(line.y1 + line.y2) / 2);
         } else {
           // Create walls with dashed lines using CreateDashedLines
           const wallMesh = BABYLON.MeshBuilder.CreateDashedLines(null, { points, dashSize: lineThickness, updatable: true });
@@ -156,7 +151,18 @@
           }
 
           wallMesh.scaling.y = wallThickness;
-          wallMesh.position = new BABYLON.Vector3(centerX, wallHeight / 2, -centerY);
+
+          // Calculate the center point of the wall
+          const centerX = (line.x1 + line.x2) / 2;
+          const centerY = (line.y1 + line.y2) / 2;
+
+          // Center the wall mesh using the parent box
+          const parentBox = BABYLON.MeshBuilder.CreateBox("parentBox", { size: 1 }); // Create a unit cube
+          parentBox.position = new BABYLON.Vector3(centerX, 0, -centerY); // Set the position based on the center point
+          parentBox.isVisible = false; // Hide the parent box
+
+          // Parent the wall mesh to the parent box
+          wallMesh.setParent(parentBox);
         }
       });
     }
