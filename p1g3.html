@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -10,39 +10,33 @@
   <!-- Include Babylon.js -->
   <script src="https://cdn.babylonjs.com/babylon.js"></script>
   <style>
-    #canvas2D,
-    #canvas3D {
-      border: 1px solid #000;
-      margin-top: 20px;
-    }
+    /* Your existing styles here */
 
-    body {
-      font-size: 24px;
-    }
-
-    button {
-      font-size: 24px;
-      padding: 15px;
-      margin: 10px;
-    }
-
-    input {
-      font-size: 24px;
-      margin: 10px;
+    label {
+      display: block;
+      margin-top: 10px;
     }
   </style>
 </head>
 
 <body>
   <input type="file" id="imageInput" accept="image/*" onchange="loadAndDetect()">
+  <label for="lineThreshold">Line Threshold:</label>
+  <input type="range" id="lineThreshold" min="1" max="300" value="275" onchange="updateLineThreshold(this.value)">
+  <span id="lineThresholdValue">275</span>
+
   <label for="lineThickness">Line Thickness:</label>
-  <input type="number" id="lineThickness" value="50">
-  
+  <input type="range" id="lineThickness" min="1" max="100" value="10" onchange="updateLineThickness(this.value)">
+  <span id="lineThicknessValue">10</span>
+
   <label for="wallColor">Wall Color:</label>
   <input type="color" id="wallColor" value="#000000">
 
   <label for="wallTexture">Wall Texture:</label>
-  <input type="text" id="wallTexture" placeholder="Texture URL" value="https://www.babylonjs-playground.com/textures/brick.jpg">
+  <select id="wallTexture">
+    <option value="">No Texture</option>
+    <option value="stone">Stone</option>
+  </select>
 
   <label for="wallHeight">Wall Height:</label>
   <input type="number" id="wallHeight" value="250">
@@ -64,6 +58,16 @@
       // OpenCV is ready
     }
 
+    function updateLineThreshold(value) {
+      document.getElementById('lineThresholdValue').textContent = value;
+      loadAndDetect(); // Trigger line detection on threshold change
+    }
+
+    function updateLineThickness(value) {
+      document.getElementById('lineThicknessValue').textContent = value;
+      // You can add real-time adjustment logic for line thickness here if needed
+    }
+
     function loadAndDetect() {
       const input = document.getElementById('imageInput');
       img = new Image();
@@ -71,12 +75,13 @@
         context2D = document.getElementById('canvas2D').getContext('2d');
         context2D.clearRect(0, 0, context2D.canvas.width, context2D.canvas.height);
         context2D.drawImage(img, 0, 0, context2D.canvas.width, context2D.canvas.height);
-        detectLines();
+        const threshold = parseInt(document.getElementById('lineThreshold').value);
+        detectLines(threshold);
       };
       img.src = URL.createObjectURL(input.files[0]);
     }
 
-    function detectLines() {
+    function detectLines(threshold) {
       if (!img) {
         alert('Please load an image first.');
         return;
@@ -87,7 +92,7 @@
       const dst = new cv.Mat();
 
       cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY);
-      cv.Canny(src, dst, 50, 100, 3, false);
+      cv.Canny(src, dst, threshold, threshold * 2, 3, false); // Adjust the threshold here
 
       // Convert the detected lines to Babylon.js format
       detectedLines = [];
@@ -115,13 +120,13 @@
         return;
       }
 
-      const lineThickness = parseInt(document.getElementById('lineThickness').value);
-      const wallColor = document.getElementById('wallColor').value;
-      const wallTexture = document.getElementById('wallTexture').value;
-      const wallHeight = parseFloat(document.getElementById('wallHeight').value);
-      const wallThickness = parseFloat(document.getElementById('wallThickness').value);
-
       detectedLines.forEach(line => {
+        const lineThickness = parseFloat(document.getElementById('lineThickness').value);
+        const wallColor = document.getElementById('wallColor').value;
+        const selectedTexture = document.getElementById('wallTexture').value;
+        const wallHeight = parseFloat(document.getElementById('wallHeight').value);
+        const wallThickness = parseFloat(document.getElementById('wallThickness').value);
+
         const points = [
           new BABYLON.Vector3(line.x1, 0, -line.y1),
           new BABYLON.Vector3(line.x1, wallHeight, -line.y1),
@@ -130,17 +135,34 @@
           new BABYLON.Vector3(line.x1, 0, -line.y1)
         ];
 
-        const wallMesh = BABYLON.MeshBuilder.CreateDashedLines(null, { points, dashSize: lineThickness, updatable: true });
-        wallMesh.color = new BABYLON.Color3.FromHexString(wallColor);
-        
-        if (wallTexture) {
-          const wallMaterial = new BABYLON.StandardMaterial("wallMaterial", babylonCanvas._babylonScene);
-          wallMaterial.diffuseTexture = new BABYLON.Texture(wallTexture, babylonCanvas._babylonScene);
-          wallMesh.material = wallMaterial;
-        }
+        if (selectedTexture === "stone") {
+          // Create walls with stone texture using CreateBox
+          const wallMesh = BABYLON.MeshBuilder.CreateBox(null, { height: wallHeight, width: Math.abs(line.x2 - line.x1), depth: wallThickness });
+          wallMesh.position = new BABYLON.Vector3((line.x1 + line.x2) / 2, wallHeight / 2, -(line.y1 + line.y2) / 2);
+        } else {
+          // Create walls with dashed lines using CreateDashedLines
+          const wallMesh = BABYLON.MeshBuilder.CreateDashedLines(null, { points, dashSize: lineThickness, updatable: true });
+          wallMesh.color = new BABYLON.Color3.FromHexString(wallColor);
 
-        wallMesh.scaling.y = wallThickness;
+          if (selectedTexture) {
+            const wallMaterial = new BABYLON.StandardMaterial("wallMaterial", babylonCanvas._babylonScene);
+            wallMaterial.diffuseTexture = new BABYLON.Texture(getTextureURL(selectedTexture), babylonCanvas._babylonScene);
+            wallMesh.material = wallMaterial;
+          }
+
+          wallMesh.scaling.y = wallThickness;
+        }
       });
+    }
+
+    function getTextureURL(textureName) {
+      switch (textureName) {
+        case "stone":
+          return "https://www.babylonjs-playground.com/textures/stone.jpg";
+        // Add more cases for other textures if needed
+        default:
+          return "";
+      }
     }
 
     // Load Babylon canvas on page load
@@ -149,8 +171,7 @@
       const engine = new BABYLON.Engine(babylonCanvas, true);
       const scene = new BABYLON.Scene(engine);
 
-      
-    // Set up camera and light
+      // Set up camera and light
       const camera = new BABYLON.UniversalCamera('camera', new BABYLON.Vector3(0, 5, -10), scene);
       camera.setTarget(BABYLON.Vector3.Zero());
       camera.attachControl(babylonCanvas, true);
@@ -158,8 +179,7 @@
 
       camera.rotation.y += Math.PI; // Rotate by 180 degrees
 
-     
-     // Set background color to a lighter gray
+      // Set background color to a lighter gray
       scene.clearColor = new BABYLON.Color4(0.9, 0.9, 0.9, 1);
 
       // Run the Babylon.js engine
@@ -206,7 +226,6 @@
         // Show the new Babylon canvas
         babylonCanvas.style.display = 'block';
       }
-
     }
   </script>
 </body>
