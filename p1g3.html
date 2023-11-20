@@ -203,14 +203,14 @@
   const scene = new BABYLON.Scene(engine);
 
   // Set up camera and light
-  const camera = new BABYLON.UniversalCamera('camera', new BABYLON.Vector3(0, 10, -200), scene);
+  const camera = new BABYLON.UniversalCamera('camera', new BABYLON.Vector3(0, 0, -200), scene);
 camera.setTarget(BABYLON.Vector3.Zero());
 camera.attachControl(babylonCanvas, true);
 
 // Animation parameters
-const animationDuration = 700; // in milliseconds
+const animationDuration = 800; // in milliseconds
 const zoomedOutPosition = new BABYLON.Vector3(0, 100, -1800);
-    camera.rotation.x = Math.PI / 10; 
+    camera.rotation.x = Math.PI / 12; 
 
 // Create a position animation
 const animation = new BABYLON.Animation(
