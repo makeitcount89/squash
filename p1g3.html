@@ -209,7 +209,7 @@ camera.attachControl(babylonCanvas, true);
 
 // Animation parameters
 const animationDuration = 1000; // in milliseconds
-const zoomedOutPosition = new BABYLON.Vector3(0, 20, -1000);
+const zoomedOutPosition = new BABYLON.Vector3(0, 10, -1000);
 
 // Create a position animation
 const animation = new BABYLON.Animation(
@@ -237,8 +237,8 @@ scene.beginAnimation(camera, 0, animationDuration, false);
     
 
   // Rotate the camera to face the object
-  camera.rotation.y = Math.PI; // Rotate by 180 degrees + 20 degrees
-  camera.rotation.x = Math.PI / 5; // Adjust the angle to tilt the camera down
+  //camera.rotation.y = Math.PI; // Rotate by 180 degrees + 20 degrees
+  //camera.rotation.x = Math.PI / 5; // Adjust the angle to tilt the camera down
     
   
 
