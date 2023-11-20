@@ -204,8 +204,37 @@
 
   // Set up camera and light
   const camera = new BABYLON.UniversalCamera('camera', new BABYLON.Vector3(0, 10, -500), scene);
-  camera.setTarget(BABYLON.Vector3.Zero());
-  camera.attachControl(babylonCanvas, true);
+camera.setTarget(BABYLON.Vector3.Zero());
+camera.attachControl(babylonCanvas, true);
+
+// Animation parameters
+const animationDuration = 1000; // in milliseconds
+const zoomedOutPosition = new BABYLON.Vector3(0, 20, -1000);
+
+// Create a position animation
+const animation = new BABYLON.Animation(
+  'cameraZoom',
+  'position',
+  60,
+  BABYLON.Animation.ANIMATIONTYPE_VECTOR3,
+  BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT
+);
+
+// Set keyframes for the animation
+const keys = [
+  { frame: 0, value: camera.position.clone() },
+  { frame: animationDuration, value: zoomedOutPosition }
+];
+
+// Add keys to the animation
+animation.setKeys(keys);
+
+// Attach the animation to the camera
+camera.animations.push(animation);
+
+// Run the animation
+scene.beginAnimation(camera, 0, animationDuration, false);
+    
 
   // Rotate the camera to face the object
   camera.rotation.y = Math.PI; // Rotate by 180 degrees + 20 degrees
