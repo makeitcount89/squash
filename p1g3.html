@@ -204,37 +204,57 @@
 
   // Set up camera and light
   const camera = new BABYLON.UniversalCamera('camera', new BABYLON.Vector3(0, 10, -500), scene);
-camera.setTarget(BABYLON.Vector3.Zero());
-camera.attachControl(babylonCanvas, true);
+  camera.setTarget(BABYLON.Vector3.Zero());
+  camera.attachControl(babylonCanvas, true);
 
-// Animation parameters
-const animationDuration = 1000; // in milliseconds
-const zoomedOutPosition = new BABYLON.Vector3(0, 100, -1000);
-    camera.rotation.x = Math.PI / 5; 
+  // Animation parameters
+  const animationDuration = 1000; // in milliseconds
+  const zoomedOutPosition = new BABYLON.Vector3(0, 100, -1000);
 
-// Create a position animation
-const animation = new BABYLON.Animation(
-  'cameraZoom',
-  'position',
-  60,
-  BABYLON.Animation.ANIMATIONTYPE_VECTOR3,
-  BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT
-);
+  // Create a position animation
+  const positionAnimation = new BABYLON.Animation(
+    'cameraZoom',
+    'position',
+    60,
+    BABYLON.Animation.ANIMATIONTYPE_VECTOR3,
+    BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT
+  );
 
-// Set keyframes for the animation
-const keys = [
-  { frame: 0, value: camera.position.clone() },
-  { frame: animationDuration, value: zoomedOutPosition }
-];
+  // Set keyframes for the position animation
+  const positionKeys = [
+    { frame: 0, value: camera.position.clone() },
+    { frame: animationDuration, value: zoomedOutPosition }
+  ];
 
-// Add keys to the animation
-animation.setKeys(keys);
+  // Add keys to the position animation
+  positionAnimation.setKeys(positionKeys);
 
-// Attach the animation to the camera
-camera.animations.push(animation);
+  // Create a rotation animation
+  const rotationAnimation = new BABYLON.Animation(
+    'cameraRotate',
+    'rotation.x',
+    60,
+    BABYLON.Animation.ANIMATIONTYPE_FLOAT,
+    BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT
+  );
 
-// Run the animation
-scene.beginAnimation(camera, 0, animationDuration, false);
+  // Set keyframes for the rotation animation
+  const rotationKeys = [
+    { frame: 0, value: camera.rotation.x },
+    { frame: animationDuration, value: Math.PI / 5 } // Adjust the rotation angle as needed
+  ];
+
+  // Add keys to the rotation animation
+  rotationAnimation.setKeys(rotationKeys);
+
+  // Attach animations to the camera
+  camera.animations.push(positionAnimation);
+  camera.animations.push(rotationAnimation);
+
+  // Run the animations
+  scene.beginAnimation(camera, 0, animationDuration, false);
+};
+    
     
 
   // Rotate the camera to face the object
