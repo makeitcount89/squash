@@ -86,27 +86,27 @@
     }
 
     function loadAndDetect() {
-  const input = document.getElementById('imageInput');
-  img = new Image();
-  img.onload = function () {
-    context2D = document.getElementById('canvas2D').getContext('2d');
-    context2D.clearRect(0, 0, context2D.canvas.width, context2D.canvas.height);
-    context2D.drawImage(img, 0, 0, context2D.canvas.width, context2D.canvas.height);
-    const threshold = parseInt(document.getElementById('lineThreshold').value);
-    detectLines(threshold);
+      const input = document.getElementById('imageInput');
+      img = new Image();
+      img.onload = function () {
+        context2D = document.getElementById('canvas2D').getContext('2d');
+        context2D.clearRect(0, 0, context2D.canvas.width, context2D.canvas.height);
+        context2D.drawImage(img, 0, 0, context2D.canvas.width, context2D.canvas.height);
+        const threshold = parseInt(document.getElementById('lineThreshold').value);
+        detectLines(threshold);
 
-    // Draw the detected lines on the 2D canvas
-    context2D.beginPath();
-    context2D.strokeStyle = 'red'; // Change the color as needed
-    detectedLines.forEach(line => {
-      context2D.moveTo(line.x1, line.y1);
-      context2D.lineTo(line.x2, line.y2);
-    });
-    context2D.stroke();
-  };
-  img.src = URL.createObjectURL(input.files[0]);
+        // Draw the detected lines on the 2D canvas
+        context2D.beginPath();
+        context2D.strokeStyle = 'red'; // Change the color as needed
+        detectedLines.forEach(line => {
+          context2D.moveTo(line.x1, line.y1);
+          context2D.lineTo(line.x2, line.y2);
+        });
+        context2D.stroke();
+      };
+      img.src = URL.createObjectURL(input.files[0]);
     }
-    
+
     function detectLines(threshold) {
       if (!img) {
         alert('Please load an image first.');
@@ -185,121 +185,26 @@
         wallMesh.color = new BABYLON.Color3.FromHexString(wallColor);
 
         if (wallTexture) {
-          const wallMaterial = new BABYLON.StandardMaterial("wallMaterial", babylonCanvas._babylonScene);
-          wallMaterial.diffuseTexture = new BABYLON.Texture(wallTexture, babylonCanvas._babylonScene);
+          const wallMaterial = new BABYLON.StandardMaterial("wallMaterial", scene);
+          wallMaterial.diffuseTexture = new BABYLON.Texture(wallTexture, scene);
           wallMesh.material = wallMaterial;
         }
 
         wallMesh.scaling.y = wallThickness;
       });
-        
+
     }
-    
 
-    // Load Babylon canvas on page load
-  
-
-  // Rotate the camera to face the object
-  //camera.rotation.y = Math.PI; // Rotate by 180 degrees + 20 degrees
-  //camera.rotation.x = Math.PI / 5; // Adjust the angle to tilt the camera down
-   
-
-
-    function setupCamera(scene) {
-  const camera = new BABYLON.UniversalCamera('camera', new BABYLON.Vector3(0, 0, -200), scene);
-  camera.setTarget(BABYLON.Vector3.Zero());
-  camera.attachControl(babylonCanvas, true);
-  camera.rotation.x = Math.PI / 12;
-
-  // Animation parameters
-  const animationDuration = 800; // in milliseconds
-  const zoomedOutPosition = new BABYLON.Vector3(0, 100, -1800);
-
-  // Create a position animation
-  const animation = new BABYLON.Animation(
-    'cameraZoom',
-    'position',
-    60,
-    BABYLON.Animation.ANIMATIONTYPE_VECTOR3,
-    BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT
-  );
-
-  // Set keyframes for the animation
-  const keys = [
-    { frame: 0, value: camera.position.clone() },
-    { frame: animationDuration, value: zoomedOutPosition }
-  ];
-
-  // Add keys to the animation
-  animation.setKeys(keys);
-
-  // Add the animation to the camera
-  camera.animations.push(animation);
-
-  // Run the animation
-  scene.beginAnimation(camera, 0, animationDuration, false);
-
-  return camera;
-}
-
-function resetCanvas() {
-  if (babylonCanvas) {
-    // Hide the Babylon canvas
-    babylonCanvas.style.display = 'none';
-
-    // Create a new Babylon canvas element
-    const newCanvas = document.createElement('canvas');
-    newCanvas.width = 1200; // Set the width as needed
-    newCanvas.height = 1200; // Set the height as needed
-    newCanvas.id = 'canvas3D';
-    document.body.appendChild(newCanvas);
-
-    // Replace the old canvas with the new one
-    babylonCanvas.parentNode.replaceChild(newCanvas, babylonCanvas);
-    babylonCanvas = newCanvas;
-
-    // Create a new Babylon engine and scene
+    // Move Babylon initialization logic outside the window.onload function
+    babylonCanvas = document.getElementById('canvas3D');
     const engine = new BABYLON.Engine(babylonCanvas, true);
-    const newScene = new BABYLON.Scene(engine);
+    scene = new BABYLON.Scene(engine);
 
-    // Set up light for the new scene (you may need to adjust these parameters)
-    const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(1, 1, 0));
+    // Set up camera and light
+    setupCamera(scene);
 
-    // Set background color to a lighter gray
-    newScene.clearColor = new BABYLON.Color4(0.9, 0.9, 0.9, 1);
+    // ... (rest of the initialization logic)
 
-    // Setup the camera for the new scene
-    setupCamera(newScene);
-
-    // Run the Babylon.js engine for the new scene
-    engine.runRenderLoop(function () {
-      newScene.render();
-    });
-
-    // Update the babylonCanvas and babylonScene variables
-    babylonCanvas._babylonEngine = engine;
-    babylonCanvas._babylonScene = newScene;
-
-    // Show the new Babylon canvas
-    babylonCanvas.style.display = 'block';
-  }
-}
-
-// Load Babylon canvas on page load
-window.onload = function () {
-  babylonCanvas = document.getElementById('canvas3D');
-  const engine = new BABYLON.Engine(babylonCanvas, true);
-  const scene = new BABYLON.Scene(engine);
-
-  // Set up camera and light
-  setupCamera(scene);
-
-  // ... (rest of the initialization logic)
-};
-    
-    
-    
-    
   </script>
 </body>
 
