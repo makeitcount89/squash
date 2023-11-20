@@ -1,259 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Image Processing and 3D Rendering</title>
-  <!-- Include OpenCV.js -->
-  <script async src="https://docs.opencv.org/master/opencv.js" onload="onOpenCvReady();" type="text/javascript"></script>
-  <!-- Include Babylon.js -->
-  <script src="https://cdn.babylonjs.com/babylon.js"></script>
-  <style>
-    #canvas2D,
-    #canvas3D {
-      border: 1px solid #000;
-      margin-top: 20px;
-    }
-
-    body {
-      font-size: 24px;
-    }
-
-    label {
-      display: block;
-      margin-top: 10px;
-    }
-
-    button {
-      font-size: 24px;
-      padding: 15px;
-      margin: 10px;
-    }
-
-    input {
-      font-size: 24px;
-      margin: 10px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Babylon.js Canvas</title>
+    <style>
+        body { margin: 0; }
+        canvas { display: block; }
+        #maximizeButton { position: absolute; top: 10px; right: 10px; }
+    </style>
 </head>
-
 <body>
-  <input type="file" id="imageInput" accept="image/*" onchange="loadAndDetect()">
-  <label for="lineThreshold">Line Threshold:</label>
-  <input type="range" id="lineThreshold" min="1" max="255" value="50" onchange="updateLineThreshold(this.value)">
-  <span id="lineThresholdValue">50</span>
+    <button id="maximizeButton" onclick="toggleMaximize()">Maximize</button>
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+    <script>
+        // Babylon.js setup
+        var canvas = document.createElement("canvas");
+        document.body.appendChild(canvas);
+        var engine = new BABYLON.Engine(canvas, true);
 
-  <label for="lineThickness">Line Thickness:</label>
-  <input type="range" id="lineThickness" min="1" max="100" value="50" onchange="updateLineThickness(this.value)">
-  <span id="lineThicknessValue">50</span>
+        // Your Babylon.js scene setup goes here
 
-  <label for="wallColor">Wall Color:</label>
-  <input type="color" id="wallColor" value="#000000">
-
-  <label for="wallTexture">Wall Texture:</label>
-  <input type="text" id="wallTexture" placeholder="Texture URL" value="https://www.babylonjs-playground.com/textures/brick.jpg">
-
-  <label for="wallHeight">Wall Height:</label>
-  <input type="number" id="wallHeight" value="250">
-
-  <label for="wallThickness">Wall Thickness:</label>
-  <input type="number" id="wallThickness" value="0.2">
-
-  <button onclick="convertTo3D()">Convert to 3D</button>
-  <button onclick="resetCanvas()">Reset</button>
-  <canvas id="canvas2D" width="600" height="600"></canvas>
-  <canvas id="canvas3D" width="1200" height="1200"></canvas>
-
-  <p id="coordinates"></p>
-
-  <script>
-
-    let img, context2D, babylonCanvas, detectedLines, scene; // Move 'scene' to a higher scope
-
-    function onOpenCvReady() {
-      // OpenCV is ready
-    }
-
-    function updateLineThreshold(value) {
-      document.getElementById('lineThresholdValue').textContent = value;
-      loadAndDetect(); // Trigger line detection on threshold change
-    }
-
-    function updateLineThickness(value) {
-      document.getElementById('lineThicknessValue').textContent = value;
-      // You can add real-time adjustment logic for line thickness here if needed
-    }
-
-    function loadAndDetect() {
-      const input = document.getElementById('imageInput');
-      img = new Image();
-      img.onload = function () {
-        context2D = document.getElementById('canvas2D').getContext('2d');
-        context2D.clearRect(0, 0, context2D.canvas.width, context2D.canvas.height);
-        context2D.drawImage(img, 0, 0, context2D.canvas.width, context2D.canvas.height);
-        const threshold = parseInt(document.getElementById('lineThreshold').value);
-        detectLines(threshold);
-      };
-      img.src = URL.createObjectURL(input.files[0]);
-    }
-
-    function detectLines(threshold) {
-      if (!img) {
-        alert('Please load an image first.');
-        return;
-      }
-
-      const canvas2D = document.getElementById('canvas2D');
-      const src = cv.imread(canvas2D);
-      const dst = new cv.Mat();
-
-      cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY);
-      cv.Canny(src, dst, threshold, threshold * 2, 3, false); // Adjust the threshold here
-
-      // Convert the detected lines to Babylon.js format
-      detectedLines = [];
-      const linesP = new cv.Mat();
-      cv.HoughLinesP(dst, linesP, 1, Math.PI / 180, 100, 50, 10);
-
-      for (let i = 0; i < linesP.rows; i++) {
-        const line = linesP.data32S.subarray(i * 4, i * 4 + 4);
-        detectedLines.push({
-          x1: line[0],
-          y1: line[1],
-          x2: line[2],
-          y2: line[3]
-        });
-      }
-
-      src.delete();
-      dst.delete();
-      linesP.delete();
-    }
-
-    function convertTo3D() {
-      if (!detectedLines) {
-        alert('Please detect lines first.');
-        return;
-      }
-
-      // Determine the bounding box of the 3D object
-      let minX = Number.MAX_VALUE;
-      let minY = Number.MAX_VALUE;
-      let maxX = Number.MIN_VALUE;
-      let maxY = Number.MIN_VALUE;
-
-      detectedLines.forEach(line => {
-        minX = Math.min(minX, line.x1, line.x2);
-        minY = Math.min(minY, -line.y1, -line.y2);
-        maxX = Math.max(maxX, line.x1, line.x2);
-        maxY = Math.max(maxY, -line.y1, -line.y2);
-      });
-
-      // Calculate the center and dimensions of the bounding box
-      const centerX = (minX + maxX) / 2;
-      const centerY = (minY + maxY) / 2;
-      const width = maxX - minX;
-      const height = maxY - minY;
-
-      detectedLines.forEach(line => {
-        const lineThickness = parseFloat(document.getElementById('lineThickness').value);
-        const wallColor = document.getElementById('wallColor').value;
-        const wallTexture = document.getElementById('wallTexture').value;
-        const wallHeight = parseFloat(document.getElementById('wallHeight').value);
-        const wallThickness = parseFloat(document.getElementById('wallThickness').value);
-
-        // Center and normalize the object
-        const points = [
-          new BABYLON.Vector3(line.x1 - centerX, 0, -line.y1 + centerY),
-          new BABYLON.Vector3(line.x1 - centerX, wallHeight, -line.y1 + centerY),
-          new BABYLON.Vector3(line.x2 - centerX, wallHeight, -line.y2 + centerY),
-          new BABYLON.Vector3(line.x2 - centerX, 0, -line.y2 + centerY),
-          new BABYLON.Vector3(line.x1 - centerX, 0, -line.y1 + centerY)
-        ];
-
-        const wallMesh = BABYLON.MeshBuilder.CreateDashedLines(null, { points, dashSize: lineThickness, updatable: true });
-        wallMesh.color = new BABYLON.Color3.FromHexString(wallColor);
-
-        if (wallTexture) {
-          const wallMaterial = new BABYLON.StandardMaterial("wallMaterial", babylonCanvas._babylonScene);
-          wallMaterial.diffuseTexture = new BABYLON.Texture(wallTexture, babylonCanvas._babylonScene);
-          wallMesh.material = wallMaterial;
+        // Maximize button functionality
+        function toggleMaximize() {
+            var elem = canvas;
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen();
+            } else if (elem.mozRequestFullScreen) { // Firefox
+                elem.mozRequestFullScreen();
+            } else if (elem.webkitRequestFullscreen) { // Chrome, Safari and Opera
+                elem.webkitRequestFullscreen();
+            } else if (elem.msRequestFullscreen) { // IE/Edge
+                elem.msRequestFullscreen();
+            }
         }
-
-        wallMesh.scaling.y = wallThickness;
-      });
-        
-    }
-    
-
-    // Load Babylon canvas on page load
-  window.onload = function () {
-  babylonCanvas = document.getElementById('canvas3D');
-  const engine = new BABYLON.Engine(babylonCanvas, true);
-  const scene = new BABYLON.Scene(engine);
-
-  // Set up camera and light
-  const camera = new BABYLON.UniversalCamera('camera', new BABYLON.Vector3(0, 5, -55), scene);
-  camera.setTarget(BABYLON.Vector3.Zero());
-  camera.attachControl(babylonCanvas, true);
-
-  // Rotate the camera to face the object
-  camera.rotation.y = Math.PI; // Rotate by 180 degrees + 20 degrees
-  
-
-  const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(1, 1, 0));
-
-  // Set background color to a lighter gray
-  scene.clearColor = new BABYLON.Color4(0.9, 0.9, 0.9, 1);
-
-  // Run the Babylon.js engine
-  engine.runRenderLoop(function () {
-    scene.render();
-  });
-};
-
-
-    function resetCanvas() {
-      if (babylonCanvas) {
-        // Hide the Babylon canvas
-        babylonCanvas.style.display = 'none';
-
-        // Create a new Babylon canvas element
-        const newCanvas = document.createElement('canvas');
-        newCanvas.width = babylonCanvas.width;
-        newCanvas.height = babylonCanvas.height;
-        babylonCanvas.parentNode.replaceChild(newCanvas, babylonCanvas);
-
-        babylonCanvas = newCanvas;
-
-        // Create a new Babylon engine and scene
-        const engine = new BABYLON.Engine(babylonCanvas, true);
-        const newScene = new BABYLON.Scene(engine);
-
-        // Set up camera and light for the new scene (you may need to adjust these parameters)
-        const camera = new BABYLON.UniversalCamera('camera', new BABYLON.Vector3(0, 5, -10), newScene);
-        camera.setTarget(BABYLON.Vector3.Zero());
-        camera.attachControl(babylonCanvas, true);
-        const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(1, 1, 0));
-
-        // Set background color to a lighter gray
-        newScene.clearColor = new BABYLON.Color4(0.9, 0.9, 0.9, 1);
-
-        // Run the Babylon.js engine for the new scene
-        engine.runRenderLoop(function () {
-          newScene.render();
-        });
-
-        // Update the babylonCanvas and babylonScene variables
-        babylonCanvas._babylonEngine = engine;
-        babylonCanvas._babylonScene = newScene;
-
-        // Show the new Babylon canvas
-        babylonCanvas.style.display = 'block';
-      }
-    }
-  </script>
+    </script>
 </body>
-
 </html>
