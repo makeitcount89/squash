@@ -6,55 +6,53 @@
     <title>Babylon.js 3D Ball</title>
     <style>
         body { margin: 0; overflow: hidden; }
+        #container { position: relative; z-index: 1; }
         canvas { display: block; }
-        #toggleButton { position: absolute; top: 10px; right: 10px; z-index: 1; }
+        #toggleButton { position: absolute; top: 10px; right: 10px; }
     </style>
 </head>
 <body>
-    <script src="https://cdn.babylonjs.com/babylon.js"></script>
-    <script>
-        // Babylon.js setup
-        var canvas = document.createElement("canvas");
-        document.body.appendChild(canvas);
-        var engine = new BABYLON.Engine(canvas, true);
+    <div id="container">
+        <button id="toggleButton" onclick="toggleFullscreen()">Toggle Fullscreen</button>
+        <script src="https://cdn.babylonjs.com/babylon.js"></script>
+        <script>
+            // Babylon.js setup
+            var canvas = document.createElement("canvas");
+            document.getElementById("container").appendChild(canvas);
+            var engine = new BABYLON.Engine(canvas, true);
 
-        // Create a scene
-        var scene = new BABYLON.Scene(engine);
+            // Create a scene
+            var scene = new BABYLON.Scene(engine);
 
-        // Create a camera
-        var camera = new BABYLON.ArcRotateCamera("camera", 0, 0, 10, BABYLON.Vector3.Zero(), scene);
-        camera.attachControl(canvas, true);
+            // Create a camera
+            var camera = new BABYLON.ArcRotateCamera("camera", 0, 0, 10, BABYLON.Vector3.Zero(), scene);
+            camera.attachControl(canvas, true);
 
-        // Create a light
-        var light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
+            // Create a light
+            var light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
 
-        // Create a sphere (3D ball)
-        var sphere = BABYLON.MeshBuilder.CreateSphere("sphere", { diameter: 2 }, scene);
+            // Create a sphere (3D ball)
+            var sphere = BABYLON.MeshBuilder.CreateSphere("sphere", { diameter: 2 }, scene);
 
-        // Render loop
-        engine.runRenderLoop(function () {
-            scene.render();
-        });
+            // Render loop
+            engine.runRenderLoop(function () {
+                scene.render();
+            });
 
-        // Handle window resize
-        window.addEventListener("resize", function () {
-            engine.resize();
-        });
+            // Handle window resize
+            window.addEventListener("resize", function () {
+                engine.resize();
+            });
 
-        // Toggle button functionality
-        var toggleButton = document.createElement("button");
-        toggleButton.id = "toggleButton";
-        toggleButton.textContent = "Toggle Fullscreen";
-        toggleButton.addEventListener("click", toggleFullscreen);
-        document.body.appendChild(toggleButton);
-
-        function toggleFullscreen() {
-            if (document.fullscreenElement) {
-                document.exitFullscreen();
-            } else {
-                canvas.requestFullscreen();
+            // Toggle button functionality
+            function toggleFullscreen() {
+                if (document.fullscreenElement) {
+                    document.exitFullscreen();
+                } else {
+                    document.getElementById("container").requestFullscreen();
+                }
             }
-        }
-    </script>
+        </script>
+    </div>
 </body>
 </html>
