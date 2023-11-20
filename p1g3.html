@@ -291,14 +291,20 @@ scene.beginAnimation(camera, 0, animationDuration, false);
     // Run the animation
     babylonCanvas._babylonScene.beginAnimation(camera, 0, animationDuration, false);
 
-    // Hide the Babylon canvas
+    // Clear the 2D canvas
+    const context2D = document.getElementById('canvas2D').getContext('2d');
+    context2D.clearRect(0, 0, context2D.canvas.width, context2D.canvas.height);
+
+    // Clear the 3D canvas
     babylonCanvas.style.display = 'none';
+    babylonCanvas.parentNode.removeChild(babylonCanvas);
 
     // Create a new Babylon canvas element
     const newCanvas = document.createElement('canvas');
-    newCanvas.width = babylonCanvas.width;
-    newCanvas.height = babylonCanvas.height;
-    babylonCanvas.parentNode.replaceChild(newCanvas, babylonCanvas);
+    newCanvas.width = 1200; // Set the width as needed
+    newCanvas.height = 1200; // Set the height as needed
+    newCanvas.id = 'canvas3D';
+    document.body.appendChild(newCanvas);
 
     babylonCanvas = newCanvas;
 
@@ -323,9 +329,9 @@ scene.beginAnimation(camera, 0, animationDuration, false);
 
     // Show the new Babylon canvas
     babylonCanvas.style.display = 'block';
-    
-      }
+  }
     }
+    
   </script>
 </body>
 
