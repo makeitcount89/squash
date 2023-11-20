@@ -16,15 +16,20 @@
       overflow: auto; /* Allow page scrolling */
     }
 
-    #imageContainer {
+    #container {
+      position: relative;
       width: 75%; /* Set image display to 75% */
       margin: auto; /* Center the image display */
+    }
+
+    #imageContainer {
+      width: 100%;
       position: relative;
     }
 
     #canvasContainer {
       position: absolute;
-      bottom: 0; /* Place at the bottom */
+      bottom: 0;
       left: 0;
       width: 100%;
       height: 50%; /* Initially occupy bottom half */
@@ -88,48 +93,48 @@
 </head>
 
 <body>
-  <input type="file" id="imageInput" accept="image/*" onchange="loadAndDetect()" class="custom-file-input">
+  <div id="container">
+    <div id="imageContainer">
+      <input type="file" id="imageInput" accept="image/*" onchange="loadAndDetect()" class="custom-file-input">
 
-  <label for="lineThreshold">Line Threshold:</label>
-  <input type="range" id="lineThreshold" class="wide-slider" min="1" max="1000" value="270"
-    onchange="updateLineThreshold(this.value)">
-  <span id="lineThresholdValue">270</span>
+      <label for="lineThreshold">Line Threshold:</label>
+      <input type="range" id="lineThreshold" class="wide-slider" min="1" max="1000" value="270"
+        onchange="updateLineThreshold(this.value)">
+      <span id="lineThresholdValue">270</span>
 
-  <label for="lineThickness">Line Thickness:</label>
-  <input type="range" id="lineThickness" class="wide-slider" min="1" max="100" value="50"
-    onchange="updateLineThickness(this.value)">
-  <span id="lineThicknessValue">50</span>
+      <label for="lineThickness">Line Thickness:</label>
+      <input type="range" id="lineThickness" class="wide-slider" min="1" max="100" value="50"
+        onchange="updateLineThickness(this.value)">
+      <span id="lineThicknessValue">50</span>
 
-  <label for="wallColor">Wall Color:</label>
-  <input type="color" id="wallColor" value="#000000">
+      <label for="wallColor">Wall Color:</label>
+      <input type="color" id="wallColor" value="#000000">
 
-  <label for="wallTexture">Wall Texture:</label>
-  <input type="text" id="wallTexture" placeholder="Texture URL"
-    value="https://www.babylonjs-playground.com/textures/brick.jpg">
+      <label for="wallTexture">Wall Texture:</label>
+      <input type="text" id="wallTexture" placeholder="Texture URL"
+        value="https://www.babylonjs-playground.com/textures/brick.jpg">
 
-  <label for="wallHeight">Wall Height:</label>
-  <input type="number" id="wallHeight" value="250">
+      <label for="wallHeight">Wall Height:</label>
+      <input type="number" id="wallHeight" value="250">
 
-  <label for="wallThickness">Wall Thickness:</label>
-  <input type="number" id="wallThickness" value="0.2">
+      <label for="wallThickness">Wall Thickness:</label>
+      <input type="number" id="wallThickness" value="0.2">
+    </div>
 
-  <div id="toggleButtonContainer">
-    <button onclick="toggleFullscreen()">Toggle Fullscreen</button>
+    <div id="toggleButtonContainer">
+      <button onclick="toggleFullscreen()">Toggle Fullscreen</button>
+    </div>
+
+    <div id="canvasContainer">
+      <canvas id="canvas3D"></canvas>
+    </div>
+
+    <div id="convertButtonContainer">
+      <button id="convertTo3DButton" onclick="convertTo3D()">Convert to 3D</button>
+    </div>
+
+    <p id="coordinates"></p>
   </div>
-
-  <div id="imageContainer">
-    <canvas id="canvas2D" width="600" height="600"></canvas>
-  </div>
-
-  <div id="canvasContainer">
-    <canvas id="canvas3D"></canvas>
-  </div>
-
-  <div id="convertButtonContainer">
-    <button id="convertTo3DButton" onclick="convertTo3D()">Convert to 3D</button>
-  </div>
-
-  <p id="coordinates"></p>
 
   <script>
     function toggleFullscreen() {
