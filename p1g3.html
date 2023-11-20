@@ -203,13 +203,13 @@
   const scene = new BABYLON.Scene(engine);
 
   // Set up camera and light
-  const camera = new BABYLON.UniversalCamera('camera', new BABYLON.Vector3(0, 115, -1300), scene);
+  const camera = new BABYLON.UniversalCamera('camera', new BABYLON.Vector3(0, 90, -1200), scene);
   camera.setTarget(BABYLON.Vector3.Zero());
   camera.attachControl(babylonCanvas, true);
 
   // Rotate the camera to face the object
   camera.rotation.y = Math.PI; // Rotate by 180 degrees + 20 degrees
-  camera.rotation.x = Math.PI / 3; // Adjust the angle to tilt the camera down
+  camera.rotation.x = Math.PI / 3.5; // Adjust the angle to tilt the camera down
     
   
 
