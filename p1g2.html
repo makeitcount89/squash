@@ -7,12 +7,11 @@
     <style>
         body { margin: 0; }
         canvas { display: block; }
-        #maximizeButton, #minimizeButton { position: absolute; top: 10px; right: 10px; }
+        #toggleButton { position: absolute; top: 10px; right: 10px; }
     </style>
 </head>
 <body>
-    <button id="maximizeButton" onclick="toggleMaximize()">Maximize</button>
-    <button id="minimizeButton" onclick="toggleMinimize()">Minimize</button>
+    <button id="toggleButton" onclick="toggleFullscreen()">Toggle Fullscreen</button>
     <script src="https://cdn.babylonjs.com/babylon.js"></script>
     <script>
         // Babylon.js setup
@@ -43,20 +42,14 @@
             engine.resize();
         });
 
-        // Maximize button functionality
-        function toggleMaximize() {
-            document.body.style.overflow = "hidden"; // Hide scrollbar
-            canvas.style.width = "100vw";
-            canvas.style.height = "100vh";
-            engine.resize();
-        }
-
-        // Minimize button functionality
-        function toggleMinimize() {
-            document.body.style.overflow = "auto"; // Restore scrollbar
-            canvas.style.width = "50vw"; // Adjust as needed
-            canvas.style.height = "50vh";
-            engine.resize();
+        // Toggle button functionality
+        function toggleFullscreen() {
+            if (document.fullscreenElement) {
+                document.exitFullscreen();
+            } else {
+                document.body.style.overflow = "hidden"; // Hide scrollbar
+                canvas.requestFullscreen();
+            }
         }
     </script>
 </body>
