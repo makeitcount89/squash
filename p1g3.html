@@ -90,11 +90,11 @@
   img = new Image();
   img.onload = function () {
     context2D = document.getElementById('canvas2D').getContext('2d');
-    
+
     // Clear the canvas
     context2D.clearRect(0, 0, context2D.canvas.width, context2D.canvas.height);
 
-    // Draw the detected lines on the canvas instead of the original image
+    // Draw the detected lines on the canvas
     drawDetectedLines();
 
     const threshold = parseInt(document.getElementById('lineThreshold').value);
@@ -113,12 +113,22 @@ function drawDetectedLines() {
   context2D.lineWidth = 2; // Set line width as needed
 
   detectedLines.forEach(line => {
+    // Normalize the coordinates based on canvas size
+    const normalizedLine = {
+      x1: (line.x1 / img.width) * context2D.canvas.width,
+      y1: (line.y1 / img.height) * context2D.canvas.height,
+      x2: (line.x2 / img.width) * context2D.canvas.width,
+      y2: (line.y2 / img.height) * context2D.canvas.height,
+    };
+
     context2D.beginPath();
-    context2D.moveTo(line.x1, line.y1);
-    context2D.lineTo(line.x2, line.y2);
+    context2D.moveTo(normalizedLine.x1, normalizedLine.y1);
+    context2D.lineTo(normalizedLine.x2, normalizedLine.y2);
     context2D.stroke();
   });
 }
+    
+
       
 
     function detectLines(threshold) {
