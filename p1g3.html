@@ -69,7 +69,7 @@
 
   <script>
 
-    let img, context2D, babylonCanvas, detectedLines, scene; // Move 'scene' to a higher scope
+    let img, context2D, babylonCanvas, detectedLines, scene, camera; // Move 'scene' to a higher scope
 
     function onOpenCvReady() {
       // OpenCV is ready
@@ -277,7 +277,8 @@ scene.beginAnimation(camera, 0, animationDuration, false);
         camera.setTarget(BABYLON.Vector3.Zero());
         camera.attachControl(babylonCanvas, true);
         const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(1, 1, 0));
-
+        
+        babylonCanvas._babylonScene.beginAnimation(camera, 0, animationDuration, false);
         // Set background color to a lighter gray
         newScene.clearColor = new BABYLON.Color4(0.9, 0.9, 0.9, 1);
 
