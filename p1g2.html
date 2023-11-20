@@ -11,7 +11,6 @@
     </style>
 </head>
 <body>
-    <button id="toggleButton" onclick="toggleFullscreen()">Toggle Fullscreen</button>
     <script src="https://cdn.babylonjs.com/babylon.js"></script>
     <script>
         // Babylon.js setup
@@ -43,6 +42,12 @@
         });
 
         // Toggle button functionality
+        var toggleButton = document.createElement("button");
+        toggleButton.id = "toggleButton";
+        toggleButton.textContent = "Toggle Fullscreen";
+        toggleButton.addEventListener("click", toggleFullscreen);
+        document.body.appendChild(toggleButton);
+
         function toggleFullscreen() {
             if (document.fullscreenElement) {
                 document.exitFullscreen();
