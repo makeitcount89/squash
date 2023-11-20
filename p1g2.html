@@ -11,9 +11,7 @@
   <script src="https://cdn.babylonjs.com/babylon.js"></script>
   <style>
     #canvasContainer {
-      position: absolute;
-      top: 0;
-      left: 0;
+      position: relative;
       width: 100%;
       height: 100%;
       overflow: hidden;
@@ -23,6 +21,14 @@
       width: 100%;
       height: 100%;
       display: block;
+    }
+
+    button {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 24px;
+      padding: 15px;
     }
 
     .custom-file-input {
@@ -42,12 +48,6 @@
     label {
       display: block;
       margin-top: 10px;
-    }
-
-    button {
-      font-size: 24px;
-      padding: 15px;
-      margin: 10px;
     }
 
     input {
@@ -79,8 +79,6 @@
 
   <label for="wallThickness">Wall Thickness:</label>
   <input type="number" id="wallThickness" value="0.2">
-
-  <button onclick="convertTo3D()">Convert to 3D</button>
 
   <div id="canvasContainer">
     <button onclick="toggleFullscreen()">Toggle Fullscreen</button>
@@ -181,8 +179,6 @@
 
       const centerX = (minX + maxX) / 2;
       const centerY = (minY + maxY) / 2;
-      const width = maxX - minX;
-      const height = maxY - minY;
 
       detectedLines.forEach(line => {
         const lineThickness = parseFloat(document.getElementById('lineThickness').value);
@@ -279,6 +275,15 @@
         babylonCanvas._babylonScene = newScene;
 
         babylonCanvas.style.display = 'block';
+      }
+    }
+
+    function toggleFullscreen() {
+      const canvasContainer = document.getElementById("canvasContainer");
+      if (!document.fullscreenElement) {
+        canvasContainer.requestFullscreen();
+      } else {
+        document.exitFullscreen();
       }
     }
   </script>
