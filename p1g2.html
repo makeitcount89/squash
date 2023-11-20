@@ -17,9 +17,10 @@
       overflow: hidden;
     }
 
+    #canvas2D,
     #canvas3D {
       width: 100%;
-      height: 100%;
+      height: auto;
       display: block;
     }
 
@@ -61,18 +62,21 @@
   <input type="file" id="imageInput" accept="image/*" onchange="loadAndDetect()" class="custom-file-input">
 
   <label for="lineThreshold">Line Threshold:</label>
-  <input type="range" id="lineThreshold" class="wide-slider" min="1" max="1000" value="270" onchange="updateLineThreshold(this.value)">
+  <input type="range" id="lineThreshold" class="wide-slider" min="1" max="1000" value="270"
+    onchange="updateLineThreshold(this.value)">
   <span id="lineThresholdValue">270</span>
 
   <label for="lineThickness">Line Thickness:</label>
-  <input type="range" id="lineThickness" class="wide-slider" min="1" max="100" value="50" onchange="updateLineThickness(this.value)">
+  <input type="range" id="lineThickness" class="wide-slider" min="1" max="100" value="50"
+    onchange="updateLineThickness(this.value)">
   <span id="lineThicknessValue">50</span>
 
   <label for="wallColor">Wall Color:</label>
   <input type="color" id="wallColor" value="#000000">
 
   <label for="wallTexture">Wall Texture:</label>
-  <input type="text" id="wallTexture" placeholder="Texture URL" value="https://www.babylonjs-playground.com/textures/brick.jpg">
+  <input type="text" id="wallTexture" placeholder="Texture URL"
+    value="https://www.babylonjs-playground.com/textures/brick.jpg">
 
   <label for="wallHeight">Wall Height:</label>
   <input type="number" id="wallHeight" value="250">
@@ -82,8 +86,11 @@
 
   <div id="canvasContainer">
     <button onclick="toggleFullscreen()">Toggle Fullscreen</button>
+    <canvas id="canvas2D" width="600" height="600"></canvas>
     <canvas id="canvas3D" width="1200" height="1200"></canvas>
   </div>
+
+  <button onclick="convertTo3D()">Convert to 3D</button>
 
   <p id="coordinates"></p>
 
@@ -199,8 +206,8 @@
         wallMesh.color = new BABYLON.Color3.FromHexString(wallColor);
 
         if (wallTexture) {
-          const wallMaterial = new BABYLON.StandardMaterial("wallMaterial", babylonCanvas._babylonScene);
-          wallMaterial.diffuseTexture = new BABYLON.Texture(wallTexture, babylonCanvas._babylonScene);
+          const wallMaterial = new BABYLON.StandardMaterial("wallMaterial", scene);
+          wallMaterial.diffuseTexture = new BABYLON.Texture(wallTexture, scene);
           wallMesh.material = wallMaterial;
         }
 
@@ -237,14 +244,14 @@
         babylonCanvas = newCanvas;
 
         const engine = new BABYLON.Engine(babylonCanvas, true);
-        const newScene = new BABYLON.Scene(engine);
+        scene = new BABYLON.Scene(engine);
 
-        const camera = new BABYLON.UniversalCamera('camera', new BABYLON.Vector3(0, 0, -200), newScene);
+        camera = new BABYLON.UniversalCamera('camera', new BABYLON.Vector3(0, 0, -200), scene);
         camera.setTarget(BABYLON.Vector3.Zero());
         camera.attachControl(babylonCanvas, true);
 
         const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(1, 1, 0));
-        newScene.clearColor = new BABYLON.Color4(0.9, 0.9, 0.9, 1);
+        scene.clearColor = new BABYLON.Color4(0.9, 0.9, 0.9, 1);
 
         const animationDuration = 10;
         const zoomedOutPosition = new BABYLON.Vector3(0, 100, -1800);
@@ -265,14 +272,14 @@
         animation.setKeys(keys);
         camera.animations.push(animation);
 
-        newScene.beginAnimation(camera, 0, animationDuration, false);
+        scene.beginAnimation(camera, 0, animationDuration, false);
 
         engine.runRenderLoop(function () {
-          newScene.render();
+          scene.render();
         });
 
         babylonCanvas._babylonEngine = engine;
-        babylonCanvas._babylonScene = newScene;
+        babylonCanvas._babylonScene = scene;
 
         babylonCanvas.style.display = 'block';
       }
