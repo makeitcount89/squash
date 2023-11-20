@@ -10,6 +10,12 @@
   <!-- Include Babylon.js -->
   <script src="https://cdn.babylonjs.com/babylon.js"></script>
   <style>
+    body {
+      font-size: 24px;
+      margin: 0;
+      overflow: hidden;
+    }
+
     #canvasContainer {
       position: relative;
       width: 100%;
@@ -46,10 +52,6 @@
       margin: 10px -20px;
     }
 
-    body {
-      font-size: 24px;
-    }
-
     label {
       display: block;
       margin-top: 10px;
@@ -58,6 +60,21 @@
     input {
       font-size: 24px;
       margin: 10px;
+    }
+
+    #convertButtonContainer {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 2;
+    }
+
+    #convertTo3DButton {
+      font-size: 24px;
+      padding: 15px;
+      background-color: #ffffff;
+      color: #000000;
     }
   </style>
 </head>
@@ -97,18 +114,9 @@
     <canvas id="canvas3D" width="1200" height="1200"></canvas>
   </div>
 
-  <button onclick="convertTo3D()">Convert to 3D</button>
-
-  <p id="coordinates"></p>
-
-  <script>
-    // ... (rest of the JavaScript code)
-  </script>
-</body>
-
-</html>
-
-  <button onclick="convertTo3D()">Convert to 3D</button>
+  <div id="convertButtonContainer">
+    <button id="convertTo3DButton" onclick="convertTo3D()">Convert to 3D</button>
+  </div>
 
   <p id="coordinates"></p>
 
