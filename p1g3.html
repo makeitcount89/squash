@@ -41,7 +41,7 @@
 <body>
   <input type="file" id="imageInput" accept="image/*" onchange="loadAndDetect()">
   <label for="lineThreshold">Line Threshold:</label>
-  <input type="range" id="lineThreshold" min="1" max="400" value="270" onchange="updateLineThreshold(this.value)">
+  <input type="range" id="lineThreshold" min="1" max="500" value="270" onchange="updateLineThreshold(this.value)">
   <span id="lineThresholdValue">270</span>
 
   <label for="lineThickness">Line Thickness:</label>
@@ -203,7 +203,7 @@
   const scene = new BABYLON.Scene(engine);
 
   // Set up camera and light
-  const camera = new BABYLON.UniversalCamera('camera', new BABYLON.Vector3(0, 5, -55), scene);
+  const camera = new BABYLON.UniversalCamera('camera', new BABYLON.Vector3(0, 5, -70), scene);
   camera.setTarget(BABYLON.Vector3.Zero());
   camera.attachControl(babylonCanvas, true);
 
