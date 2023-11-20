@@ -3,15 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Babylon.js Canvas</title>
+    <title>Babylon.js 3D Ball</title>
     <style>
         body { margin: 0; }
         canvas { display: block; }
-        #maximizeButton { position: absolute; top: 10px; right: 10px; }
+        #maximizeButton, #minimizeButton { position: absolute; top: 10px; right: 10px; }
     </style>
 </head>
 <body>
     <button id="maximizeButton" onclick="toggleMaximize()">Maximize</button>
+    <button id="minimizeButton" onclick="toggleMinimize()">Minimize</button>
     <script src="https://cdn.babylonjs.com/babylon.js"></script>
     <script>
         // Babylon.js setup
@@ -19,20 +20,43 @@
         document.body.appendChild(canvas);
         var engine = new BABYLON.Engine(canvas, true);
 
-        // Your Babylon.js scene setup goes here
+        // Create a scene
+        var scene = new BABYLON.Scene(engine);
+
+        // Create a camera
+        var camera = new BABYLON.ArcRotateCamera("camera", 0, 0, 10, BABYLON.Vector3.Zero(), scene);
+        camera.attachControl(canvas, true);
+
+        // Create a light
+        var light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
+
+        // Create a sphere (3D ball)
+        var sphere = BABYLON.MeshBuilder.CreateSphere("sphere", { diameter: 2 }, scene);
+
+        // Render loop
+        engine.runRenderLoop(function () {
+            scene.render();
+        });
+
+        // Handle window resize
+        window.addEventListener("resize", function () {
+            engine.resize();
+        });
 
         // Maximize button functionality
         function toggleMaximize() {
-            var elem = canvas;
-            if (elem.requestFullscreen) {
-                elem.requestFullscreen();
-            } else if (elem.mozRequestFullScreen) { // Firefox
-                elem.mozRequestFullScreen();
-            } else if (elem.webkitRequestFullscreen) { // Chrome, Safari and Opera
-                elem.webkitRequestFullscreen();
-            } else if (elem.msRequestFullscreen) { // IE/Edge
-                elem.msRequestFullscreen();
-            }
+            document.body.style.overflow = "hidden"; // Hide scrollbar
+            canvas.style.width = "100vw";
+            canvas.style.height = "100vh";
+            engine.resize();
+        }
+
+        // Minimize button functionality
+        function toggleMinimize() {
+            document.body.style.overflow = "auto"; // Restore scrollbar
+            canvas.style.width = "50vw"; // Adjust as needed
+            canvas.style.height = "50vh";
+            engine.resize();
         }
     </script>
 </body>
