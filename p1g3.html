@@ -209,7 +209,7 @@
 
   // Animation parameters
   const animationDuration = 1000; // in milliseconds
-  const zoomedOutPosition = new BABYLON.Vector3(0, 100, -1500);
+  const zoomedOutPosition = new BABYLON.Vector3(0, 100, -1000);
 
   // Create a position animation
   const positionAnimation = new BABYLON.Animation(
@@ -241,7 +241,7 @@
   // Set keyframes for the rotation animation
   const rotationKeys = [
     { frame: 0, value: camera.rotation.x },
-    { frame: animationDuration, value: Math.PI / 5 } // Adjust the rotation angle as needed
+    { frame: animationDuration, value: Math.PI / 4 } // Adjust the rotation angle as needed
   ];
 
   // Add keys to the rotation animation
