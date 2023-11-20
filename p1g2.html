@@ -46,10 +46,15 @@
 
             // Toggle button functionality
             function toggleFullscreen() {
+                var container = document.getElementById("container");
                 if (document.fullscreenElement) {
                     document.exitFullscreen();
+                    canvas.style.width = container.offsetWidth + "px";
+                    canvas.style.height = container.offsetHeight + "px";
                 } else {
-                    document.getElementById("container").requestFullscreen();
+                    container.requestFullscreen();
+                    canvas.style.width = "100%";
+                    canvas.style.height = "100%";
                 }
             }
         </script>
