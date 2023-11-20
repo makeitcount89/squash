@@ -10,6 +10,11 @@
   <!-- Include Babylon.js -->
   <script src="https://cdn.babylonjs.com/babylon.js"></script>
   <style>
+    .wide-slider {
+  width: calc(100% + 40px); /* Adjust the width as needed */
+  margin: 10px -20px; /* Compensate for the increased width */
+    }
+    
     #canvas2D,
     #canvas3D {
       border: 1px solid #000;
@@ -41,13 +46,13 @@
 <body>
   <input type="file" id="imageInput" accept="image/*" onchange="loadAndDetect()">
   <label for="lineThreshold">Line Threshold:</label>
-  <input type="range" id="lineThreshold" min="1" max="1000" value="270" onchange="updateLineThreshold(this.value)">
-  <span id="lineThresholdValue">270</span>
+<input type="range" id="lineThreshold" class="wide-slider" min="1" max="1000" value="270" onchange="updateLineThreshold(this.value)">
+<span id="lineThresholdValue">270</span>
 
-  <label for="lineThickness">Line Thickness:</label>
-  <input type="range" id="lineThickness" min="1" max="100" value="50" onchange="updateLineThickness(this.value)">
-  <span id="lineThicknessValue">50</span>
-
+<label for="lineThickness">Line Thickness:</label>
+<input type="range" id="lineThickness" class="wide-slider" min="1" max="100" value="50" onchange="updateLineThickness(this.value)">
+<span id="lineThicknessValue">50</span>
+  
   <label for="wallColor">Wall Color:</label>
   <input type="color" id="wallColor" value="#000000">
 
