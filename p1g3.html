@@ -385,7 +385,7 @@ scene.beginAnimation(camera, 0, animationDuration, false);
     });
   }
 
- function deleteSelectedLines() {
+function deleteSelectedLines() {
   if (!detectedLines) {
     alert('Please detect lines first.');
     return;
@@ -403,12 +403,12 @@ scene.beginAnimation(camera, 0, animationDuration, false);
     detectedLines.forEach((line, index) => {
       const distToLine = pointToLineDistance({ x: mouseX, y: mouseY }, line);
       if (distToLine < 5) { // Adjust the tolerance as needed
-          // Add timestamp to the removed line
-          line.timestamp = new Date();
+        // Add timestamp to the removed line and push it to the deletedLines array
+        line.timestamp = new Date();
+        deletedLines.push(line);
 
-          // Remove the selected line
-          detectedLines.splice(index, 1);
-       
+        // Remove the selected line from the detectedLines array
+        detectedLines.splice(index, 1);
 
         // Redraw the canvas without the deleted line
         context2D.clearRect(0, 0, canvas2D.width, canvas2D.height);
@@ -426,6 +426,7 @@ scene.beginAnimation(camera, 0, animationDuration, false);
     });
   });
 }
+
 
 // Calculate the distance from a point to a line
 function pointToLineDistance(point, line) {
@@ -463,38 +464,38 @@ function pointToLineDistance(point, line) {
 
 
 
-  // Add the undo function
   function undo() {
-    const canvas2D = document.getElementById('canvas2D');
-    const context2D = canvas2D.getContext('2d');
+  const canvas2D = document.getElementById('canvas2D');
+  const context2D = canvas2D.getContext('2d');
 
-    if (detectedLines.length > 0) {
-      // Remove the last line from the array
-      const removedLine = detectedLines.pop();
+  if (detectedLines.length > 0) {
+    // Remove the last line from the array
+    const removedLine = detectedLines.pop();
 
-      // Clear the canvas
-      context2D.clearRect(0, 0, canvas2D.width, canvas2D.height);
-      context2D.drawImage(img, 0, 0, canvas2D.width, canvas2D.height);
+    // Clear the canvas
+    context2D.clearRect(0, 0, canvas2D.width, canvas2D.height);
+    context2D.drawImage(img, 0, 0, canvas2D.width, canvas2D.height);
 
-      // Redraw remaining lines
-      context2D.beginPath();
-      context2D.strokeStyle = 'red'; // Change the color as needed
-      detectedLines.forEach(line => {
-        context2D.moveTo(line.x1, line.y1);
-        context2D.lineTo(line.x2, line.y2);
-      });
-      context2D.stroke();
+    // Redraw remaining lines
+    context2D.beginPath();
+    context2D.strokeStyle = 'red'; // Change the color as needed
+    detectedLines.forEach(line => {
+      context2D.moveTo(line.x1, line.y1);
+      context2D.lineTo(line.x2, line.y2);
+    });
+    context2D.stroke();
 
-      // Check if the removed line has a timestamp
-      if (removedLine.timestamp) {
-        // Newly added line, log or handle accordingly
-        console.log('Undid the last action (Added Line):', removedLine);
-      } else {
-        // Deleted line, log or handle accordingly
-        console.log('Undid the last action (Deleted Line):', removedLine);
-      }
+    // Check if the removed line has a timestamp
+    if (removedLine.timestamp) {
+      // Newly added line, log or handle accordingly
+      console.log('Undid the last action (Added Line):', removedLine);
+    } else {
+      // Deleted line, push it back to the detectedLines array
+      deletedLines.push(removedLine);
     }
   }
+}
+
 
 
     
