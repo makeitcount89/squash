@@ -403,8 +403,12 @@ scene.beginAnimation(camera, 0, animationDuration, false);
     detectedLines.forEach((line, index) => {
       const distToLine = pointToLineDistance({ x: mouseX, y: mouseY }, line);
       if (distToLine < 5) { // Adjust the tolerance as needed
-        // Remove the selected line
-        detectedLines.splice(index, 1);
+          // Add timestamp to the removed line
+          line.timestamp = new Date();
+
+          // Remove the selected line
+          detectedLines.splice(index, 1);
+       
 
         // Redraw the canvas without the deleted line
         context2D.clearRect(0, 0, canvas2D.width, canvas2D.height);
