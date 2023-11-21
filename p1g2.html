@@ -181,7 +181,7 @@
   const height = maxY - minY;
 
   // Create a ground plane
-  const ground = BABYLON.MeshBuilder.CreateGround('ground', { width: width + 40, height: height}, babylonCanvas._babylonScene);
+  const ground = BABYLON.MeshBuilder.CreateGround('ground', { width: width + 60, height: height}, babylonCanvas._babylonScene);
   const leftOffset = 330;  // Adjust this value to move the ground to the left
   const closerOffset = -880; // Adjust this value to move the ground closer
 
@@ -236,8 +236,8 @@ camera.attachControl(babylonCanvas, true);
 
 // Animation parameters
 const animationDuration = 700; // in milliseconds
-const zoomedOutPosition = new BABYLON.Vector3(0, 110, -1800);
-    camera.rotation.x = Math.PI / 11; 
+const zoomedOutPosition = new BABYLON.Vector3(0, 115, -1300);
+    camera.rotation.x = Math.PI / 10; 
 
 // Create a position animation
 const animation = new BABYLON.Animation(
