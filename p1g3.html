@@ -358,9 +358,7 @@ scene.beginAnimation(camera, 0, animationDuration, false);
   // Add the drawLine function
 
 
-     function stopDrawing() {
-      isDrawing = false;
-    }
+     
 
  function drawLine(event) {
       if (isDrawing) {
@@ -395,6 +393,10 @@ scene.beginAnimation(camera, 0, animationDuration, false);
     }
   }
 }
+ }
+   function stopDrawing() {
+      isDrawing = false;
+    }
 
 function startErasing(event) {
       isErasing = true;
