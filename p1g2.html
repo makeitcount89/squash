@@ -154,7 +154,7 @@
       linesP.delete();
     }
 
-    function convertTo3D() {
+   function convertTo3D() {
   resetCanvas();
   if (!detectedLines) {
     alert('Please detect lines first.');
@@ -182,8 +182,13 @@
 
   // Create a ground plane
   const ground = BABYLON.MeshBuilder.CreateGround('ground', { width: width + 100, height: height + 100 }, babylonCanvas._babylonScene);
-  ground.position = new BABYLON.Vector3(centerX, 0, -centerY);
   
+  // Position the ground at the center of the bounding box
+  ground.position = new BABYLON.Vector3(centerX, -1, -centerY);
+
+  // Rotate the ground to be parallel to the XY plane
+  ground.rotation.x = Math.PI / 2;
+
   // Apply the original image as a texture to the ground
   const groundMaterial = new BABYLON.StandardMaterial('groundMaterial', babylonCanvas._babylonScene);
   groundMaterial.diffuseTexture = new BABYLON.Texture(img.src, babylonCanvas._babylonScene);
@@ -217,6 +222,7 @@
     wallMesh.scaling.y = wallThickness;
   });
 }
+
 
 
     // Load Babylon canvas on page load
