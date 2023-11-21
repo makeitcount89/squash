@@ -83,11 +83,9 @@
 
   <script>
 
-    let img, context2D, babylonCanvas, detectedLines, scene, camera, startPoint, deletedLines;// Move 'scene' to a higher scope
-
-    function onOpenCvReady() {
-      // OpenCV is ready
-    }
+   let img, context2D, babylonCanvas, detectedLines, scene, camera, startPoint, deletedLines;
+    let isDrawing = false;
+    let isErasing = false;
 
     function updateLineThreshold(value) {
       document.getElementById('lineThresholdValue').textContent = value;
@@ -128,8 +126,20 @@
       }
 
       const canvas2D = document.getElementById('canvas2D');
+      canvas2D.addEventListener('touchstart', startDrawing);
+    canvas2D.addEventListener('touchmove', drawLine);
+    canvas2D.addEventListener('touchend', stopDrawing);
+       // Use touchstart and touchend events for erasing lines on mobile
+    canvas2D.addEventListener('touchstart', startErasing);
+    canvas2D.addEventListener('touchend', stopErasing);
+
+       function startDrawing(event) {
+      isDrawing = true;
+      startPoint = getTouchPosition(event);
+    }
       const src = cv.imread(canvas2D);
       const dst = new cv.Mat();
+      
 
       cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY);
       cv.Canny(src, dst, threshold, threshold * 2, 3, false); // Adjust the threshold here
@@ -348,10 +358,13 @@ scene.beginAnimation(camera, 0, animationDuration, false);
   // Add the drawLine function
 
 
-let isDrawing = false;
-let isErasing = false;
+     function stopDrawing() {
+      isDrawing = false;
+    }
 
-function drawLine(event) {
+ function drawLine(event) {
+      if (isDrawing) {
+        const endPoint = getTouchPosition(event);
   const canvas2D = document.getElementById('canvas2D');
   const context2D = canvas2D.getContext('2d');
 
@@ -383,7 +396,8 @@ function drawLine(event) {
   }
 }
 
-function deleteSelectedLines(event) {
+function startErasing(event) {
+      isErasing = true;
   const canvas2D = document.getElementById('canvas2D');
   const context2D = canvas2D.getContext('2d');
 
@@ -412,6 +426,17 @@ function deleteSelectedLines(event) {
     });
   }
 }
+   
+    function stopErasing() {
+      isErasing = false;
+    }
+   function getTouchPosition(event) {
+      const touch = event.touches[0];
+      return {
+        x: touch.clientX - canvas2D.getBoundingClientRect().left,
+        y: touch.clientY - canvas2D.getBoundingClientRect().top
+      };
+    }
 
 // Add event listeners outside the functions
 const canvas2D = document.getElementById('canvas2D');
