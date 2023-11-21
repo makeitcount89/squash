@@ -346,95 +346,78 @@ scene.beginAnimation(camera, 0, animationDuration, false);
   //let detectedLines = [];
 
   // Add the drawLine function
-// ...
+
 
 let isDrawing = false;
 let isErasing = false;
 
-function drawLine() {
+function drawLine(event) {
   const canvas2D = document.getElementById('canvas2D');
   const context2D = canvas2D.getContext('2d');
-
-  // Disable erasing
-  isErasing = false;
-  isDrawing = true;
-
 
   if (isDrawing) {
-    // Add event listener for drawing
-    canvas2D.addEventListener('click', function (event) {
-      const mouseX = event.clientX - canvas2D.getBoundingClientRect().left;
-      const mouseY = event.clientY - canvas2D.getBoundingClientRect().top;
+    const mouseX = event.clientX - canvas2D.getBoundingClientRect().left;
+    const mouseY = event.clientY - canvas2D.getBoundingClientRect().top;
 
-      if (!startPoint) {
-        startPoint = { x: mouseX, y: mouseY };
-      } else {
-        const endPoint = { x: mouseX, y: mouseY };
-        context2D.beginPath();
-        context2D.strokeStyle = 'red';
-        context2D.moveTo(startPoint.x, startPoint.y);
-        context2D.lineTo(endPoint.x, endPoint.y);
-        context2D.stroke();
+    if (!startPoint) {
+      startPoint = { x: mouseX, y: mouseY };
+    } else {
+      const endPoint = { x: mouseX, y: mouseY };
+      context2D.beginPath();
+      context2D.strokeStyle = 'red';
+      context2D.moveTo(startPoint.x, startPoint.y);
+      context2D.lineTo(endPoint.x, endPoint.y);
+      context2D.stroke();
 
-        const newLine = {
-          x1: startPoint.x,
-          y1: startPoint.y,
-          x2: endPoint.x,
-          y2: endPoint.y,
-          timestamp: new Date()
-        };
-        detectedLines.push(newLine);
+      const newLine = {
+        x1: startPoint.x,
+        y1: startPoint.y,
+        x2: endPoint.x,
+        y2: endPoint.y,
+        timestamp: new Date()
+      };
+      detectedLines.push(newLine);
 
-        startPoint = null;
-      }
-    });
-  } else {
-    // Remove the event listener
-    canvas2D.removeEventListener('click', drawLine);
+      startPoint = null;
+    }
   }
-  
 }
 
-function deleteSelectedLines() {
+function deleteSelectedLines(event) {
   const canvas2D = document.getElementById('canvas2D');
   const context2D = canvas2D.getContext('2d');
 
-  // Disable drawing
-  isDrawing = false;
-  isErasing = true;
-
-
   if (isErasing) {
-    // Add event listener for erasing
-    canvas2D.addEventListener('click', function (event) {
-      const mouseX = event.clientX - canvas2D.getBoundingClientRect().left;
-      const mouseY = event.clientY - canvas2D.getBoundingClientRect().top;
+    const mouseX = event.clientX - canvas2D.getBoundingClientRect().left;
+    const mouseY = event.clientY - canvas2D.getBoundingClientRect().top;
 
-      detectedLines.forEach((line, index) => {
-        const distToLine = pointToLineDistance({ x: mouseX, y: mouseY }, line);
-        if (distToLine < 5) {
-          const deletedLine = { ...line, timestamp: new Date() };
-          deletedLines.push(deletedLine);
-          detectedLines.splice(index, 1);
+    detectedLines.forEach((line, index) => {
+      const distToLine = pointToLineDistance({ x: mouseX, y: mouseY }, line);
+      if (distToLine < 5) {
+        const deletedLine = { ...line, timestamp: new Date() };
+        deletedLines.push(deletedLine);
+        detectedLines.splice(index, 1);
 
-          context2D.clearRect(0, 0, canvas2D.width, canvas2D.height);
-          context2D.drawImage(img, 0, 0, canvas2D.width, canvas2D.height);
+        context2D.clearRect(0, 0, canvas2D.width, canvas2D.height);
+        context2D.drawImage(img, 0, 0, canvas2D.width, canvas2D.height);
 
-          context2D.beginPath();
-          context2D.strokeStyle = 'red';
-          detectedLines.forEach(line => {
-            context2D.moveTo(line.x1, line.y1);
-            context2D.lineTo(line.x2, line.y2);
-          });
-          context2D.stroke();
-        }
-      });
+        context2D.beginPath();
+        context2D.strokeStyle = 'red';
+        detectedLines.forEach(line => {
+          context2D.moveTo(line.x1, line.y1);
+          context2D.lineTo(line.x2, line.y2);
+        });
+        context2D.stroke();
+      }
     });
-  } else {
-    // Remove the event listener
-    canvas2D.removeEventListener('click', deleteSelectedLines);
   }
 }
+
+// Add event listeners outside the functions
+const canvas2D = document.getElementById('canvas2D');
+canvas2D.addEventListener('click', drawLine);
+canvas2D.addEventListener('click', deleteSelectedLines);
+
 
 
 
