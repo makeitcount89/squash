@@ -348,7 +348,18 @@ scene.beginAnimation(camera, 0, animationDuration, false);
   } else {
     document.exitFullscreen();
   }
+
+  // Resize Babylon.js canvas on entering/exiting fullscreen
+  babylonCanvas.width = window.innerWidth;
+  babylonCanvas.height = window.innerHeight;
+  
+  // Inform Babylon.js about the new size
+  const engine = babylonCanvas._babylonEngine;
+  if (engine) {
+    engine.resize();
+  }
     }
+    
     
   </script>
 </body>
