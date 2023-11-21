@@ -334,6 +334,81 @@ scene.beginAnimation(camera, 0, animationDuration, false);
     babylonCanvas.style.display = 'block';
   }
     }
+    function deleteSelectedLines() {
+  if (!detectedLines) {
+    alert('Please detect lines first.');
+    return;
+  }
+
+  const canvas2D = document.getElementById('canvas2D');
+  const context2D = canvas2D.getContext('2d');
+
+  // Capture mouse click coordinates
+  canvas2D.addEventListener('click', function (event) {
+    const mouseX = event.clientX - canvas2D.getBoundingClientRect().left;
+    const mouseY = event.clientY - canvas2D.getBoundingClientRect().top;
+
+    // Check if clicked on a red line
+    detectedLines.forEach((line, index) => {
+      const distToLine = pointToLineDistance({ x: mouseX, y: mouseY }, line);
+      if (distToLine < 5) { // Adjust the tolerance as needed
+        // Remove the selected line
+        detectedLines.splice(index, 1);
+
+        // Redraw the canvas without the deleted line
+        context2D.clearRect(0, 0, canvas2D.width, canvas2D.height);
+        context2D.drawImage(img, 0, 0, canvas2D.width, canvas2D.height);
+
+        // Draw remaining lines
+        context2D.beginPath();
+        context2D.strokeStyle = 'red'; // Change the color as needed
+        detectedLines.forEach(line => {
+          context2D.moveTo(line.x1, line.y1);
+          context2D.lineTo(line.x2, line.y2);
+        });
+        context2D.stroke();
+      }
+    });
+  });
+}
+
+// Calculate the distance from a point to a line
+function pointToLineDistance(point, line) {
+  const { x, y } = point;
+  const { x1, y1, x2, y2 } = line;
+
+  const A = x - x1;
+  const B = y - y1;
+  const C = x2 - x1;
+  const D = y2 - y1;
+
+  const dot = A * C + B * D;
+  const lenSq = C * C + D * D;
+  let param = -1;
+  if (lenSq !== 0) {
+    param = dot / lenSq;
+  }
+
+  let xx, yy;
+  if (param < 0) {
+    xx = x1;
+    yy = y1;
+  } else if (param > 1) {
+    xx = x2;
+    yy = y2;
+  } else {
+    xx = x1 + param * C;
+    yy = y1 + param * D;
+  }
+
+  const dx = x - xx;
+  const dy = y - yy;
+  return Math.sqrt(dx * dx + dy * dy);
+}
+
+// Add this button within your <body> tag to trigger line deletion
+<button onclick="deleteSelectedLines()">Delete Selected Lines</button>
+    
     
   </script>
 </body>
