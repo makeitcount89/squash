@@ -338,7 +338,7 @@ scene.beginAnimation(camera, 0, animationDuration, false);
   }
     }
     function toggleFullScreen() {
-  const babylonCanvas = document.getElementById('canvas3D'); // Replace 'yourCanvasId' with the actual ID of your canvas
+  const babylonCanvas = document.getElementById('canvas3D');
 
   if (!document.fullscreenElement) {
     babylonCanvas.requestFullscreen().catch(err => {
@@ -347,15 +347,7 @@ scene.beginAnimation(camera, 0, animationDuration, false);
   } else {
     document.exitFullscreen();
   }
-}
-
-// Add an event listener to resize the canvas when the window is resized
-window.addEventListener('resize', () => {
-  const babylonCanvas = document.getElementById('canvas3D'); // Replace 'yourCanvasId' with the actual ID of your canvas
-  babylonCanvas.width = window.innerWidth;
-  babylonCanvas.height = window.innerHeight;
-});
-    
+    }
     
   </script>
 </body>
