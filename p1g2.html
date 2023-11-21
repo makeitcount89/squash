@@ -309,8 +309,9 @@ scene.beginAnimation(camera, 0, animationDuration, false);
     newScene.clearColor = new BABYLON.Color4(0.9, 0.9, 0.9, 1);
 
     // Animation parameters
-    const animationDuration = 10; // in milliseconds
-    const zoomedOutPosition = new BABYLON.Vector3(0, 110, -1800);
+    const animationDuration = 200; // in milliseconds
+    const zoomedOutPosition = new BABYLON.Vector3(0, 115, -900);
+    camera.rotation.x = Math.PI / 8; 
 
     // Create a position animation
     const animation = new BABYLON.Animation(
