@@ -64,8 +64,11 @@
   <input type="color" id="wallColor" value="#000000">
 
   <label for="wallTexture">Wall Texture:</label>
-  <input type="text" id="wallTexture" placeholder="Texture URL" value="https://www.babylonjs-playground.com/textures/brick.jpg">
-
+<select id="wallTexture" onchange="updateWallTexture()">
+  <option value="lines" selected>Lines</option>
+  <option value="brick">Brick</option>
+</select>
+  
   <label for="wallHeight">Wall Height:</label>
   <input type="number" id="wallHeight" value="250">
 
@@ -152,62 +155,49 @@
       dst.delete();
       linesP.delete();
     }
+;
+       function convertTo3D() {
+  resetCanvas();
+  if (!detectedLines) {
+    alert('Please detect lines first.');
+    return;
+  }
 
-    function convertTo3D() {
-      resetCanvas();
-      if (!detectedLines) {
-        alert('Please detect lines first.');
-        return;
-      }
+  const wallTextureType = document.getElementById('wallTexture').value;
 
-      // Determine the bounding box of the 3D object
-      let minX = Number.MAX_VALUE;
-      let minY = Number.MAX_VALUE;
-      let maxX = Number.MIN_VALUE;
-      let maxY = Number.MIN_VALUE;
+  detectedLines.forEach(line => {
+    const lineThickness = parseFloat(document.getElementById('lineThickness').value);
+    const wallColor = document.getElementById('wallColor').value;
+    const wallHeight = parseFloat(document.getElementById('wallHeight').value);
+    const wallThickness = parseFloat(document.getElementById('wallThickness').value);
 
-      detectedLines.forEach(line => {
-        minX = Math.min(minX, line.x1, line.x2);
-        minY = Math.min(minY, -line.y1, -line.y2);
-        maxX = Math.max(maxX, line.x1, line.x2);
-        maxY = Math.max(maxY, -line.y1, -line.y2);
-      });
+    // Center and normalize the object
+    const points = [
+      new BABYLON.Vector3(line.x1, 0, -line.y1),
+      new BABYLON.Vector3(line.x1, wallHeight, -line.y1),
+      new BABYLON.Vector3(line.x2, wallHeight, -line.y2),
+      new BABYLON.Vector3(line.x2, 0, -line.y2),
+      new BABYLON.Vector3(line.x1, 0, -line.y1)
+    ];
 
-      // Calculate the center and dimensions of the bounding box
-      const centerX = (minX + maxX) / 2;
-      const centerY = (minY + maxY) / 2;
-      const width = maxX - minX;
-      const height = maxY - minY;
+    let wallMesh;
 
-      detectedLines.forEach(line => {
-        const lineThickness = parseFloat(document.getElementById('lineThickness').value);
-        const wallColor = document.getElementById('wallColor').value;
-        const wallTexture = document.getElementById('wallTexture').value;
-        const wallHeight = parseFloat(document.getElementById('wallHeight').value);
-        const wallThickness = parseFloat(document.getElementById('wallThickness').value);
-
-        // Center and normalize the object
-        const points = [
-          new BABYLON.Vector3(line.x1 - centerX, 0, -line.y1 + centerY),
-          new BABYLON.Vector3(line.x1 - centerX, wallHeight, -line.y1 + centerY),
-          new BABYLON.Vector3(line.x2 - centerX, wallHeight, -line.y2 + centerY),
-          new BABYLON.Vector3(line.x2 - centerX, 0, -line.y2 + centerY),
-          new BABYLON.Vector3(line.x1 - centerX, 0, -line.y1 + centerY)
-        ];
-
-        const wallMesh = BABYLON.MeshBuilder.CreateDashedLines(null, { points, dashSize: lineThickness, updatable: true });
-        wallMesh.color = new BABYLON.Color3.FromHexString(wallColor);
-
-        if (wallTexture) {
-          const wallMaterial = new BABYLON.StandardMaterial("wallMaterial", babylonCanvas._babylonScene);
-          wallMaterial.diffuseTexture = new BABYLON.Texture(wallTexture, babylonCanvas._babylonScene);
-          wallMesh.material = wallMaterial;
-        }
-
-        wallMesh.scaling.y = wallThickness;
-      });
-        
+    if (wallTextureType === 'lines') {
+      // Create mesh with dashed lines
+      wallMesh = BABYLON.MeshBuilder.CreateDashedLines(null, { points, dashSize: lineThickness, updatable: true });
+      wallMesh.color = new BABYLON.Color3.FromHexString(wallColor);
+    } else if (wallTextureType === 'brick') {
+      // Create mesh with brick texture
+      wallMesh = BABYLON.MeshBuilder.CreateBox(null, { width: Math.abs(line.x2 - line.x1), height: wallHeight, depth: lineThickness }, babylonCanvas._babylonScene);
+      wallMesh.position = new BABYLON.Vector3((line.x1 + line.x2) / 2, wallHeight / 2, -((line.y1 + line.y2) / 2));
+      const wallMaterial = new BABYLON.StandardMaterial("wallMaterial", babylonCanvas._babylonScene);
+      wallMaterial.diffuseTexture = new BABYLON.Texture("https://www.babylonjs-playground.com/textures/brick.jpg", babylonCanvas._babylonScene);
+      wallMesh.material = wallMaterial;
     }
+
+    wallMesh.scaling.y = wallThickness;
+  });
+       }
     
 
     // Load Babylon canvas on page load
