@@ -182,7 +182,7 @@
 
   // Create a ground plane
   const ground = BABYLON.MeshBuilder.CreateGround('ground', { width: width, height: height}, babylonCanvas._babylonScene);
-  const leftOffset = 360;  // Adjust this value to move the ground to the left
+  const leftOffset = 330;  // Adjust this value to move the ground to the left
   const closerOffset = -880; // Adjust this value to move the ground closer
 
   ground.position = new BABYLON.Vector3(centerX - leftOffset, 0, -centerY + closerOffset);
