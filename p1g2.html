@@ -182,7 +182,11 @@
 
   // Create a ground plane
   const ground = BABYLON.MeshBuilder.CreateGround('ground', { width: width + 100, height: height + 100 }, babylonCanvas._babylonScene);
-  ground.position = new BABYLON.Vector3(centerX, 0, -centerY);
+  const leftOffset = 15;  // Adjust this value to move the ground to the left
+  const closerOffset = 30; // Adjust this value to move the ground closer
+
+  ground.position = new BABYLON.Vector3(centerX - leftOffset, 0, -centerY + closerOffset);
+
   
   // Apply the original image as a texture to the ground
   const groundMaterial = new BABYLON.StandardMaterial('groundMaterial', babylonCanvas._babylonScene);
