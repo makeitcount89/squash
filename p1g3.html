@@ -397,47 +397,53 @@ scene.beginAnimation(camera, 0, animationDuration, false);
     });
   }
 
-  // Add the deleteSelectedLines function
-  function deleteSelectedLines() {
-    if (!detectedLines) {
-      alert('Please detect lines first.');
-      return;
-    }
-
-    const canvas2D = document.getElementById('canvas2D');
-    const context2D = canvas2D.getContext('2d');
-
-    // Capture mouse click coordinates
-    canvas2D.addEventListener('click', function (event) {
-      const mouseX = event.clientX - canvas2D.getBoundingClientRect().left;
-      const mouseY = event.clientY - canvas2D.getBoundingClientRect().top;
-
-      // Check if clicked on a red line
-      detectedLines.forEach((line, index) => {
-        const distToLine = pointToLineDistance({ x: mouseX, y: mouseY }, line);
-        if (distToLine < 5) { // Adjust the tolerance as needed
-          // Add timestamp to the removed line
-          line.timestamp = new Date();
-
-          // Remove the selected line
-          detectedLines.splice(index, 1);
-
-          // Redraw the canvas without the deleted line
-          context2D.clearRect(0, 0, canvas2D.width, canvas2D.height);
-          context2D.drawImage(img, 0, 0, canvas2D.width, canvas2D.height);
-
-          // Draw remaining lines
-          context2D.beginPath();
-          context2D.strokeStyle = 'red'; // Change the color as needed
-          detectedLines.forEach(line => {
-            context2D.moveTo(line.x1, line.y1);
-            context2D.lineTo(line.x2, line.y2);
-          });
-          context2D.stroke();
-        }
-      });
-    });
+function deleteSelectedLines() {
+  if (!detectedLines) {
+    alert('Please detect lines first.');
+    return;
   }
+
+  const canvas2D = document.getElementById('canvas2D');
+  const context2D = canvas2D.getContext('2d');
+
+  // Capture mouse click coordinates
+  const handleClick = function (event) {
+    const mouseX = event.clientX - canvas2D.getBoundingClientRect().left;
+    const mouseY = event.clientY - canvas2D.getBoundingClientRect().top;
+
+    // Check if clicked on a red line
+    detectedLines.forEach((line, index) => {
+      const distToLine = pointToLineDistance({ x: mouseX, y: mouseY }, line);
+      if (distToLine < 5) { // Adjust the tolerance as needed
+        // Add timestamp to the removed line
+        line.timestamp = new Date();
+
+        // Remove the selected line
+        detectedLines.splice(index, 1);
+
+        // Remove the event listener to avoid multiple clicks
+        canvas2D.removeEventListener('click', handleClick);
+
+        // Redraw the canvas without the deleted line
+        context2D.clearRect(0, 0, canvas2D.width, canvas2D.height);
+        context2D.drawImage(img, 0, 0, canvas2D.width, canvas2D.height);
+
+        // Draw remaining lines
+        context2D.beginPath();
+        context2D.strokeStyle = 'red'; // Change the color as needed
+        detectedLines.forEach(line => {
+          context2D.moveTo(line.x1, line.y1);
+          context2D.lineTo(line.x2, line.y2);
+        });
+        context2D.stroke();
+      }
+    });
+  };
+
+  // Attach the event listener
+  canvas2D.addEventListener('click', handleClick);
+}
+
 
   // Add the undo function
   function undo() {
