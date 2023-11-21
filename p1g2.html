@@ -156,7 +156,8 @@
       linesP.delete();
     }
 ;
-       function convertTo3D() {
+   
+  function convertTo3D() {
   resetCanvas();
   if (!detectedLines) {
     alert('Please detect lines first.');
@@ -180,24 +181,23 @@
       new BABYLON.Vector3(line.x1, 0, -line.y1)
     ];
 
-    let wallMesh;
-
     if (wallTextureType === 'lines') {
       // Create mesh with dashed lines
-      wallMesh = BABYLON.MeshBuilder.CreateDashedLines(null, { points, dashSize: lineThickness, updatable: true });
+      const wallMesh = BABYLON.MeshBuilder.CreateDashedLines(null, { points, dashSize: lineThickness, updatable: true });
       wallMesh.color = new BABYLON.Color3.FromHexString(wallColor);
+      wallMesh.scaling.y = wallThickness;
     } else if (wallTextureType === 'brick') {
       // Create mesh with brick texture
-      wallMesh = BABYLON.MeshBuilder.CreateBox(null, { width: Math.abs(line.x2 - line.x1), height: wallHeight, depth: lineThickness }, babylonCanvas._babylonScene);
+      const wallWidth = Math.abs(line.x2 - line.x1);
+      const wallMesh = BABYLON.MeshBuilder.CreateBox(null, { width: wallWidth, height: wallHeight, depth: lineThickness }, babylonCanvas._babylonScene);
       wallMesh.position = new BABYLON.Vector3((line.x1 + line.x2) / 2, wallHeight / 2, -((line.y1 + line.y2) / 2));
       const wallMaterial = new BABYLON.StandardMaterial("wallMaterial", babylonCanvas._babylonScene);
       wallMaterial.diffuseTexture = new BABYLON.Texture("https://www.babylonjs-playground.com/textures/brick.jpg", babylonCanvas._babylonScene);
       wallMesh.material = wallMaterial;
     }
-
-    wallMesh.scaling.y = wallThickness;
   });
-       }
+  }
+    
     
 
     // Load Babylon canvas on page load
