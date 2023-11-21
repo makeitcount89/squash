@@ -73,6 +73,7 @@
   <input type="number" id="wallThickness" value="0.2">
 <button onclick="drawLine()">Draw Line</button>
   <button onclick="deleteSelectedLines()">Eraser</button>
+  <button onclick="undo()">Undo</button>
     
   <button onclick="convertTo3D()">Convert to 3D</button>
   <canvas id="canvas2D" width="600" height="600"></canvas>
@@ -449,7 +450,36 @@ function drawLine() {
 }
 
 // Add this button within your <body> tag to trigger line drawing
+// Add the undo function
+function undo() {
+  const canvas2D = document.getElementById('canvas2D');
+  const context2D = canvas2D.getContext('2d');
 
+  if (detectedLines.length > 0) {
+    // Remove the last line from the array
+    const removedLine = detectedLines.pop();
+
+    // Clear the canvas
+    context2D.clearRect(0, 0, canvas2D.width, canvas2D.height);
+    context2D.drawImage(img, 0, 0, canvas2D.width, canvas2D.height);
+
+    // Redraw remaining lines
+    context2D.beginPath();
+    context2D.strokeStyle = 'red'; // Change the color as needed
+    detectedLines.forEach(line => {
+      context2D.moveTo(line.x1, line.y1);
+      context2D.lineTo(line.x2, line.y2);
+    });
+    context2D.stroke();
+
+    // Optional: You can display the removedLine coordinates or take other actions if needed
+    console.log('Undid the last action:', removedLine);
+  }
+}
+
+// Add this button within your <body> tag to trigger the undo action
+
+    
     
 
     
