@@ -181,7 +181,7 @@
   const height = maxY - minY;
 
   // Create a ground plane
-  const ground = BABYLON.MeshBuilder.CreateGround('ground', { width: width + 100, height: height + 100 }, babylonCanvas._babylonScene);
+  const ground = BABYLON.MeshBuilder.CreateGround('ground', { width: width, height: height}, babylonCanvas._babylonScene);
   const leftOffset = 360;  // Adjust this value to move the ground to the left
   const closerOffset = -880; // Adjust this value to move the ground closer
 
