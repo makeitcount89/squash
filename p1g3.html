@@ -384,8 +384,9 @@ scene.beginAnimation(camera, 0, animationDuration, false);
       }
     });
   }
+let deletedLines = [];
 
-function deleteSelectedLines() {
+    function deleteSelectedLines() {
   if (!detectedLines) {
     alert('Please detect lines first.');
     return;
@@ -404,8 +405,8 @@ function deleteSelectedLines() {
       const distToLine = pointToLineDistance({ x: mouseX, y: mouseY }, line);
       if (distToLine < 5) { // Adjust the tolerance as needed
         // Add timestamp to the removed line and push it to the deletedLines array
-        line.timestamp = new Date();
-        deletedLines.push(line);
+        const deletedLine = { ...line, timestamp: new Date() };
+        deletedLines.push(deletedLine);
 
         // Remove the selected line from the detectedLines array
         detectedLines.splice(index, 1);
@@ -426,6 +427,7 @@ function deleteSelectedLines() {
     });
   });
 }
+
 
 
 // Calculate the distance from a point to a line
@@ -463,18 +465,26 @@ function pointToLineDistance(point, line) {
 }
 
 
-
-  function undo() {
+function undo() {
   const canvas2D = document.getElementById('canvas2D');
   const context2D = canvas2D.getContext('2d');
 
-  if (detectedLines.length > 0) {
-    // Remove the last line from the array
-    const removedLine = detectedLines.pop();
+  if (deletedLines.length > 0) {
+    // Get the last deleted line from the array
+    const lastDeletedLine = deletedLines.pop();
 
     // Clear the canvas
     context2D.clearRect(0, 0, canvas2D.width, canvas2D.height);
     context2D.drawImage(img, 0, 0, canvas2D.width, canvas2D.height);
+
+    // Check if the last deleted line has a timestamp
+    if (lastDeletedLine.timestamp) {
+      // Reinstate the line from deletedLines
+      detectedLines.push(lastDeletedLine);
+    } else {
+      // Remove the last line from the detectedLines array
+      detectedLines.pop();
+    }
 
     // Redraw remaining lines
     context2D.beginPath();
@@ -485,17 +495,10 @@ function pointToLineDistance(point, line) {
     });
     context2D.stroke();
 
-    // Check if the removed line has a timestamp
-    if (removedLine.timestamp) {
-      // Newly added line, log or handle accordingly
-      console.log('Undid the last action (Added Line):', removedLine);
-    } else {
-      // Deleted line, push it back to the detectedLines array
-      deletedLines.push(removedLine);
-    }
+    // Log or handle the undo action accordingly
+    console.log('Undid the last action:', lastDeletedLine);
   }
 }
-
 
 
     
