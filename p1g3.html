@@ -71,8 +71,8 @@
 
   <label for="wallThickness">Wall Thickness:</label>
   <input type="number" id="wallThickness" value="0.2">
-// Add this button within your <body> tag to trigger line deletion
-<button onclick="deleteSelectedLines()">Delete Selected Lines</button>
+<button onclick="drawLine()">Draw Line</button>
+  <button onclick="deleteSelectedLines()">Eraser</button>
     
   <button onclick="convertTo3D()">Convert to 3D</button>
   <canvas id="canvas2D" width="600" height="600"></canvas>
@@ -407,7 +407,50 @@ function pointToLineDistance(point, line) {
   const dy = y - yy;
   return Math.sqrt(dx * dx + dy * dy);
 }
+// Add the drawLine function
+function drawLine() {
+  const canvas2D = document.getElementById('canvas2D');
+  const context2D = canvas2D.getContext('2d');
 
+  let startPoint = null;
+
+  // Capture mouse click coordinates
+  canvas2D.addEventListener('click', function (event) {
+    const mouseX = event.clientX - canvas2D.getBoundingClientRect().left;
+    const mouseY = event.clientY - canvas2D.getBoundingClientRect().top;
+
+    if (!startPoint) {
+      // First click, set the start point
+      startPoint = { x: mouseX, y: mouseY };
+    } else {
+      // Second click, draw the line and add coordinates
+      const endPoint = { x: mouseX, y: mouseY };
+
+      // Draw the line on the canvas
+      context2D.beginPath();
+      context2D.strokeStyle = 'red'; // Change the color as needed
+      context2D.moveTo(startPoint.x, startPoint.y);
+      context2D.lineTo(endPoint.x, endPoint.y);
+      context2D.stroke();
+
+      // Add coordinates to the detectedLines array
+      const newLine = {
+        x1: startPoint.x,
+        y1: startPoint.y,
+        x2: endPoint.x,
+        y2: endPoint.y
+      };
+      detectedLines.push(newLine);
+
+      // Reset start point for the next line
+      startPoint = null;
+    }
+  });
+}
+
+// Add this button within your <body> tag to trigger line drawing
+
+    
 
     
   </script>
