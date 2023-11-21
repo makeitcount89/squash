@@ -357,9 +357,8 @@ function drawLine() {
 
   // Disable erasing
   isErasing = false;
+  isDrawing = true;
 
-  // Toggle drawing state on button click
-  isDrawing = !isDrawing;
 
   if (isDrawing) {
     // Add event listener for drawing
@@ -393,6 +392,7 @@ function drawLine() {
     // Remove the event listener
     canvas2D.removeEventListener('click', drawLine);
   }
+  
 }
 
 function deleteSelectedLines() {
@@ -401,9 +401,8 @@ function deleteSelectedLines() {
 
   // Disable drawing
   isDrawing = false;
+  isErasing = true;
 
-  // Toggle erasing state on button click
-  isErasing = !isErasing;
 
   if (isErasing) {
     // Add event listener for erasing
