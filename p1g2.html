@@ -151,7 +151,7 @@
         });
       }
 
-      src.delete();
+      src.delte();
       dst.delete();
       linesP.delete();
     }
@@ -187,8 +187,10 @@
       wallMesh.color = new BABYLON.Color3.FromHexString(wallColor);
       wallMesh.scaling.y = wallThickness;
     } else if (wallTextureType === 'brick') {
+      // Calculate the width of the wall
+      const wallWidth = Math.sqrt((line.x2 - line.x1) ** 2 + (line.y2 - line.y1) ** 2);
+
       // Create mesh with brick texture
-      const wallWidth = Math.abs(line.x2 - line.x1);
       const wallMesh = BABYLON.MeshBuilder.CreateBox(null, { width: wallWidth, height: wallHeight, depth: lineThickness }, babylonCanvas._babylonScene);
       wallMesh.position = new BABYLON.Vector3((line.x1 + line.x2) / 2, wallHeight / 2, -((line.y1 + line.y2) / 2));
       const wallMaterial = new BABYLON.StandardMaterial("wallMaterial", babylonCanvas._babylonScene);
@@ -197,6 +199,7 @@
     }
   });
   }
+    
     
     
 
