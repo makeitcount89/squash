@@ -71,7 +71,9 @@
 
   <label for="wallThickness">Wall Thickness:</label>
   <input type="number" id="wallThickness" value="0.2">
-
+// Add this button within your <body> tag to trigger line deletion
+<button onclick="deleteSelectedLines()">Delete Selected Lines</button>
+    
   <button onclick="convertTo3D()">Convert to 3D</button>
   <canvas id="canvas2D" width="600" height="600"></canvas>
   <canvas id="canvas3D" width="1200" height="1200"></canvas>
@@ -406,9 +408,7 @@ function pointToLineDistance(point, line) {
   return Math.sqrt(dx * dx + dy * dy);
 }
 
-// Add this button within your <body> tag to trigger line deletion
-<button onclick="deleteSelectedLines()">Delete Selected Lines</button>
-    
+
     
   </script>
 </body>
