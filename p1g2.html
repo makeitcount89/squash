@@ -56,9 +56,6 @@
 <input type="range" id="lineThreshold" class="wide-slider" min="1" max="1000" value="270" onchange="updateLineThreshold(this.value)">
 <span id="lineThresholdValue">270</span>
 
-<label for="lineThickness">Line Thickness:</label>
-<input type="range" id="lineThickness" class="wide-slider" min="1" max="100" value="50" onchange="updateLineThickness(this.value)">
-<span id="lineThicknessValue">50</span>
   
   <label for="wallColor">Wall Color:</label>
   <input type="color" id="wallColor" value="#000000">
@@ -95,9 +92,15 @@
     }
 
     function updateLineThickness(value) {
-      document.getElementById('lineThicknessValue').textContent = value;
-      // You can add real-time adjustment logic for line thickness here if needed
+  // Set the line thickness value to 0.2
+  const fixedValue = 0.2;
+
+  // Display the fixed line thickness value
+  document.getElementById('lineThicknessValue').textContent = fixedValue;
+
+  // You can add real-time adjustment logic for line thickness here if needed
     }
+    
 
     function loadAndDetect() {
   const input = document.getElementById('imageInput');
