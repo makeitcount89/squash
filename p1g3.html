@@ -381,6 +381,17 @@ function drawLine() {
     }
   });
 }
+    function pointToLineDistance(point, line) {
+  const { x: x0, y: y0 } = point;
+  const { x: x1, y: y1, x: x2, y: y2 } = line;
+
+  const A = y2 - y1;
+  const B = x1 - x2;
+  const C = (x2 - x1) * y1 + (y1 - y2) * x1;
+
+  return Math.abs(A * x0 + B * y0 + C) / Math.sqrt(A * A + B * B);
+    }
+    
     // Add the deleteSelectedLines function
 function deleteSelectedLines() {
   if (!detectedLines) {
