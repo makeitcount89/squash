@@ -83,7 +83,7 @@
 
   <script>
 
-    let img, context2D, babylonCanvas, detectedLines, scene, camera, startPoint; // Move 'scene' to a higher scope
+    let img, context2D, babylonCanvas, detectedLines, scene, camera, startPoint, deletedLines;// Move 'scene' to a higher scope
 
     function onOpenCvReady() {
       // OpenCV is ready
@@ -338,8 +338,8 @@ scene.beginAnimation(camera, 0, animationDuration, false);
   }
     }
     
-// Add timestamp property to the detectedLines array
-//let detectedLines = [];
+/// Add timestamp property to the detectedLines array
+///let detectedLines = [];
 
 
   // Add timestamp property to the detectedLines array
