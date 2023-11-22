@@ -86,6 +86,56 @@
   <p id="coordinates"></p>
 
   <script>
+   
+
+  window.onload = function () {
+    const autosavedData = localStorage.getItem("autosave");
+    if (autosavedData) {
+      const savedData = JSON.parse(autosavedData);
+      const selectedFile = savedData.selectedFile;
+
+      // Load the selected file if available
+      if (selectedFile) {
+        document.getElementById('imageInput').addEventListener('change', function () {
+          loadSelectedFile(selectedFile);
+        });
+
+        // Trigger the change event to load the image
+        document.getElementById('imageInput').dispatchEvent(new Event('change'));
+      }
+    }
+
+  
+
+  function loadSelectedFile(selectedFile) {
+    const savedData = JSON.parse(localStorage.getItem(selectedFile));
+    detectedLines = savedData.detectedLines;
+
+    const savedImage = new Image();
+    savedImage.onload = function () {
+      img = savedImage;
+      context2D.clearRect(0, 0, context2D.canvas.width, context2D.canvas.height);
+      context2D.drawImage(savedImage, 0, 0, context2D.canvas.width, context2D.canvas.height);
+
+      // Update other elements based on loaded data
+      document.getElementById('lineThreshold').value = savedData.lineThreshold;
+      updateLineThreshold(savedData.lineThreshold);
+
+      // Draw the detected lines on the 2D canvas
+      context2D.beginPath();
+      context2D.strokeStyle = 'red'; // Change the color as needed
+      detectedLines.forEach(line => {
+        context2D.moveTo(line.x1, line.y1);
+        context2D.lineTo(line.x2, line.y2);
+      });
+      context2D.stroke();
+    };
+
+    savedImage.src = savedData.imageDataURL;
+  }
+
+  
+  
 
     let img, context2D, babylonCanvas, detectedLines, scene, camera, startPoint; // Move 'scene' to a higher scope
 
