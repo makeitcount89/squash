@@ -482,6 +482,11 @@ function handleLineSelection2D(mouseX, mouseY) {
 function redrawCanvas() {
   context2D.clearRect(0, 0, context2D.canvas.width, context2D.canvas.height);
 
+  // Draw the selected image
+  if (img) {
+    context2D.drawImage(img, 0, 0, context2D.canvas.width, context2D.canvas.height);
+  }
+
   // Draw the remaining lines
   context2D.beginPath();
   context2D.strokeStyle = 'red'; // Change the color as needed
@@ -491,6 +496,7 @@ function redrawCanvas() {
   });
   context2D.stroke();
 }
+
  function deleteSelectedLine() {
   // Call the line deletion function with mouse coordinates
   handleLineSelection2D( /* provide mouseX and mouseY values */ );
