@@ -19,16 +19,19 @@
 </head>
 <body>
   <div id="toolbar">
-    <button id="drawFree">Draw</button>
     <button id="drawRect">Draw Rectangle</button>
     <button id="drawLine">Draw Line</button>
+    <button id="delete">Delete</button>
+    <button id="undo">Undo</button>
+    <button id="redo">Redo</button>
   </div>
   <input type="file" id="imageInput" />
   <canvas id="canvas" width="800" height="600"></canvas>
 
   <script>
     var canvas = new fabric.Canvas('canvas', {
-      isDrawingMode: false
+      isDrawingMode: false,
+      state: []
     });
 
     // Handle image upload
@@ -53,15 +56,11 @@
         scaleX: canvas.width / img.width,
         scaleY: canvas.height / img.height,
       });
+      canvas.state = [];
+      updateButtons();
     }
 
     // Toolbar button event listeners
-    document.getElementById('drawFree').addEventListener('click', function() {
-      canvas.isDrawingMode = true;
-      canvas.freeDrawingBrush.width = 2;
-      canvas.freeDrawingBrush.color = 'black';
-    });
-
     document.getElementById('drawRect').addEventListener('click', function() {
       canvas.isDrawingMode = false;
       canvas.selection = false;
@@ -94,6 +93,7 @@
           canvas.forEachObject(function(obj) {
             obj.selectable = true;
           });
+          saveState();
         });
       });
     });
@@ -126,9 +126,52 @@
           canvas.forEachObject(function(obj) {
             obj.selectable = true;
           });
+          saveState();
         });
       });
     });
+
+    document.getElementById('delete').addEventListener('click', function() {
+      var activeObject = canvas.getActiveObject();
+      if (activeObject) {
+        canvas.remove(activeObject);
+        saveState();
+      }
+    });
+
+    document.getElementById('undo').addEventListener('click', function() {
+      if (canvas.state.length > 0) {
+        var state = canvas.state.pop();
+        canvas.loadFromJSON(state);
+        canvas.renderAll();
+        updateButtons();
+      }
+    });
+
+    document.getElementById('redo').addEventListener('click', function() {
+      // Assuming you want to redo the last undone action
+      if (canvas.redoState.length > 0) {
+        var state = canvas.redoState.pop();
+        canvas.loadFromJSON(state);
+        canvas.renderAll();
+        updateButtons();
+      }
+    });
+
+    // Function to save the current state
+    function saveState() {
+      var json = JSON.stringify(canvas.toDatalessJSON());
+      canvas.state.push(json);
+      // Clear redoState when a new action is performed
+      canvas.redoState = [];
+      updateButtons();
+    }
+
+    // Function to update button states
+    function updateButtons() {
+      document.getElementById('undo').disabled = canvas.state.length === 0;
+      document.getElementById('redo').disabled = canvas.redoState.length === 0;
+    }
   </script>
 </body>
 </html>
