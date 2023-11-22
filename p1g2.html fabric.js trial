@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/4.0.0-beta.12/fabric.min.js"></script>
+  <title>Canvas Drawing Example</title>
+</head>
+<body>
+  <input type="file" id="imageInput" />
+  <canvas id="canvas" width="800" height="600" style="border:1px solid #000;"></canvas>
+  <button id="deleteButton">Delete</button>
+  <button id="undoButton">Undo</button>
+  <button id="freeSelectButton">Free Select</button>
+
+  <script>
+    var canvas;
+    var isFreeSelectMode = false;
+
+    // Function to handle image upload
+    document.getElementById('imageInput').addEventListener('change', handleImage);
+
+    function handleImage(e) {
+      var reader = new FileReader();
+      reader.onload = function(event){
+        var img = new Image();
+        img.onload = function(){
+          initFabric(img);
+        };
+        img.src = event.target.result;
+      };
+      reader.readAsDataURL(e.target.files[0]);
+    }
+
+    // Function to initialize Fabric.js
+    function initFabric(img) {
+      canvas = new fabric.Canvas('canvas', {
+        isDrawingMode: true
+      });
+
+      // Add the uploaded image to the canvas
+      var fabricImage = new fabric.Image(img, {
+        left: 0,
+        top: 0,
+        scaleX: canvas.width / img.width,
+        scaleY: canvas.height / img.height,
+      });
+
+      canvas.add(fabricImage);
+
+      // Example: Draw a rectangle
+      var rect = new fabric.Rect({
+        left: 100,
+        top: 100,
+        width: 50,
+        height: 50,
+        fill: 'red'
+      });
+      canvas.add(rect);
+
+      // Example: Draw a line
+      var line = new fabric.Line([50, 50, 200, 200], {
+        stroke: 'blue',
+        strokeWidth: 2
+      });
+      canvas.add(line);
+
+      // Example: Get coordinates of the rectangle
+      console.log('Rectangle coordinates:', rect.left, rect.top, rect.width, rect.height);
+
+      // Example: Get coordinates of the line
+      console.log('Line coordinates:', line.x1, line.y1, line.x2, line.y2);
+
+      // Delete button functionality
+      document.getElementById('deleteButton').addEventListener('click', function() {
+        var activeObject = canvas.getActiveObject();
+        if (activeObject) {
+          canvas.remove(activeObject);
+        }
+      });
+
+      // Undo button functionality
+      document.getElementById('undoButton').addEventListener('click', function() {
+        var objects = canvas.getObjects();
+        if (objects.length > 0) {
+          canvas.remove(objects[objects.length - 1]);
+        }
+      });
+
+      // Free Select button functionality
+      document.getElementById('freeSelectButton').addEventListener('click', function() {
+        isFreeSelectMode = !isFreeSelectMode;
+        canvas.isDrawingMode = !isFreeSelectMode;
+
+        if (isFreeSelectMode) {
+          canvas.selection = false;
+          canvas.forEachObject(function(obj) {
+            obj.selectable = false;
+          });
+        } else {
+          canvas.selection = true;
+          canvas.forEachObject(function(obj) {
+            obj.selectable = true;
+          });
+        }
+      });
+
+      // Handle interruption of drawing when switching modes
+      canvas.on('mouse:down', function(options) {
+        if (isFreeSelectMode) {
+          canvas.selection = false;
+          canvas.forEachObject(function(obj) {
+            obj.selectable = false;
+          });
+        } else {
+          canvas.selection = true;
+          canvas.forEachObject(function(obj) {
+            obj.selectable = true;
+          });
+        }
+      });
+    }
+  </script>
+</body>
+</html>
