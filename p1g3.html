@@ -452,18 +452,27 @@ function loadAndDetect() {
     function handleLineSelection2D(mouseX, mouseY) {
   // Iterate through detected lines and check if the click is near any line
   detectedLines.forEach(line => {
-    const distance = pointToLineDistance({ x: mouseX, y: mouseY }, line);
+    const distance = pointToLineDistance({ x: mouseX, y: mouseY }, line, true);
     const lineThickness = parseFloat(document.getElementById('lineThickness').value);
 
     if (distance < lineThickness) {
       // Line is clicked, highlight it in blue
-      console.log('Selected Line in Blue:', line);
+      context2D.beginPath();
+      context2D.strokeStyle = 'blue';
+      context2D.moveTo(line.x1, line.y1);
+      context2D.lineTo(line.x2, line.y2);
+      context2D.stroke();
     } else {
       // Keep other lines red
-      console.log('Other Lines in Red:', line);
+      context2D.beginPath();
+      context2D.strokeStyle = 'red';
+      context2D.moveTo(line.x1, line.y1);
+      context2D.lineTo(line.x2, line.y2);
+      context2D.stroke();
     }
   });
-}
+    }
+    
 
   </script>
 </body>
