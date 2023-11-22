@@ -9,13 +9,15 @@
 <body>
   <input type="file" id="imageInput" />
   <canvas id="canvas" width="800" height="600" style="border:1px solid #000;"></canvas>
+  <button id="lassoButton">Lasso</button>
+  <button id="rectangleButton">Rectangle</button>
+  <button id="lineButton">Line</button>
   <button id="deleteButton">Delete</button>
   <button id="undoButton">Undo</button>
-  <button id="freeSelectButton">Free Select</button>
 
   <script>
     var canvas;
-    var isFreeSelectMode = false;
+    var isLassoMode = false;
 
     // Function to handle image upload
     document.getElementById('imageInput').addEventListener('change', handleImage);
@@ -35,7 +37,7 @@
     // Function to initialize Fabric.js
     function initFabric(img) {
       canvas = new fabric.Canvas('canvas', {
-        isDrawingMode: true
+        isDrawingMode: false
       });
 
       // Add the uploaded image to the canvas
@@ -47,6 +49,69 @@
       });
 
       canvas.add(fabricImage);
+
+      // Lasso button functionality
+      document.getElementById('lassoButton').addEventListener('click', function() {
+        isLassoMode = !isLassoMode;
+        canvas.isDrawingMode = isLassoMode;
+
+        if (isLassoMode) {
+          canvas.selection = false;
+          canvas.forEachObject(function(obj) {
+            obj.selectable = true;
+          });
+        } else {
+          canvas.selection = true;
+          canvas.forEachObject(function(obj) {
+            obj.selectable = true;
+          });
+        }
+      });
+
+      // Rectangle button functionality
+      document.getElementById('rectangleButton').addEventListener('click', function() {
+        isLassoMode = false;
+        canvas.isDrawingMode = false;
+        canvas.selection = true;
+
+        canvas.forEachObject(function(obj) {
+          obj.selectable = true;
+        });
+
+        canvas.on('mouse:down', function(o) {
+          var pointer = canvas.getPointer(o.e);
+          var rect = new fabric.Rect({
+            left: pointer.x,
+            top: pointer.y,
+            width: 10,
+            height: 10,
+            fill: 'red'
+          });
+          canvas.add(rect);
+          canvas.setActiveObject(rect);
+        });
+      });
+
+      // Line button functionality
+      document.getElementById('lineButton').addEventListener('click', function() {
+        isLassoMode = false;
+        canvas.isDrawingMode = false;
+        canvas.selection = true;
+
+        canvas.forEachObject(function(obj) {
+          obj.selectable = true;
+        });
+
+        canvas.on('mouse:down', function(o) {
+          var pointer = canvas.getPointer(o.e);
+          var line = new fabric.Line([pointer.x, pointer.y, pointer.x, pointer.y], {
+            stroke: 'blue',
+            strokeWidth: 2
+          });
+          canvas.add(line);
+          canvas.setActiveObject(line);
+        });
+      });
 
       // Delete button functionality
       document.getElementById('deleteButton').addEventListener('click', function() {
@@ -61,82 +126,6 @@
         var objects = canvas.getObjects();
         if (objects.length > 0) {
           canvas.remove(objects[objects.length - 1]);
-        }
-      });
-
-      // Free Select button functionality
-      document.getElementById('freeSelectButton').addEventListener('click', function() {
-        isFreeSelectMode = !isFreeSelectMode;
-        canvas.isDrawingMode = !isFreeSelectMode;
-
-        if (isFreeSelectMode) {
-          canvas.selection = false;
-          canvas.forEachObject(function(obj) {
-            obj.selectable = false;
-          });
-        } else {
-          canvas.selection = true;
-          canvas.forEachObject(function(obj) {
-            obj.selectable = true;
-          });
-        }
-      });
-
-      // Handle interruption of drawing when switching modes
-      canvas.on('mouse:down', function(options) {
-        if (isFreeSelectMode) {
-          canvas.selection = false;
-          canvas.forEachObject(function(obj) {
-            obj.selectable = false;
-          });
-        } else {
-          canvas.selection = true;
-          canvas.forEachObject(function(obj) {
-            obj.selectable = true;
-          });
-        }
-      });
-
-      // Event listener for drawing rectangles
-      canvas.on('mouse:down', function(o) {
-        if (!isFreeSelectMode) {
-          var pointer = canvas.getPointer(o.e);
-          var rect = new fabric.Rect({
-            left: pointer.x,
-            top: pointer.y,
-            width: 10,
-            height: 10,
-            fill: 'red'
-          });
-          canvas.add(rect);
-          canvas.setActiveObject(rect);
-        }
-      });
-
-      // Event listener for drawing lines
-      canvas.on('mouse:down', function(o) {
-        if (!isFreeSelectMode) {
-          var pointer = canvas.getPointer(o.e);
-          var line = new fabric.Line([pointer.x, pointer.y, pointer.x, pointer.y], {
-            stroke: 'blue',
-            strokeWidth: 2
-          });
-          canvas.add(line);
-          canvas.setActiveObject(line);
-        }
-      });
-
-      // Event listener for drawing freeform lines
-      canvas.on('mouse:down', function(o) {
-        if (isFreeSelectMode) {
-          canvas.isDrawingMode = true;
-        }
-      });
-
-      // Event listener for completing freeform lines
-      canvas.on('mouse:up', function(o) {
-        if (isFreeSelectMode) {
-          canvas.isDrawingMode = false;
         }
       });
     }
