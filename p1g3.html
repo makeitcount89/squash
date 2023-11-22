@@ -496,15 +496,7 @@ function redrawCanvas() {
   });
   context2D.stroke();
 }
-
- function deleteSelectedLine() {
-  // Call the line deletion function with mouse coordinates
-  handleLineSelection2D( /* provide mouseX and mouseY values */ );
-   refresh();
- }
-
-     let savedCameraPosition;
-
+  let savedCameraPosition;
     function refresh() {
       if (babylonCanvas && camera) {
         // Save the current camera position
@@ -518,6 +510,14 @@ function redrawCanvas() {
         camera.setTarget(BABYLON.Vector3.Zero()); // Adjust the target if needed
       }
     }
+ function deleteSelectedLine() {
+  // Call the line deletion function with mouse coordinates
+  handleLineSelection2D( /* provide mouseX and mouseY values */ );
+   refresh();
+ }
+
+   
+
   </script>
 </body>
 
