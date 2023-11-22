@@ -368,15 +368,13 @@ scene.beginAnimation(camera, 0, animationDuration, false);
     
 
 
-  // Add timestamp property to the detectedLines array
-  //let detectedLines = [];
-let selectedLine = null;
-
 function selectLine(event) {
   const mouseX = event.clientX - canvas2D.getBoundingClientRect().left;
   const mouseY = event.clientY - canvas2D.getBoundingClientRect().top;
 
   // Check if the click is near any line
+  selectedLine = null; // Reset selectedLine
+
   detectedLines.forEach(line => {
     const distToLine = pointToLineDistance({ x: mouseX, y: mouseY }, line);
     if (distToLine < 5) {
@@ -386,6 +384,7 @@ function selectLine(event) {
     }
   });
 }
+    
 
 function deleteSelectedLine() {
   if (selectedLine) {
@@ -420,10 +419,7 @@ function highlightSelectedLine() {
     context2D.fill();
   }
 }
-
-// Add event listeners to trigger the new functions
-canvas2D.addEventListener('click', selectLine);
-document.getElementById('deleteButton').addEventListener('click', deleteSelectedLine);
+    
     
   
   function undo() {
