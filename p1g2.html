@@ -10,21 +10,22 @@
   <!-- Include Babylon.js -->
   <script src="https://cdn.babylonjs.com/babylon.js"></script>
   <!-- Include Fabric.js -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/3.6.6/fabric.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/3.6.6/fabric.min.js"></script>
+
   <style>
     .custom-file-input {
-      padding: 15px;
-      font-size: 50px;
+  padding: 15px; /* Adjust padding as needed */
+  font-size: 50px; /* Adjust font size as needed */
+  /* Add any additional styling you want */
     }
-
+    
     .wide-slider {
-      width: calc(100% + 40px);
-      margin: 10px -20px;
+  width: calc(100% + 40px); /* Adjust the width as needed */
+  margin: 10px -20px; /* Compensate for the increased width */
     }
-
+    
     #canvas2D,
-    #canvas3D,
-    #fabricCanvas {
+    #canvas3D {
       border: 1px solid #000;
       margin-top: 20px;
     }
@@ -53,15 +54,15 @@
 
 <body>
   <input type="file" id="imageInput" accept="image/*" onchange="loadAndDetect()" class="custom-file-input">
-
+  
   <label for="lineThreshold">Line Threshold:</label>
-  <input type="range" id="lineThreshold" class="wide-slider" min="1" max="1000" value="270" onchange="updateLineThreshold(this.value)">
-  <span id="lineThresholdValue">270</span>
+<input type="range" id="lineThreshold" class="wide-slider" min="1" max="1000" value="270" onchange="updateLineThreshold(this.value)">
+<span id="lineThresholdValue">270</span>
 
-  <label for="lineThickness">Line Thickness:</label>
-  <input type="range" id="lineThickness" class="wide-slider" min="1" max="100" value="50" onchange="updateLineThickness(this.value)">
-  <span id="lineThicknessValue">50</span>
-
+<label for="lineThickness">Line Thickness:</label>
+<input type="range" id="lineThickness" class="wide-slider" min="1" max="100" value="50" onchange="updateLineThickness(this.value)">
+<span id="lineThicknessValue">50</span>
+  
   <label for="wallColor">Wall Color:</label>
   <input type="color" id="wallColor" value="#000000">
 
@@ -73,19 +74,21 @@
 
   <label for="wallThickness">Wall Thickness:</label>
   <input type="number" id="wallThickness" value="0.2">
-
-  <button id="deleteButton" onclick="deleteSelectedLine()">Delete Selected Line</button>
-  <button onclick="undo()">Undo</button>
-
+  
+<button id="deleteButton" onclick="refresh3D()">Delete Selected Line</button>
+<button onclick="undo()">Undo</button>
+  
+    
   <button onclick="convertTo3D()">Convert to 3D</button>
   <canvas id="canvas2D" width="600" height="600"></canvas>
-  <canvas id="canvas3D" width="1200" height="1200"></canvas>
   <canvas id="fabricCanvas" width="600" height="600"></canvas>
+  <canvas id="canvas3D" width="1200" height="1200"></canvas>
 
   <p id="coordinates"></p>
 
   <script>
-    let img, context2D, babylonCanvas, detectedLines, scene, camera, startPoint, fabricCanvas, deletedLines = [];
+
+    let img, context2D, babylonCanvas, detectedLines, scene, camera, startPoint; // Move 'scene' to a higher scope
 
     function onOpenCvReady() {
       // OpenCV is ready
@@ -102,35 +105,39 @@
     }
 
     function loadAndDetect() {
-      const input = document.getElementById('imageInput');
-      img = new Image();
-      img.onload = function () {
-        context2D = document.getElementById('canvas2D').getContext('2d');
-        context2D.clearRect(0, 0, context2D.canvas.width, context2D.canvas.height);
-        context2D.drawImage(img, 0, 0, context2D.canvas.width, context2D.canvas.height);
-        const threshold = parseInt(document.getElementById('lineThreshold').value);
-        detectLines(threshold);
+  const input = document.getElementById('imageInput');
+  img = new Image();
+  img.onload = function () {
+    context2D = document.getElementById('canvas2D').getContext('2d');
+    context2D.clearRect(0, 0, context2D.canvas.width, context2D.canvas.height);
+    context2D.drawImage(img, 0, 0, context2D.canvas.width, context2D.canvas.height);
+    const threshold = parseInt(document.getElementById('lineThreshold').value);
+    detectLines(threshold);
+    
+// Clear Fabric.js canvas
+    fabricCanvas.clear();
 
-        // Draw the detected lines on the 2D canvas
-        context2D.beginPath();
-        context2D.strokeStyle = 'red'; // Change the color as needed
-        detectedLines.forEach(line => {
-          context2D.moveTo(line.x1, line.y1);
-          context2D.lineTo(line.x2, line.y2);
+    // Draw the detected lines on Fabric.js canvas
+    detectedLines.forEach(line => {
+        const points = line.points.map(point => {
+            return { x: point.x, y: point.y };
         });
-        context2D.stroke();
 
-        // Add click event listener for line selection on the 2D canvas
-        document.getElementById('canvas2D').addEventListener('click', function (event) {
-          const rect = context2D.canvas.getBoundingClientRect();
-          const mouseX = event.clientX - rect.left;
-          const mouseY = event.clientY - rect.top;
-          handleLineSelection2D(mouseX, mouseY);
-        });
-      };
-      img.src = URL.createObjectURL(input.files[0]);
+        const fabricLine = new fabric.Path(points, { stroke: 'red', strokeWidth: 2 });
+        fabricCanvas.add(fabricLine);
+    });
+    // Draw the detected lines on the 2D canvas
+    context2D.beginPath();
+    context2D.strokeStyle = 'red'; // Change the color as needed
+    detectedLines.forEach(line => {
+      context2D.moveTo(line.x1, line.y1);
+      context2D.lineTo(line.x2, line.y2);
+    });
+    context2D.stroke();
+  };
+  img.src = URL.createObjectURL(input.files[0]);
     }
-
+    
     function detectLines(threshold) {
       if (!img) {
         alert('Please load an image first.');
@@ -164,134 +171,133 @@
       linesP.delete();
     }
 
-    function handleLineSelection2D(mouseX, mouseY) {
-      const sensitivitydist = 7;
-
-      // Iterate through detected lines and check if the click is near any line
-      detectedLines.forEach((line, index) => {
-        const distance = pointToLineDistance({ x: mouseX, y: mouseY }, line, true);
-
-        if (distance < sensitivitydist) {
-          // Line is clicked, highlight it in blue
-          context2D.beginPath();
-          context2D.strokeStyle = 'blue';
-          context2D.moveTo(line.x1, line.y1);
-          context2D.lineTo(line.x2, line.y2);
-          context2D.stroke();
-
-          // Store the deleted line with a timestamp
-          const timestamp = new Date().toLocaleString();
-          deletedLines.push({ ...line, timestamp });
-
-          // Delete the selected line
-          detectedLines.splice(index, 1);
-
-        } else {
-          // Keep other lines red
-          context2D.beginPath();
-          context2D.strokeStyle = 'red';
-          context2D.moveTo(line.x1, line.y1);
-          context2D.lineTo(line.x2, line.y2);
-          context2D.stroke();
-        }
-      });
-    }
-
-    function undo() {
-      if (deletedLines.length > 0) {
-        const lastDeleted = deletedLines.pop();
-        detectedLines.push(lastDeleted);
-
-        // Redraw the canvas with the restored line
-        redrawCanvas();
-      }
-    }
-
-    function redrawCanvas() {
-      context2D.clearRect(0, 0, context2D.canvas.width, context2D.canvas.height);
-
-      // Draw the remaining lines
-      context2D.beginPath();
-      context2D.strokeStyle = 'red'; // Change the color as needed
-      detectedLines.forEach(line => {
-        context2D.moveTo(line.x1, line.y1);
-        context2D.lineTo(line.x2, line.y2);
-      });
-      context2D.stroke();
-    }
-
-    function deleteSelectedLine() {
-      // Call the line deletion function with mouse coordinates
-      handleLineSelection2D( /* provide mouseX and mouseY values */ );
-      redrawCanvas();
-    }
-
     function convertTo3D() {
-      resetCanvas();
-      if (!detectedLines) {
-        alert('Please detect lines first.');
-        return;
-      }
+  resetCanvas();
+  if (!detectedLines) {
+    alert('Please detect lines first.');
+    return;
+  }
 
-      // Determine the bounding box of the 3D object
-      let minX = Number.MAX_VALUE;
-      let minY = Number.MAX_VALUE;
-      let maxX = Number.MIN_VALUE;
-      let maxY = Number.MIN_VALUE;
+  // Determine the bounding box of the 3D object
+  let minX = Number.MAX_VALUE;
+  let minY = Number.MAX_VALUE;
+  let maxX = Number.MIN_VALUE;
+  let maxY = Number.MIN_VALUE;
 
-      detectedLines.forEach(line => {
-        minX = Math.min(minX, line.x1, line.x2);
-        minY = Math.min(minY, -line.y1, -line.y2);
-        maxX = Math.max(maxX, line.x1, line.x2);
-        maxY = Math.max(maxY, -line.y1, -line.y2);
-      });
+  detectedLines.forEach(line => {
+    minX = Math.min(minX, line.x1, line.x2);
+    minY = Math.min(minY, -line.y1, -line.y2);
+    maxX = Math.max(maxX, line.x1, line.x2);
+    maxY = Math.max(maxY, -line.y1, -line.y2);
+  });
 
-      // Calculate the center and dimensions of the bounding box
-      const centerX = (minX + maxX) / 2;
-      const centerY = (minY + maxY) / 2;
-      const width = maxX - minX;
-      const height = maxY - minY;
+  // Calculate the center and dimensions of the bounding box
+  const centerX = (minX + maxX) / 2;
+  const centerY = (minY + maxY) / 2;
+  const width = maxX - minX;
+  const height = maxY - minY;
 
-      // Create a ground plane
-      const ground = BABYLON.MeshBuilder.CreateGround('ground', { width: width + 50, height: height }, babylonCanvas._babylonScene);
-      const leftOffset = 350;  // Adjust this value to move the ground to the left
-      const closerOffset = -880; // Adjust this value to move the ground closer
+  // Create a ground plane
+  const ground = BABYLON.MeshBuilder.CreateGround('ground', { width: width + 50, height: height}, babylonCanvas._babylonScene);
+  const leftOffset = 350;  // Adjust this value to move the ground to the left
+  const closerOffset = -880; // Adjust this value to move the ground closer
 
-      ground.position = new BABYLON.Vector3(centerX - leftOffset, 0, -centerY + closerOffset);
+  ground.position = new BABYLON.Vector3(centerX - leftOffset, 0, -centerY + closerOffset);
 
-      // Apply the original image as a texture to the ground
-      const groundMaterial = new BABYLON.StandardMaterial('groundMaterial', babylonCanvas._babylonScene);
-      groundMaterial.diffuseTexture = new BABYLON.Texture(img.src, babylonCanvas._babylonScene);
-      ground.material = groundMaterial;
+  
+  // Apply the original image as a texture to the ground
+  const groundMaterial = new BABYLON.StandardMaterial('groundMaterial', babylonCanvas._babylonScene);
+  groundMaterial.diffuseTexture = new BABYLON.Texture(img.src, babylonCanvas._babylonScene);
+  ground.material = groundMaterial;
 
-      detectedLines.forEach(line => {
-        const lineThickness = parseFloat(document.getElementById('lineThickness').value);
-        const wallColor = document.getElementById('wallColor').value;
-        const wallTexture = document.getElementById('wallTexture').value;
-        const wallHeight = parseFloat(document.getElementById('wallHeight').value);
-        const wallThickness = parseFloat(document.getElementById('wallThickness').value);
+  detectedLines.forEach(line => {
+    const lineThickness = parseFloat(document.getElementById('lineThickness').value);
+    const wallColor = document.getElementById('wallColor').value;
+    const wallTexture = document.getElementById('wallTexture').value;
+    const wallHeight = parseFloat(document.getElementById('wallHeight').value);
+    const wallThickness = parseFloat(document.getElementById('wallThickness').value);
 
-        // Center and normalize the object
-        const points = [
-          new BABYLON.Vector3(line.x1 - centerX, 0, -line.y1 + centerY),
-          new BABYLON.Vector3(line.x1 - centerX, wallHeight, -line.y1 + centerY),
-          new BABYLON.Vector3(line.x2 - centerX, wallHeight, -line.y2 + centerY),
-          new BABYLON.Vector3(line.x2 - centerX, 0, -line.y2 + centerY),
-          new BABYLON.Vector3(line.x1 - centerX, 0, -line.y1 + centerY)
-        ];
+    // Center and normalize the object
+    const points = [
+      new BABYLON.Vector3(line.x1 - centerX, 0, -line.y1 + centerY),
+      new BABYLON.Vector3(line.x1 - centerX, wallHeight, -line.y1 + centerY),
+      new BABYLON.Vector3(line.x2 - centerX, wallHeight, -line.y2 + centerY),
+      new BABYLON.Vector3(line.x2 - centerX, 0, -line.y2 + centerY),
+      new BABYLON.Vector3(line.x1 - centerX, 0, -line.y1 + centerY)
+    ];
 
-        const wallMesh = BABYLON.MeshBuilder.CreateDashedLines(null, { points, dashSize: lineThickness, updatable: true });
-        wallMesh.color = new BABYLON.Color3.FromHexString(wallColor);
+    const wallMesh = BABYLON.MeshBuilder.CreateDashedLines(null, { points, dashSize: lineThickness, updatable: true });
+    wallMesh.color = new BABYLON.Color3.FromHexString(wallColor);
 
-        if (wallTexture) {
-          const wallMaterial = new BABYLON.StandardMaterial('wallMaterial', babylonCanvas._babylonScene);
-          wallMaterial.diffuseTexture = new BABYLON.Texture(wallTexture, babylonCanvas._babylonScene);
-          wallMesh.material = wallMaterial;
-        }
-
-        wallMesh.scaling.y = wallThickness;
-      });
+    if (wallTexture) {
+      const wallMaterial = new BABYLON.StandardMaterial('wallMaterial', babylonCanvas._babylonScene);
+      wallMaterial.diffuseTexture = new BABYLON.Texture(wallTexture, babylonCanvas._babylonScene);
+      wallMesh.material = wallMaterial;
     }
+
+    wallMesh.scaling.y = wallThickness;
+  });
+}
+
+
+    // Load Babylon canvas on page load
+  window.onload = function () {
+  babylonCanvas = document.getElementById('canvas3D');
+  const engine = new BABYLON.Engine(babylonCanvas, true);
+  const scene = new BABYLON.Scene(engine);
+
+  // Set up camera and light
+  const camera = new BABYLON.UniversalCamera('camera', new BABYLON.Vector3(0, 0, -200), scene);
+camera.setTarget(BABYLON.Vector3.Zero());
+camera.attachControl(babylonCanvas, true);
+
+// Animation parameters
+const animationDuration = 700; // in milliseconds
+const zoomedOutPosition = new BABYLON.Vector3(0, 140, -700);
+    camera.rotation.x = Math.PI / 6; 
+
+// Create a position animation
+const animation = new BABYLON.Animation(
+  'cameraZoom',
+  'position',
+  60,
+  BABYLON.Animation.ANIMATIONTYPE_VECTOR3,
+  BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT
+);
+
+// Set keyframes for the animation
+const keys = [
+  { frame: 0, value: camera.position.clone() },
+  { frame: animationDuration, value: zoomedOutPosition }
+];
+
+// Add keys to the animation
+animation.setKeys(keys);
+
+// Attach the animation to the camera
+camera.animations.push(animation);
+
+// Run the animation
+scene.beginAnimation(camera, 0, animationDuration, false);
+    
+
+  // Rotate the camera to face the object
+  //camera.rotation.y = Math.PI; // Rotate by 180 degrees + 20 degrees
+  //camera.rotation.x = Math.PI / 5; // Adjust the angle to tilt the camera down
+    
+  
+
+  const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(1, 1, 0));
+
+  // Set background color to a lighter gray
+  scene.clearColor = new BABYLON.Color4(0.9, 0.9, 0.9, 1);
+
+  // Run the Babylon.js engine
+  engine.runRenderLoop(function () {
+    scene.render();
+  });
+};
+
 
     function resetCanvas() {
   if (babylonCanvas) {
@@ -443,6 +449,8 @@ function loadAndDetect() {
   };
   img.src = URL.createObjectURL(input.files[0]);
 }
+    
+ let deletedLines = []; // Array to store deleted lines with timestamps
 
 function handleLineSelection2D(mouseX, mouseY) {
   const sensitivitydist = 7;
@@ -503,17 +511,177 @@ function redrawCanvas() {
     context2D.lineTo(line.x2, line.y2);
   });
   context2D.stroke();
-}
 
+  
+    function reboot() {
+  if (babylonCanvas) {
+    // Hide the Babylon canvas
+    babylonCanvas.style.display = 'none';
+
+    // Create a new Babylon canvas element
+    const newCanvas = document.createElement('canvas');
+    newCanvas.width = babylonCanvas.width;
+    newCanvas.height = babylonCanvas.height;
+    babylonCanvas.parentNode.replaceChild(newCanvas, babylonCanvas);
+
+    babylonCanvas = newCanvas;
+
+    // Create a new Babylon engine and scene
+    const engine = new BABYLON.Engine(babylonCanvas, true);
+    const newScene = new BABYLON.Scene(engine);
+
+    // Set up camera and light for the new scene (you may need to adjust these parameters)
+    const camera = new BABYLON.UniversalCamera('camera', new BABYLON.Vector3(0, 0, -200), newScene);
+    camera.setTarget(BABYLON.Vector3.Zero());
+    camera.attachControl(babylonCanvas, true);
+    const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(1, 1, 0));
+
+    // Set background color to a lighter gray
+    newScene.clearColor = new BABYLON.Color4(0.9, 0.9, 0.9, 1);
+
+    // Animation parameters
+    const animationDuration = 200; // in milliseconds
+    const zoomedOutPosition = new BABYLON.Vector3(0, 120, -1050);
+    camera.rotation.x = Math.PI / 8; 
+
+    // Create a position animation
+    const animation = new BABYLON.Animation(
+      'cameraZoom',
+      'position',
+      60,
+      BABYLON.Animation.ANIMATIONTYPE_VECTOR3,
+      BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT
+    );
+
+    // Set keyframes for the animation
+    const keys = [
+      { frame: 0, value: camera.position.clone() },
+      { frame: animationDuration, value: zoomedOutPosition }
+    ];
+
+    // Add keys to the animation
+    animation.setKeys(keys);
+
+    // Attach the animation to the camera
+    camera.animations.push(animation);
+
+    // Run the animation
+    newScene.beginAnimation(camera, 0, animationDuration, false);
+
+    // Run the Babylon.js engine for the new scene
+    engine.runRenderLoop(function () {
+      newScene.render();
+    });
+
+    // Update the babylonCanvas and babylonScene variables
+    babylonCanvas._babylonEngine = engine;
+    babylonCanvas._babylonScene = newScene;
+
+    // Show the new Babylon canvas
+    babylonCanvas.style.display = 'block';
+  }
+    }
+}
+  //let savedCameraPosition;
+    // Set the camera back to its saved position
+        //camera.position.copyFrom(savedCameraPosition);
+        //camera.setTarget(BABYLON.Vector3.Zero()); 
+  function refresh3D() {
+  reboot();
+  if (!detectedLines) {
+    alert('Please detect lines first.');
+    return;
+  }
+
+  // Determine the bounding box of the 3D object
+  let minX = Number.MAX_VALUE;
+  let minY = Number.MAX_VALUE;
+  let maxX = Number.MIN_VALUE;
+  let maxY = Number.MIN_VALUE;
+
+  detectedLines.forEach(line => {
+    minX = Math.min(minX, line.x1, line.x2);
+    minY = Math.min(minY, -line.y1, -line.y2);
+    maxX = Math.max(maxX, line.x1, line.x2);
+    maxY = Math.max(maxY, -line.y1, -line.y2);
+  });
+
+  // Calculate the center and dimensions of the bounding box
+  const centerX = (minX + maxX) / 2;
+  const centerY = (minY + maxY) / 2;
+  const width = maxX - minX;
+  const height = maxY - minY;
+
+  // Create a ground plane
+  const ground = BABYLON.MeshBuilder.CreateGround('ground', { width: width + 50, height: height}, babylonCanvas._babylonScene);
+  const leftOffset = 350;  // Adjust this value to move the ground to the left
+  const closerOffset = -880; // Adjust this value to move the ground closer
+
+  ground.position = new BABYLON.Vector3(centerX - leftOffset, 0, -centerY + closerOffset);
+
+  
+  // Apply the original image as a texture to the ground
+  const groundMaterial = new BABYLON.StandardMaterial('groundMaterial', babylonCanvas._babylonScene);
+  groundMaterial.diffuseTexture = new BABYLON.Texture(img.src, babylonCanvas._babylonScene);
+  ground.material = groundMaterial;
+
+  detectedLines.forEach(line => {
+    const lineThickness = parseFloat(document.getElementById('lineThickness').value);
+    const wallColor = document.getElementById('wallColor').value;
+    const wallTexture = document.getElementById('wallTexture').value;
+    const wallHeight = parseFloat(document.getElementById('wallHeight').value);
+    const wallThickness = parseFloat(document.getElementById('wallThickness').value);
+
+    // Center and normalize the object
+    const points = [
+      new BABYLON.Vector3(line.x1 - centerX, 0, -line.y1 + centerY),
+      new BABYLON.Vector3(line.x1 - centerX, wallHeight, -line.y1 + centerY),
+      new BABYLON.Vector3(line.x2 - centerX, wallHeight, -line.y2 + centerY),
+      new BABYLON.Vector3(line.x2 - centerX, 0, -line.y2 + centerY),
+      new BABYLON.Vector3(line.x1 - centerX, 0, -line.y1 + centerY)
+    ];
+
+    const wallMesh = BABYLON.MeshBuilder.CreateDashedLines(null, { points, dashSize: lineThickness, updatable: true });
+    wallMesh.color = new BABYLON.Color3.FromHexString(wallColor);
+
+    if (wallTexture) {
+      const wallMaterial = new BABYLON.StandardMaterial('wallMaterial', babylonCanvas._babylonScene);
+      wallMaterial.diffuseTexture = new BABYLON.Texture(wallTexture, babylonCanvas._babylonScene);
+      wallMesh.material = wallMaterial;
+    }
+
+    wallMesh.scaling.y = wallThickness;
+  });
+}
+    
  function deleteSelectedLine() {
   // Call the line deletion function with mouse coordinates
-  handleLineSelection2D( /* provide mouseX and mouseY values */ );
+  handleLineSelection2D( /* provide mouseX and mouseY values */);
    redrawCanvas();
+   refresh3D();
  }
-    
+
+   // Add this to your script section
+
+let fabricCanvas = new fabric.Canvas('fabricCanvas', { isDrawingMode: true });
+
+// Event listener for when drawing is completed
+fabricCanvas.on('path:created', function(options) {
+    // Extract points from the path and add to your detectedLines array or process as needed
+    const points = options.path.path.map(point => {
+        return { x: point[1], y: point[2] };
+    });
+
+    detectedLines.push({ points });
+});
+
+// Disable Fabric.js selection
+fabricCanvas.selection = false;
+
+
+  
 
   </script>
 </body>
 
 </html>
-    
