@@ -508,17 +508,28 @@ function redrawCanvas() {
    convertTo3D();
  }
     
-function toggleFullscreen() {
+function toggleFullScreen() {
   const babylonCanvas = document.getElementById('canvas3D');
 
-  if (document.fullscreenElement) {
-    document.exitFullscreen();
-  } else {
+  if (!document.fullscreenElement) {
     babylonCanvas.requestFullscreen().catch(err => {
-      console.error('Failed to enter fullscreen mode:', err);
+      alert(`Error attempting to enable full-screen mode: ${err.message}`);
     });
+  } else {
+    document.exitFullscreen();
+  }
+
+  // Resize Babylon.js canvas on entering/exiting fullscreen
+  babylonCanvas.width = window.innerWidth;
+  babylonCanvas.height = window.innerHeight;
+  
+  // Inform Babylon.js about the new size
+  const engine = babylonCanvas._babylonEngine;
+  if (engine) {
+    engine.resize();
   }
 }
+    
     function saveToLocalStorage() {
   // Example: Save detected lines and settings
   localStorage.setItem('detectedLines', JSON.stringify(detectedLines));
