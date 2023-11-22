@@ -352,7 +352,55 @@ scene.beginAnimation(camera, 0, animationDuration, false);
   }
     }
     
+// Add this function to handle 2D canvas click events
+function handle2DCanvasClick(event) {
+  const rect = canvas2D.getBoundingClientRect();
+  const x = event.clientX - rect.left;
+  const y = event.clientY - rect.top;
 
+  // Iterate through detected lines and check if the click is within a certain range of a line
+  const clickRange = 5; // Adjust this value based on your preference for click sensitivity
+  detectedLines.forEach((line, index) => {
+    if (
+      x > Math.min(line.x1, line.x2) - clickRange &&
+      x < Math.max(line.x1, line.x2) + clickRange &&
+      y > Math.min(line.y1, line.y2) - clickRange &&
+      y < Math.max(line.y1, line.y2) + clickRange
+    ) {
+      // Line is selected, highlight the line
+      highlightLine(index);
+    }
+  });
+}
+
+// Add this function to highlight the selected line
+function highlightLine(index) {
+  context2D.clearRect(0, 0, context2D.canvas.width, context2D.canvas.height);
+
+  // Draw the image on the 2D canvas
+  context2D.drawImage(img, 0, 0, context2D.canvas.width, context2D.canvas.height);
+
+  // Draw all lines in red
+  context2D.beginPath();
+  context2D.strokeStyle = 'red';
+  detectedLines.forEach((line, i) => {
+    context2D.moveTo(line.x1, line.y1);
+    context2D.lineTo(line.x2, line.y2);
+
+    // Highlight the selected line in a different color
+    if (i === index) {
+      context2D.strokeStyle = 'blue'; // Adjust the color for highlighting
+      context2D.lineWidth = 3; // Adjust the line width for highlighting
+    }
+  });
+
+  // Stroke all lines
+  context2D.stroke();
+}
+
+// Add this line to set up the click event listener for the 2D canvas
+canvas2D.addEventListener('click', handle2DCanvasClick);
+    
 
     
 
