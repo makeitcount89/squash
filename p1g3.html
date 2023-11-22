@@ -526,11 +526,13 @@ function toggleFullscreen() {
       detectedLines: detectedLines,
       lineThreshold: document.getElementById('lineThreshold').value,
       // Add other data to save
+
+      // Save the image as a data URL
+      imageDataURL: img.src,
     };
     localStorage.setItem(fileName, JSON.stringify(dataToSave));
   }
     }
-    
     function loadFromLocalStorage() {
   const savedFiles = Object.keys(localStorage);
   const selectedFile = window.prompt("Choose a file to load:\n" + savedFiles.join("\n"));
@@ -538,11 +540,21 @@ function toggleFullscreen() {
     const savedData = JSON.parse(localStorage.getItem(selectedFile));
     detectedLines = savedData.detectedLines;
     document.getElementById('lineThreshold').value = savedData.lineThreshold;
+
     // Update the UI or trigger necessary functions
     updateLineThreshold(savedData.lineThreshold);
     redrawCanvas(); // Refresh the canvas or other components
+
+    // Load the saved image
+    const savedImage = new Image();
+    savedImage.onload = function () {
+      context2D.clearRect(0, 0, context2D.canvas.width, context2D.canvas.height);
+      context2D.drawImage(savedImage, 0, 0, context2D.canvas.width, context2D.canvas.height);
+    };
+    savedImage.src = savedData.imageDataURL;
   }
 }
+
 
   </script>
 </body>
