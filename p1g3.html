@@ -536,24 +536,36 @@ function toggleFullscreen() {
     function loadFromLocalStorage() {
   const savedFiles = Object.keys(localStorage);
   const selectedFile = window.prompt("Choose a file to load:\n" + savedFiles.join("\n"));
+  
   if (selectedFile && savedFiles.includes(selectedFile)) {
     const savedData = JSON.parse(localStorage.getItem(selectedFile));
     detectedLines = savedData.detectedLines;
-    document.getElementById('lineThreshold').value = savedData.lineThreshold;
-
-    // Update the UI or trigger necessary functions
-    updateLineThreshold(savedData.lineThreshold);
-    redrawCanvas(); // Refresh the canvas or other components
-
+    
     // Load the saved image
     const savedImage = new Image();
     savedImage.onload = function () {
+      img = savedImage;
       context2D.clearRect(0, 0, context2D.canvas.width, context2D.canvas.height);
       context2D.drawImage(savedImage, 0, 0, context2D.canvas.width, context2D.canvas.height);
+
+      // Update other elements based on loaded data
+      document.getElementById('lineThreshold').value = savedData.lineThreshold;
+      updateLineThreshold(savedData.lineThreshold);
+
+      // Draw the detected lines on the 2D canvas
+      context2D.beginPath();
+      context2D.strokeStyle = 'red'; // Change the color as needed
+      detectedLines.forEach(line => {
+        context2D.moveTo(line.x1, line.y1);
+        context2D.lineTo(line.x2, line.y2);
+      });
+      context2D.stroke();
     };
+
     savedImage.src = savedData.imageDataURL;
   }
-}
+    }
+    
 
 
   </script>
