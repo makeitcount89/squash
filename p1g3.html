@@ -71,8 +71,9 @@
 
   <label for="wallThickness">Wall Thickness:</label>
   <input type="number" id="wallThickness" value="0.2">
-<button onclick="drawLine()">Draw Line</button>
-  <button onclick="deleteSelectedLines()">Eraser</button>
+  
+<button id="deleteButton">Delete Selected Line</button>
+  
   <button onclick="undo()">Undo</button>
     
   <button onclick="convertTo3D()">Convert to 3D</button>
@@ -83,9 +84,11 @@
 
   <script>
 
-   let img, context2D, babylonCanvas, detectedLines, scene, camera, startPoint, deletedLines;
-    let isDrawing = false;
-    let isErasing = false;
+    let img, context2D, babylonCanvas, detectedLines, scene, camera, startPoint; // Move 'scene' to a higher scope
+
+    function onOpenCvReady() {
+      // OpenCV is ready
+    }
 
     function updateLineThreshold(value) {
       document.getElementById('lineThresholdValue').textContent = value;
@@ -126,20 +129,8 @@
       }
 
       const canvas2D = document.getElementById('canvas2D');
-      canvas2D.addEventListener('touchstart', startDrawing);
-    canvas2D.addEventListener('touchmove', drawLine);
-    canvas2D.addEventListener('touchend', stopDrawing);
-       // Use touchstart and touchend events for erasing lines on mobile
-    canvas2D.addEventListener('touchstart', startErasing);
-    canvas2D.addEventListener('touchend', stopErasing);
-
-       function startDrawing(event) {
-      isDrawing = true;
-      startPoint = getTouchPosition(event);
-    }
       const src = cv.imread(canvas2D);
       const dst = new cv.Mat();
-      
 
       cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY);
       cv.Canny(src, dst, threshold, threshold * 2, 3, false); // Adjust the threshold here
@@ -165,61 +156,73 @@
     }
 
     function convertTo3D() {
-      resetCanvas();
-      if (!detectedLines) {
-        alert('Please detect lines first.');
-        return;
-      }
+  resetCanvas();
+  if (!detectedLines) {
+    alert('Please detect lines first.');
+    return;
+  }
 
-      // Determine the bounding box of the 3D object
-      let minX = Number.MAX_VALUE;
-      let minY = Number.MAX_VALUE;
-      let maxX = Number.MIN_VALUE;
-      let maxY = Number.MIN_VALUE;
+  // Determine the bounding box of the 3D object
+  let minX = Number.MAX_VALUE;
+  let minY = Number.MAX_VALUE;
+  let maxX = Number.MIN_VALUE;
+  let maxY = Number.MIN_VALUE;
 
-      detectedLines.forEach(line => {
-        minX = Math.min(minX, line.x1, line.x2);
-        minY = Math.min(minY, -line.y1, -line.y2);
-        maxX = Math.max(maxX, line.x1, line.x2);
-        maxY = Math.max(maxY, -line.y1, -line.y2);
-      });
+  detectedLines.forEach(line => {
+    minX = Math.min(minX, line.x1, line.x2);
+    minY = Math.min(minY, -line.y1, -line.y2);
+    maxX = Math.max(maxX, line.x1, line.x2);
+    maxY = Math.max(maxY, -line.y1, -line.y2);
+  });
 
-      // Calculate the center and dimensions of the bounding box
-      const centerX = (minX + maxX) / 2;
-      const centerY = (minY + maxY) / 2;
-      const width = maxX - minX;
-      const height = maxY - minY;
+  // Calculate the center and dimensions of the bounding box
+  const centerX = (minX + maxX) / 2;
+  const centerY = (minY + maxY) / 2;
+  const width = maxX - minX;
+  const height = maxY - minY;
 
-      detectedLines.forEach(line => {
-        const lineThickness = parseFloat(document.getElementById('lineThickness').value);
-        const wallColor = document.getElementById('wallColor').value;
-        const wallTexture = document.getElementById('wallTexture').value;
-        const wallHeight = parseFloat(document.getElementById('wallHeight').value);
-        const wallThickness = parseFloat(document.getElementById('wallThickness').value);
+  // Create a ground plane
+  const ground = BABYLON.MeshBuilder.CreateGround('ground', { width: width + 50, height: height}, babylonCanvas._babylonScene);
+  const leftOffset = 350;  // Adjust this value to move the ground to the left
+  const closerOffset = -880; // Adjust this value to move the ground closer
 
-        // Center and normalize the object
-        const points = [
-          new BABYLON.Vector3(line.x1 - centerX, 0, -line.y1 + centerY),
-          new BABYLON.Vector3(line.x1 - centerX, wallHeight, -line.y1 + centerY),
-          new BABYLON.Vector3(line.x2 - centerX, wallHeight, -line.y2 + centerY),
-          new BABYLON.Vector3(line.x2 - centerX, 0, -line.y2 + centerY),
-          new BABYLON.Vector3(line.x1 - centerX, 0, -line.y1 + centerY)
-        ];
+  ground.position = new BABYLON.Vector3(centerX - leftOffset, 0, -centerY + closerOffset);
 
-        const wallMesh = BABYLON.MeshBuilder.CreateDashedLines(null, { points, dashSize: lineThickness, updatable: true });
-        wallMesh.color = new BABYLON.Color3.FromHexString(wallColor);
+  
+  // Apply the original image as a texture to the ground
+  const groundMaterial = new BABYLON.StandardMaterial('groundMaterial', babylonCanvas._babylonScene);
+  groundMaterial.diffuseTexture = new BABYLON.Texture(img.src, babylonCanvas._babylonScene);
+  ground.material = groundMaterial;
 
-        if (wallTexture) {
-          const wallMaterial = new BABYLON.StandardMaterial("wallMaterial", babylonCanvas._babylonScene);
-          wallMaterial.diffuseTexture = new BABYLON.Texture(wallTexture, babylonCanvas._babylonScene);
-          wallMesh.material = wallMaterial;
-        }
+  detectedLines.forEach(line => {
+    const lineThickness = parseFloat(document.getElementById('lineThickness').value);
+    const wallColor = document.getElementById('wallColor').value;
+    const wallTexture = document.getElementById('wallTexture').value;
+    const wallHeight = parseFloat(document.getElementById('wallHeight').value);
+    const wallThickness = parseFloat(document.getElementById('wallThickness').value);
 
-        wallMesh.scaling.y = wallThickness;
-      });
-        
+    // Center and normalize the object
+    const points = [
+      new BABYLON.Vector3(line.x1 - centerX, 0, -line.y1 + centerY),
+      new BABYLON.Vector3(line.x1 - centerX, wallHeight, -line.y1 + centerY),
+      new BABYLON.Vector3(line.x2 - centerX, wallHeight, -line.y2 + centerY),
+      new BABYLON.Vector3(line.x2 - centerX, 0, -line.y2 + centerY),
+      new BABYLON.Vector3(line.x1 - centerX, 0, -line.y1 + centerY)
+    ];
+
+    const wallMesh = BABYLON.MeshBuilder.CreateDashedLines(null, { points, dashSize: lineThickness, updatable: true });
+    wallMesh.color = new BABYLON.Color3.FromHexString(wallColor);
+
+    if (wallTexture) {
+      const wallMaterial = new BABYLON.StandardMaterial('wallMaterial', babylonCanvas._babylonScene);
+      wallMaterial.diffuseTexture = new BABYLON.Texture(wallTexture, babylonCanvas._babylonScene);
+      wallMesh.material = wallMaterial;
     }
-    
+
+    wallMesh.scaling.y = wallThickness;
+  });
+}
+
 
     // Load Babylon canvas on page load
   window.onload = function () {
@@ -234,8 +237,8 @@ camera.attachControl(babylonCanvas, true);
 
 // Animation parameters
 const animationDuration = 700; // in milliseconds
-const zoomedOutPosition = new BABYLON.Vector3(0, 100, -1800);
-    camera.rotation.x = Math.PI / 12; 
+const zoomedOutPosition = new BABYLON.Vector3(0, 140, -700);
+    camera.rotation.x = Math.PI / 6; 
 
 // Create a position animation
 const animation = new BABYLON.Animation(
@@ -307,8 +310,9 @@ scene.beginAnimation(camera, 0, animationDuration, false);
     newScene.clearColor = new BABYLON.Color4(0.9, 0.9, 0.9, 1);
 
     // Animation parameters
-    const animationDuration = 10; // in milliseconds
-    const zoomedOutPosition = new BABYLON.Vector3(0, 100, -1800);
+    const animationDuration = 200; // in milliseconds
+    const zoomedOutPosition = new BABYLON.Vector3(0, 120, -1050);
+    camera.rotation.x = Math.PI / 8; 
 
     // Create a position animation
     const animation = new BABYLON.Animation(
@@ -348,175 +352,111 @@ scene.beginAnimation(camera, 0, animationDuration, false);
   }
     }
     
-/// Add timestamp property to the detectedLines array
-///let detectedLines = [];
+// Add timestamp property to the detectedLines array
+//let detectedLines = [];
+
+    function pointToLineDistance(point, line) {
+  const { x: x0, y: y0 } = point;
+  const { x: x1, y: y1, x: x2, y: y2 } = line;
+
+  const A = y2 - y1;
+  const B = x1 - x2;
+  const C = (x2 - x1) * y1 + (y1 - y2) * x1;
+
+  return Math.abs(A * x0 + B * y0 + C) / Math.sqrt(A * A + B * B);
+    }
+    
 
 
   // Add timestamp property to the detectedLines array
   //let detectedLines = [];
+let selectedLine = null;
 
-  // Add the drawLine function
+function selectLine(event) {
+  const mouseX = event.clientX - canvas2D.getBoundingClientRect().left;
+  const mouseY = event.clientY - canvas2D.getBoundingClientRect().top;
 
+  // Check if the click is near any line
+  detectedLines.forEach(line => {
+    const distToLine = pointToLineDistance({ x: mouseX, y: mouseY }, line);
+    if (distToLine < 5) {
+      selectedLine = line;
+      highlightSelectedLine();
+      return;
+    }
+  });
+}
 
-     
+function deleteSelectedLine() {
+  if (selectedLine) {
+    const index = detectedLines.indexOf(selectedLine);
+    detectedLines.splice(index, 1);
+    resetCanvas(); // Clear and redraw the canvas
+    highlightSelectedLine(); // Update the highlight
+    selectedLine = null;
+  }
+}
 
- function drawLine(event) {
-      if (isDrawing) {
-        const endPoint = getTouchPosition(event);
-  const canvas2D = document.getElementById('canvas2D');
+function highlightSelectedLine() {
   const context2D = canvas2D.getContext('2d');
+  context2D.clearRect(0, 0, canvas2D.width, canvas2D.height);
+  context2D.drawImage(img, 0, 0, canvas2D.width, canvas2D.height);
 
-  if (isDrawing) {
-    const mouseX = event.clientX - canvas2D.getBoundingClientRect().left;
-    const mouseY = event.clientY - canvas2D.getBoundingClientRect().top;
+  // Draw all lines
+  context2D.beginPath();
+  context2D.strokeStyle = 'red';
+  detectedLines.forEach(line => {
+    context2D.moveTo(line.x1, line.y1);
+    context2D.lineTo(line.x2, line.y2);
+  });
+  context2D.stroke();
 
-    if (!startPoint) {
-      startPoint = { x: mouseX, y: mouseY };
-    } else {
-      const endPoint = { x: mouseX, y: mouseY };
+  // Highlight the selected line with circles at each end
+  if (selectedLine) {
+    context2D.beginPath();
+    context2D.arc(selectedLine.x1, selectedLine.y1, 5, 0, 2 * Math.PI);
+    context2D.arc(selectedLine.x2, selectedLine.y2, 5, 0, 2 * Math.PI);
+    context2D.fillStyle = 'blue';
+    context2D.fill();
+  }
+}
+
+// Add event listeners to trigger the new functions
+canvas2D.addEventListener('click', selectLine);
+document.getElementById('deleteButton').addEventListener('click', deleteSelectedLine);
+    
+  
+  function undo() {
+    const canvas2D = document.getElementById('canvas2D');
+    const context2D = canvas2D.getContext('2d');
+
+    if (detectedLines.length > 0) {
+      // Remove the last line from the array
+      const removedLine = detectedLines.pop();
+
+      // Clear the canvas
+      context2D.clearRect(0, 0, canvas2D.width, canvas2D.height);
+      context2D.drawImage(img, 0, 0, canvas2D.width, canvas2D.height);
+
+      // Redraw remaining lines
       context2D.beginPath();
-      context2D.strokeStyle = 'red';
-      context2D.moveTo(startPoint.x, startPoint.y);
-      context2D.lineTo(endPoint.x, endPoint.y);
+      context2D.strokeStyle = 'red'; // Change the color as needed
+      detectedLines.forEach(line => {
+        context2D.moveTo(line.x1, line.y1);
+        context2D.lineTo(line.x2, line.y2);
+      });
       context2D.stroke();
 
-      const newLine = {
-        x1: startPoint.x,
-        y1: startPoint.y,
-        x2: endPoint.x,
-        y2: endPoint.y,
-        timestamp: new Date()
-      };
-      detectedLines.push(newLine);
-
-      startPoint = null;
-    }
-  }
-}
- }
-   function stopDrawing() {
-      isDrawing = false;
-    }
-
-function startErasing(event) {
-      isErasing = true;
-  const canvas2D = document.getElementById('canvas2D');
-  const context2D = canvas2D.getContext('2d');
-
-  if (isErasing) {
-    const mouseX = event.clientX - canvas2D.getBoundingClientRect().left;
-    const mouseY = event.clientY - canvas2D.getBoundingClientRect().top;
-
-    detectedLines.forEach((line, index) => {
-      const distToLine = pointToLineDistance({ x: mouseX, y: mouseY }, line);
-      if (distToLine < 5) {
-        const deletedLine = { ...line, timestamp: new Date() };
-        deletedLines.push(deletedLine);
-        detectedLines.splice(index, 1);
-
-        context2D.clearRect(0, 0, canvas2D.width, canvas2D.height);
-        context2D.drawImage(img, 0, 0, canvas2D.width, canvas2D.height);
-
-        context2D.beginPath();
-        context2D.strokeStyle = 'red';
-        detectedLines.forEach(line => {
-          context2D.moveTo(line.x1, line.y1);
-          context2D.lineTo(line.x2, line.y2);
-        });
-        context2D.stroke();
+      // Check if the removed line has a timestamp
+      if (removedLine.timestamp) {
+        // Newly added line, log or handle accordingly
+        console.log('Undid the last action (Added Line):', removedLine);
+      } else {
+        // Deleted line, log or handle accordingly
+        console.log('Undid the last action (Deleted Line):', removedLine);
       }
-    });
-  }
-}
-   
-    function stopErasing() {
-      isErasing = false;
     }
-   function getTouchPosition(event) {
-      const touch = event.touches[0];
-      return {
-        x: touch.clientX - canvas2D.getBoundingClientRect().left,
-        y: touch.clientY - canvas2D.getBoundingClientRect().top
-      };
-    }
-
-// Add event listeners outside the functions
-const canvas2D = document.getElementById('canvas2D');
-canvas2D.addEventListener('click', drawLine);
-canvas2D.addEventListener('click', deleteSelectedLines);
-
-
-
-
-// Calculate the distance from a point to a line
-function pointToLineDistance(point, line) {
-  const { x, y } = point;
-  const { x1, y1, x2, y2 } = line;
-
-  const A = x - x1;
-  const B = y - y1;
-  const C = x2 - x1;
-  const D = y2 - y1;
-
-  const dot = A * C + B * D;
-  const lenSq = C * C + D * D;
-  let param = -1;
-  if (lenSq !== 0) {
-    param = dot / lenSq;
   }
-
-  let xx, yy;
-  if (param < 0) {
-    xx = x1;
-    yy = y1;
-  } else if (param > 1) {
-    xx = x2;
-    yy = y2;
-  } else {
-    xx = x1 + param * C;
-    yy = y1 + param * D;
-  }
-
-  const dx = x - xx;
-  const dy = y - yy;
-  return Math.sqrt(dx * dx + dy * dy);
-}
-
-
-function undo() {
-  const canvas2D = document.getElementById('canvas2D');
-  const context2D = canvas2D.getContext('2d');
-
-  if (deletedLines.length > 0) {
-    // Get the last deleted line from the array
-    const lastDeletedLine = deletedLines.pop();
-
-    // Clear the canvas
-    context2D.clearRect(0, 0, canvas2D.width, canvas2D.height);
-    context2D.drawImage(img, 0, 0, canvas2D.width, canvas2D.height);
-
-    // Check if the last deleted line has a timestamp
-    if (lastDeletedLine.timestamp) {
-      // Reinstate the line from deletedLines
-      detectedLines.push(lastDeletedLine);
-    } else {
-      // Remove the last line from the detectedLines array
-      detectedLines.pop();
-    }
-
-    // Redraw remaining lines
-    context2D.beginPath();
-    context2D.strokeStyle = 'red'; // Change the color as needed
-    detectedLines.forEach(line => {
-      context2D.moveTo(line.x1, line.y1);
-      context2D.lineTo(line.x2, line.y2);
-    });
-    context2D.stroke();
-
-    // Log or handle the undo action accordingly
-    console.log('Undid the last action:', lastDeletedLine);
-  }
-}
 
 
     
