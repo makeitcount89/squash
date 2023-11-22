@@ -617,17 +617,20 @@ function loadFromLocalStorage() {
         context2D.lineTo(line.x2, line.y2);
       });
       context2D.stroke();
+
+      // Automatically select the image file after loading
+      const input = document.getElementById('imageInput');
+      const file = new File([savedImage], savedData.imageLocation, { type: savedImage.type });
+      input.files = [file];
+
+      // Trigger the change event to load the image
+      input.dispatchEvent(new Event('change'));
     };
 
     savedImage.src = savedData.imageDataURL;
-
-    // Automatically select the image file after loading
-    const input = document.getElementById('imageInput');
-    input.value = savedData.imageLocation; // Set the input file value to the saved image location
   }
 }
     
-
   </script>
 </body>
 
