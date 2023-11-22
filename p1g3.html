@@ -496,12 +496,7 @@ function redrawCanvas() {
  function deleteSelectedLine() {
   // Call the line deletion function with mouse coordinates
   handleLineSelection2D( /* provide mouseX and mouseY values */ );
-   detectedLines.forEach((line, index) => {
-   context2D.beginPath();
-      context2D.strokeStyle = 'red';
-      context2D.moveTo(line.x1, line.y1);
-      context2D.lineTo(line.x2, line.y2);
-      context2D.stroke();
+   redrawCanvas();
  }
   }
     
