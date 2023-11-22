@@ -500,9 +500,47 @@ function redrawCanvas() {
  function deleteSelectedLine() {
   // Call the line deletion function with mouse coordinates
   handleLineSelection2D( /* provide mouseX and mouseY values */ );
-   redrawCanvas();
+   refresh();
  }
-    
+    <!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- Include OpenCV.js -->
+  <script async src="https://docs.opencv.org/master/opencv.js" onload="onOpenCvReady();" type="text/javascript"></script>
+  <!-- Include Babylon.js -->
+  <script src="https://cdn.babylonjs.com/babylon.js"></script>
+  <style>
+    /* Your styles remain unchanged */
+  </style>
+</head>
+
+<body>
+  <!-- Your HTML content remains unchanged -->
+  <button onclick="refresh()">Refresh</button>
+
+  <script>
+    // Your existing JavaScript code remains unchanged
+
+    let savedCameraPosition;
+
+    function refresh() {
+      if (babylonCanvas) {
+        // Save the current camera position
+        savedCameraPosition = camera.position.clone();
+
+        // Reset the canvas
+        resetCanvas();
+
+        // Set the camera back to its saved position
+        camera.position.copyFrom(savedCameraPosition);
+      }
+    }
+  </script>
+</body>
+
+</html>
+
 
   </script>
 </body>
