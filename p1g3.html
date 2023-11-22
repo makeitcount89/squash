@@ -503,10 +503,10 @@ function redrawCanvas() {
    refresh();
  }
 
-    let savedCameraPosition;
+     let savedCameraPosition;
 
     function refresh() {
-      if (babylonCanvas) {
+      if (babylonCanvas && camera) {
         // Save the current camera position
         savedCameraPosition = camera.position.clone();
 
@@ -515,6 +515,7 @@ function redrawCanvas() {
 
         // Set the camera back to its saved position
         camera.position.copyFrom(savedCameraPosition);
+        camera.setTarget(BABYLON.Vector3.Zero()); // Adjust the target if needed
       }
     }
   </script>
