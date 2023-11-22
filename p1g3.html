@@ -450,12 +450,13 @@ function loadAndDetect() {
     }
     
     function handleLineSelection2D(mouseX, mouseY) {
+      const sensitivitydist = 7;
   // Iterate through detected lines and check if the click is near any line
   detectedLines.forEach(line => {
     const distance = pointToLineDistance({ x: mouseX, y: mouseY }, line, true);
-    const lineThickness = parseFloat(document.getElementById('lineThickness').value);
+    //const lineThickness = parseFloat(document.getElementById('lineThickness').value);
 
-    if (distance < lineThickness) {
+    if (distance < sensitivitydist) {
       // Line is clicked, highlight it in blue
       context2D.beginPath();
       context2D.strokeStyle = 'blue';
