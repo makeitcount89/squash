@@ -72,9 +72,9 @@
   <label for="wallThickness">Wall Thickness:</label>
   <input type="number" id="wallThickness" value="0.2">
   
-<button id="deleteButton">Delete Selected Line</button>
+<button id="deleteButton" onclick="deleteSelectedLine()">Delete Selected Line</button>
+<button onclick="undo()">Undo</button>
   
-  <button onclick="undo()">Undo</button>
     
   <button onclick="convertTo3D()">Convert to 3D</button>
   <canvas id="canvas2D" width="600" height="600"></canvas>
@@ -433,28 +433,15 @@ function loadAndDetect() {
   };
   img.src = URL.createObjectURL(input.files[0]);
 }
-    function handleLineSelection2D(mouseX, mouseY) {
-  // Iterate through detected lines and check if the click is near any line
-  detectedLines.forEach(line => {
-    const distance = pointToLineDistance({ x: mouseX, y: mouseY }, line);
-    const lineThickness = parseFloat(document.getElementById('lineThickness').value);
-
-    if (distance < lineThickness) {
-      // Line is clicked, highlight it in blue
-      console.log('Selected Line in Blue:', line);
-    } else {
-      // Keep other lines red
-      console.log('Other Lines in Red:', line);
-    }
-  });
-    }
     
-    function handleLineSelection2D(mouseX, mouseY) {
-      const sensitivitydist = 7;
+ let deletedLines = []; // Array to store deleted lines with timestamps
+
+function handleLineSelection2D(mouseX, mouseY) {
+  const sensitivitydist = 7;
+
   // Iterate through detected lines and check if the click is near any line
-  detectedLines.forEach(line => {
+  detectedLines.forEach((line, index) => {
     const distance = pointToLineDistance({ x: mouseX, y: mouseY }, line, true);
-    //const lineThickness = parseFloat(document.getElementById('lineThickness').value);
 
     if (distance < sensitivitydist) {
       // Line is clicked, highlight it in blue
@@ -463,6 +450,13 @@ function loadAndDetect() {
       context2D.moveTo(line.x1, line.y1);
       context2D.lineTo(line.x2, line.y2);
       context2D.stroke();
+
+      // Store the deleted line with a timestamp
+      const timestamp = new Date().toLocaleString();
+      deletedLines.push({ ...line, timestamp });
+
+      // Delete the selected line
+      detectedLines.splice(index, 1);
     } else {
       // Keep other lines red
       context2D.beginPath();
@@ -472,7 +466,33 @@ function loadAndDetect() {
       context2D.stroke();
     }
   });
-    }
+}
+    function undo() {
+  if (deletedLines.length > 0) {
+    const lastDeleted = deletedLines.pop();
+    detectedLines.push(lastDeleted);
+
+    // Redraw the canvas with the restored line
+    redrawCanvas();
+  }
+}
+
+function redrawCanvas() {
+  context2D.clearRect(0, 0, context2D.canvas.width, context2D.canvas.height);
+
+  // Draw the remaining lines
+  context2D.beginPath();
+  context2D.strokeStyle = 'red'; // Change the color as needed
+  detectedLines.forEach(line => {
+    context2D.moveTo(line.x1, line.y1);
+    context2D.lineTo(line.x2, line.y2);
+  });
+  context2D.stroke();
+}
+ function deleteSelectedLine() {
+  // Call the line deletion function with mouse coordinates
+  handleLineSelection2D( /* provide mouseX and mouseY values */ );
+ }
     
 
   </script>
