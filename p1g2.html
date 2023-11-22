@@ -48,29 +48,6 @@
 
       canvas.add(fabricImage);
 
-      // Example: Draw a rectangle
-      var rect = new fabric.Rect({
-        left: 100,
-        top: 100,
-        width: 50,
-        height: 50,
-        fill: 'red'
-      });
-      canvas.add(rect);
-
-      // Example: Draw a line
-      var line = new fabric.Line([50, 50, 200, 200], {
-        stroke: 'blue',
-        strokeWidth: 2
-      });
-      canvas.add(line);
-
-      // Example: Get coordinates of the rectangle
-      console.log('Rectangle coordinates:', rect.left, rect.top, rect.width, rect.height);
-
-      // Example: Get coordinates of the line
-      console.log('Line coordinates:', line.x1, line.y1, line.x2, line.y2);
-
       // Delete button functionality
       document.getElementById('deleteButton').addEventListener('click', function() {
         var activeObject = canvas.getActiveObject();
@@ -117,6 +94,49 @@
           canvas.forEachObject(function(obj) {
             obj.selectable = true;
           });
+        }
+      });
+
+      // Event listener for drawing rectangles
+      canvas.on('mouse:down', function(o) {
+        if (!isFreeSelectMode) {
+          var pointer = canvas.getPointer(o.e);
+          var rect = new fabric.Rect({
+            left: pointer.x,
+            top: pointer.y,
+            width: 10,
+            height: 10,
+            fill: 'red'
+          });
+          canvas.add(rect);
+          canvas.setActiveObject(rect);
+        }
+      });
+
+      // Event listener for drawing lines
+      canvas.on('mouse:down', function(o) {
+        if (!isFreeSelectMode) {
+          var pointer = canvas.getPointer(o.e);
+          var line = new fabric.Line([pointer.x, pointer.y, pointer.x, pointer.y], {
+            stroke: 'blue',
+            strokeWidth: 2
+          });
+          canvas.add(line);
+          canvas.setActiveObject(line);
+        }
+      });
+
+      // Event listener for drawing freeform lines
+      canvas.on('mouse:down', function(o) {
+        if (isFreeSelectMode) {
+          canvas.isDrawingMode = true;
+        }
+      });
+
+      // Event listener for completing freeform lines
+      canvas.on('mouse:up', function(o) {
+        if (isFreeSelectMode) {
+          canvas.isDrawingMode = false;
         }
       });
     }
