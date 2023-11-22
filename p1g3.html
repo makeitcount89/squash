@@ -520,30 +520,30 @@ function toggleFullscreen() {
   }
 }
     function saveToLocalStorage() {
-  // Example: Save detected lines and settings
-  localStorage.setItem('detectedLines', JSON.stringify(detectedLines));
-  localStorage.setItem('lineThreshold', document.getElementById('lineThreshold').value);
-
-  // Add more items as needed
-    }
-    function loadFromLocalStorage() {
-  // Example: Load detected lines and settings
-  const savedLines = localStorage.getItem('detectedLines');
-  const savedThreshold = localStorage.getItem('lineThreshold');
-
-  // Check if data exists
-  if (savedLines && savedThreshold) {
-    detectedLines = JSON.parse(savedLines);
-    document.getElementById('lineThreshold').value = savedThreshold;
-
-    // Update the UI or trigger necessary functions
-    updateLineThreshold(savedThreshold);
-    redrawCanvas(); // Refresh the canvas or other components
+  const fileName = window.prompt("Enter a file name:");
+  if (fileName) {
+    const dataToSave = {
+      detectedLines: detectedLines,
+      lineThreshold: document.getElementById('lineThreshold').value,
+      // Add other data to save
+    };
+    localStorage.setItem(fileName, JSON.stringify(dataToSave));
   }
-
-  // Add more logic for other saved items
     }
     
+    function loadFromLocalStorage() {
+  const savedFiles = Object.keys(localStorage);
+  const selectedFile = window.prompt("Choose a file to load:\n" + savedFiles.join("\n"));
+  if (selectedFile && savedFiles.includes(selectedFile)) {
+    const savedData = JSON.parse(localStorage.getItem(selectedFile));
+    detectedLines = savedData.detectedLines;
+    document.getElementById('lineThreshold').value = savedData.lineThreshold;
+    // Update the UI or trigger necessary functions
+    updateLineThreshold(savedData.lineThreshold);
+    redrawCanvas(); // Refresh the canvas or other components
+  }
+}
+
   </script>
 </body>
 
