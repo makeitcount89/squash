@@ -22,6 +22,9 @@
     <button id="drawRect">Draw Rectangle</button>
     <button id="drawLine">Draw Line</button>
     <button id="delete">Delete</button>
+    <button id="select">Select</button>
+    <button id="rotate">Rotate</button>
+    <button id="stretch">Stretch</button>
     <button id="undo">Undo</button>
     <button id="redo">Redo</button>
   </div>
@@ -135,6 +138,32 @@
       var activeObject = canvas.getActiveObject();
       if (activeObject) {
         canvas.remove(activeObject);
+        saveState();
+      }
+    });
+
+    document.getElementById('select').addEventListener('click', function() {
+      canvas.isDrawingMode = false;
+      canvas.selection = true;
+      canvas.forEachObject(function(obj) {
+        obj.selectable = true;
+      });
+    });
+
+    document.getElementById('rotate').addEventListener('click', function() {
+      var activeObject = canvas.getActiveObject();
+      if (activeObject) {
+        activeObject.set({ angle: activeObject.angle + 45 });
+        canvas.renderAll();
+        saveState();
+      }
+    });
+
+    document.getElementById('stretch').addEventListener('click', function() {
+      var activeObject = canvas.getActiveObject();
+      if (activeObject && activeObject.type === 'line') {
+        activeObject.set({ scaleX: activeObject.scaleX * 1.5 });
+        canvas.renderAll();
         saveState();
       }
     });
