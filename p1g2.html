@@ -4,21 +4,41 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/4.0.0-beta.12/fabric.min.js"></script>
-  <title>Canvas Drawing Example</title>
+  <style>
+    #toolbar {
+      background-color: #f1f1f1;
+      padding: 10px;
+      text-align: center;
+    }
+    #canvas {
+      border: 1px solid #000;
+      margin-top: 10px;
+    }
+  </style>
+  <title>Canvas Drawing with Toolbar</title>
 </head>
 <body>
+  <div id="toolbar">
+    <button id="drawFree">Draw</button>
+    <button id="drawRect">Draw Rectangle</button>
+    <button id="drawLine">Draw Line</button>
+  </div>
   <input type="file" id="imageInput" />
-  <canvas id="canvas" width="800" height="600" style="border:1px solid #000;"></canvas>
+  <canvas id="canvas" width="800" height="600"></canvas>
 
   <script>
-    // Function to handle image upload
+    var canvas = new fabric.Canvas('canvas', {
+      isDrawingMode: false
+    });
+
+    // Handle image upload
     document.getElementById('imageInput').addEventListener('change', handleImage);
 
     function handleImage(e) {
       var reader = new FileReader();
-      reader.onload = function(event){
+      reader.onload = function(event) {
         var img = new Image();
-        img.onload = function(){
+        img.onload = function() {
           initFabric(img);
         };
         img.src = event.target.result;
@@ -26,45 +46,89 @@
       reader.readAsDataURL(e.target.files[0]);
     }
 
-    // Function to initialize Fabric.js
+    // Initialize Fabric.js with the uploaded image
     function initFabric(img) {
-      var canvas = new fabric.Canvas('canvas', {
-        isDrawingMode: true
-      });
-
-      // Add the uploaded image to the canvas
-      var fabricImage = new fabric.Image(img, {
-        left: 0,
-        top: 0,
+      canvas.clear();
+      canvas.setBackgroundImage(img.src, canvas.renderAll.bind(canvas), {
         scaleX: canvas.width / img.width,
         scaleY: canvas.height / img.height,
       });
-
-      canvas.add(fabricImage);
-
-      // Example: Draw a rectangle
-      var rect = new fabric.Rect({
-        left: 100,
-        top: 100,
-        width: 50,
-        height: 50,
-        fill: 'red'
-      });
-      canvas.add(rect);
-
-      // Example: Draw a line
-      var line = new fabric.Line([50, 50, 200, 200], {
-        stroke: 'blue',
-        strokeWidth: 2
-      });
-      canvas.add(line);
-
-      // Example: Get coordinates of the rectangle
-      console.log('Rectangle coordinates:', rect.left, rect.top, rect.width, rect.height);
-
-      // Example: Get coordinates of the line
-      console.log('Line coordinates:', line.x1, line.y1, line.x2, line.y2);
     }
+
+    // Toolbar button event listeners
+    document.getElementById('drawFree').addEventListener('click', function() {
+      canvas.isDrawingMode = true;
+      canvas.freeDrawingBrush.width = 2;
+      canvas.freeDrawingBrush.color = 'black';
+    });
+
+    document.getElementById('drawRect').addEventListener('click', function() {
+      canvas.isDrawingMode = false;
+      canvas.selection = false;
+      canvas.forEachObject(function(obj) {
+        obj.selectable = false;
+      });
+      canvas.off('mouse:down');
+      canvas.on('mouse:down', function(o) {
+        var pointer = canvas.getPointer(o.e);
+        var rect = new fabric.Rect({
+          left: pointer.x,
+          top: pointer.y,
+          width: 0,
+          height: 0,
+          fill: 'transparent',
+          stroke: 'black',
+          strokeWidth: 2
+        });
+        canvas.add(rect);
+        canvas.on('mouse:move', function(o) {
+          var pointer = canvas.getPointer(o.e);
+          rect.set({ width: pointer.x - rect.left, height: pointer.y - rect.top });
+          canvas.renderAll();
+        });
+        canvas.on('mouse:up', function() {
+          canvas.off('mouse:move');
+          canvas.off('mouse:up');
+          rect.selectable = true;
+          canvas.selection = true;
+          canvas.forEachObject(function(obj) {
+            obj.selectable = true;
+          });
+        });
+      });
+    });
+
+    document.getElementById('drawLine').addEventListener('click', function() {
+      canvas.isDrawingMode = false;
+      canvas.selection = false;
+      canvas.forEachObject(function(obj) {
+        obj.selectable = false;
+      });
+      canvas.off('mouse:down');
+      canvas.on('mouse:down', function(o) {
+        var pointer = canvas.getPointer(o.e);
+        var points = [pointer.x, pointer.y, pointer.x, pointer.y];
+        var line = new fabric.Line(points, {
+          strokeWidth: 2,
+          stroke: 'black',
+        });
+        canvas.add(line);
+        canvas.on('mouse:move', function(o) {
+          var pointer = canvas.getPointer(o.e);
+          line.set({ x2: pointer.x, y2: pointer.y });
+          canvas.renderAll();
+        });
+        canvas.on('mouse:up', function() {
+          canvas.off('mouse:move');
+          canvas.off('mouse:up');
+          line.selectable = true;
+          canvas.selection = true;
+          canvas.forEachObject(function(obj) {
+            obj.selectable = true;
+          });
+        });
+      });
+    });
   </script>
 </body>
 </html>
