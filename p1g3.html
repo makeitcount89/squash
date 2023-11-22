@@ -404,8 +404,67 @@ const line2 = { x1: 1, y1: 1, x2: 5, y2: 5 };
 pointToLineDistance(point, line1, true);  // Highlighted in blue
 pointToLineDistance(point, line2, false); // Kept red
     
+function loadAndDetect() {
+  const input = document.getElementById('imageInput');
+  img = new Image();
+  img.onload = function () {
+    context2D = document.getElementById('canvas2D').getContext('2d');
+    context2D.clearRect(0, 0, context2D.canvas.width, context2D.canvas.height);
+    context2D.drawImage(img, 0, 0, context2D.canvas.width, context2D.canvas.height);
+    const threshold = parseInt(document.getElementById('lineThreshold').value);
+    detectLines(threshold);
 
+    // Draw the detected lines on the 2D canvas
+    context2D.beginPath();
+    context2D.strokeStyle = 'red'; // Change the color as needed
+    detectedLines.forEach(line => {
+      context2D.moveTo(line.x1, line.y1);
+      context2D.lineTo(line.x2, line.y2);
+    });
+    context2D.stroke();
+
+    // Add click event listener for line selection on the 2D canvas
+    document.getElementById('canvas2D').addEventListener('click', function (event) {
+      const rect = context2D.canvas.getBoundingClientRect();
+      const mouseX = event.clientX - rect.left;
+      const mouseY = event.clientY - rect.top;
+      handleLineSelection2D(mouseX, mouseY);
+    });
+  };
+  img.src = URL.createObjectURL(input.files[0]);
+}
+    function handleLineSelection2D(mouseX, mouseY) {
+  // Iterate through detected lines and check if the click is near any line
+  detectedLines.forEach(line => {
+    const distance = pointToLineDistance({ x: mouseX, y: mouseY }, line);
+    const lineThickness = parseFloat(document.getElementById('lineThickness').value);
+
+    if (distance < lineThickness) {
+      // Line is clicked, highlight it in blue
+      console.log('Selected Line in Blue:', line);
+    } else {
+      // Keep other lines red
+      console.log('Other Lines in Red:', line);
+    }
+  });
+    }
     
+    function handleLineSelection2D(mouseX, mouseY) {
+  // Iterate through detected lines and check if the click is near any line
+  detectedLines.forEach(line => {
+    const distance = pointToLineDistance({ x: mouseX, y: mouseY }, line);
+    const lineThickness = parseFloat(document.getElementById('lineThickness').value);
+
+    if (distance < lineThickness) {
+      // Line is clicked, highlight it in blue
+      console.log('Selected Line in Blue:', line);
+    } else {
+      // Keep other lines red
+      console.log('Other Lines in Red:', line);
+    }
+  });
+}
+
   </script>
 </body>
 
