@@ -398,16 +398,20 @@ function highlightLine(index) {
     context2D.moveTo(line.x1, line.y1);
     context2D.lineTo(line.x2, line.y2);
 
-    // Highlight the selected line in a different color
+    // Highlight only the selected line in blue
     if (i === index) {
       context2D.strokeStyle = 'blue'; // Adjust the color for highlighting
       context2D.lineWidth = 3; // Adjust the line width for highlighting
+    } else {
+      context2D.strokeStyle = 'red'; // Reset the color for other lines
+      context2D.lineWidth = 1; // Reset the line width for other lines
     }
+    
+    // Stroke each line individually
+    context2D.stroke();
   });
-
-  // Stroke all lines
-  context2D.stroke();
 }
+    
 
 // Add this line to set up the click event listener for the 2D canvas
 canvas2D.addEventListener('click', handle2DCanvasClick);
