@@ -602,7 +602,11 @@ function loadFromLocalStorage() {
     const savedImage = new Image();
     savedImage.onload = function () {
       img = savedImage;
+
+      // Clear the canvas
       context2D.clearRect(0, 0, context2D.canvas.width, context2D.canvas.height);
+
+      // Draw the loaded image on the 2D canvas
       context2D.drawImage(savedImage, 0, 0, context2D.canvas.width, context2D.canvas.height);
 
       // Update other elements based on loaded data
@@ -617,14 +621,6 @@ function loadFromLocalStorage() {
         context2D.lineTo(line.x2, line.y2);
       });
       context2D.stroke();
-
-      // Automatically select the image file after loading
-      const input = document.getElementById('imageInput');
-      const file = new File([savedImage], savedData.imageLocation, { type: savedImage.type });
-      input.files = [file];
-
-      // Trigger the change event to load the image
-      input.dispatchEvent(new Event('change'));
     };
 
     savedImage.src = savedData.imageDataURL;
