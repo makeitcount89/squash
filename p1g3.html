@@ -481,7 +481,9 @@ function handleLineSelection2D(mouseX, mouseY) {
 
 function redrawCanvas() {
   context2D.clearRect(0, 0, context2D.canvas.width, context2D.canvas.height);
-
+  // Redraw the image
+  context2D.drawImage(img, 0, 0, context2D.canvas.width, context2D.canvas.height);
+  
   // Draw the remaining lines
   context2D.beginPath();
   context2D.strokeStyle = 'red'; // Change the color as needed
