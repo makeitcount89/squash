@@ -354,34 +354,35 @@ scene.beginAnimation(camera, 0, animationDuration, false);
     
 // Add this function to handle 2D canvas click events
 // Add this function to handle 2D canvas click events
-// Add this function to highlight the selected line
-function highlightLine(index) {
-  context2D.clearRect(0, 0, context2D.canvas.width, context2D.canvas.height);
+function handle2DCanvasClick(event) {
+  const rect = canvas2D.getBoundingClientRect();
+  const x = event.clientX - rect.left;
+  const y = event.clientY - rect.top;
 
-  // Draw the image on the 2D canvas
-  context2D.drawImage(img, 0, 0, context2D.canvas.width, context2D.canvas.height);
+  // Iterate through detected lines and check if the click is within a certain range of a line
+  const clickRange = 5; // Adjust this value based on your preference for click sensitivity
+  let lineSelected = false;
 
-  // Draw all lines in red
-  context2D.beginPath();
-  context2D.strokeStyle = 'red';
-  detectedLines.forEach((line, i) => {
-    context2D.moveTo(line.x1, line.y1);
-    context2D.lineTo(line.x2, line.y2);
-
-    // Highlight only the selected line in blue
-    if (i === index) {
-      context2D.strokeStyle = 'blue'; // Adjust the color for highlighting
-      context2D.lineWidth = 3; // Adjust the line width for highlighting
-    } else {
-      context2D.strokeStyle = 'red'; // Reset the color for other lines
-      context2D.lineWidth = 1; // Reset the line width for other lines
+  detectedLines.forEach((line, index) => {
+    if (
+      x > Math.min(line.x1, line.x2) - clickRange &&
+      x < Math.max(line.x1, line.x2) + clickRange &&
+      y > Math.min(line.y1, line.y2) - clickRange &&
+      y < Math.max(line.y1, line.y2) + clickRange
+    ) {
+      // Line is selected, highlight the line
+      highlightLine(index);
+      lineSelected = true;
     }
-    
-    // Stroke each line individually
-    context2D.stroke();
   });
+
+  // If a line is selected, prevent further processing
+  if (lineSelected) {
+    return;
+  }
+
+  // Add your additional logic if no line is selected
 }
-    
     
 // Add this function to highlight the selected line
 function highlightLine(index) {
