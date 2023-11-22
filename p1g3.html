@@ -453,6 +453,15 @@ function highlightSelectedLine() {
       }
     }
   }
+    
+
+// Add event listeners outside the functions
+const canvas2D = document.getElementById('canvas2D');
+canvas2D.addEventListener('click', selectLine);
+document.getElementById('deleteButton').addEventListener('click', deleteSelectedLine);
+
+
+    
 
 
     
