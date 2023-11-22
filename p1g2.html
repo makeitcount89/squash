@@ -74,8 +74,8 @@
 
   <label for="wallThickness">Wall Thickness:</label>
   <input type="number" id="wallThickness" value="0.2">
-  
-<button id="deleteButton" onclick="refresh3D()">Delete Selected Line</button>
+  <button onclick="enableFabricDrawing()">Draw Line</button>
+<button id="deleteButton" onclick="deleteSelectedLine()">Delete Selected Line</button>
 <button onclick="undo()">Undo</button>
   
     
@@ -658,7 +658,6 @@ function redrawCanvas() {
   // Call the line deletion function with mouse coordinates
   handleLineSelection2D( /* provide mouseX and mouseY values */);
    redrawCanvas();
-   refresh3D();
  }
 
    // Add this to your script section
@@ -678,7 +677,24 @@ fabricCanvas.on('path:created', function(options) {
 // Disable Fabric.js selection
 fabricCanvas.selection = false;
 
+// Function to enable Fabric.js drawing mode
+  function enableFabricDrawing() {
+    // Enable Fabric.js drawing mode
+    fabricCanvas.isDrawingMode = true;
+  }
 
+  // Event listener for when drawing is completed
+  fabricCanvas.on('path:created', function(options) {
+    // Extract points from the path and add to your detectedLines array or process as needed
+    const points = options.path.path.map(point => {
+      return { x: point[1], y: point[2] };
+    });
+
+    detectedLines.push({ points });
+  });
+
+  // Disable Fabric.js selection
+  fabricCanvas.selection = false;
   
 
   </script>
