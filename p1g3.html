@@ -79,6 +79,8 @@
   <button onclick="convertTo3D()">Convert to 3D</button>
   <canvas id="canvas2D" width="600" height="600"></canvas>
   <button onclick="toggleFullscreen()">Fullscreen</button>
+  <button onclick="saveToLocalStorage()">Save</button>
+  <button onclick="loadFromLocalStorage()">Load</button>
   <canvas id="canvas3D" width="1200" height="1200"></canvas>
 
   <p id="coordinates"></p>
@@ -517,6 +519,30 @@ function toggleFullscreen() {
     });
   }
 }
+    function saveToLocalStorage() {
+  // Example: Save detected lines and settings
+  localStorage.setItem('detectedLines', JSON.stringify(detectedLines));
+  localStorage.setItem('lineThreshold', document.getElementById('lineThreshold').value);
+
+  // Add more items as needed
+    }
+    function loadFromLocalStorage() {
+  // Example: Load detected lines and settings
+  const savedLines = localStorage.getItem('detectedLines');
+  const savedThreshold = localStorage.getItem('lineThreshold');
+
+  // Check if data exists
+  if (savedLines && savedThreshold) {
+    detectedLines = JSON.parse(savedLines);
+    document.getElementById('lineThreshold').value = savedThreshold;
+
+    // Update the UI or trigger necessary functions
+    updateLineThreshold(savedThreshold);
+    redrawCanvas(); // Refresh the canvas or other components
+  }
+
+  // Add more logic for other saved items
+    }
     
   </script>
 </body>
