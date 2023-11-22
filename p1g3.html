@@ -599,17 +599,22 @@ function loadFromLocalStorage() {
     const savedData = JSON.parse(localStorage.getItem(selectedFile));
     detectedLines = savedData.detectedLines;
 
+    // Create a new Image object
     const savedImage = new Image();
-    savedImage.onload = function () {
-      img = savedImage;
-      context2D.clearRect(0, 0, context2D.canvas.width, context2D.canvas.height);
-      context2D.drawImage(savedImage, 0, 0, context2D.canvas.width, context2D.canvas.height);
+    savedImage.src = savedData.imageDataURL;
+
+    // Use the loadImage function to handle the image loading
+    loadImage(savedImage, function () {
+      // The image is loaded, proceed with other operations
 
       // Update other elements based on loaded data
       document.getElementById('lineThreshold').value = savedData.lineThreshold;
       updateLineThreshold(savedData.lineThreshold);
 
       // Draw the detected lines on the 2D canvas
+      context2D.clearRect(0, 0, context2D.canvas.width, context2D.canvas.height);
+      context2D.drawImage(savedImage, 0, 0, context2D.canvas.width, context2D.canvas.height);
+      
       context2D.beginPath();
       context2D.strokeStyle = 'red'; // Change the color as needed
       detectedLines.forEach(line => {
@@ -625,10 +630,15 @@ function loadFromLocalStorage() {
 
       // Trigger the change event to load the image
       input.dispatchEvent(new Event('change'));
-    };
-
-    savedImage.src = savedData.imageDataURL;
+    });
   }
+}
+
+// Function to load an image with a callback for completion
+function loadImage(image, callback) {
+  image.onload = function () {
+    callback();
+  };
 }
     
   </script>
