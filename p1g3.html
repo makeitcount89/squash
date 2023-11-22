@@ -457,20 +457,8 @@ function handleLineSelection2D(mouseX, mouseY) {
 
       // Delete the selected line
       detectedLines.splice(index, 1);
-        // Clear the canvas
-  context2D.clearRect(0, 0, context2D.canvas.width, context2D.canvas.height);
+      selectedline = null;
 
-  // Redraw the remaining lines
-  context2D.beginPath();
-  context2D.strokeStyle = 'red'; // Change the color as needed
-  detectedLines.forEach(line => {
-    context2D.moveTo(line.x1, line.y1);
-    context2D.lineTo(line.x2, line.y2);
-  });
-  context2D.stroke();
-
-  // Reset selectedLine to null
-  selectedLine = null;
     } else {
       // Keep other lines red
       context2D.beginPath();
