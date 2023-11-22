@@ -353,6 +353,7 @@ scene.beginAnimation(camera, 0, animationDuration, false);
     }
     
 // Add this function to handle 2D canvas click events
+// Add this function to handle 2D canvas click events
 function handle2DCanvasClick(event) {
   const rect = canvas2D.getBoundingClientRect();
   const x = event.clientX - rect.left;
@@ -360,6 +361,8 @@ function handle2DCanvasClick(event) {
 
   // Iterate through detected lines and check if the click is within a certain range of a line
   const clickRange = 5; // Adjust this value based on your preference for click sensitivity
+  let lineSelected = false;
+
   detectedLines.forEach((line, index) => {
     if (
       x > Math.min(line.x1, line.x2) - clickRange &&
@@ -369,10 +372,18 @@ function handle2DCanvasClick(event) {
     ) {
       // Line is selected, highlight the line
       highlightLine(index);
+      lineSelected = true;
     }
   });
-}
 
+  // If a line is selected, prevent further processing
+  if (lineSelected) {
+    return;
+  }
+
+  // Add your additional logic if no line is selected
+}
+    
 // Add this function to highlight the selected line
 function highlightLine(index) {
   context2D.clearRect(0, 0, context2D.canvas.width, context2D.canvas.height);
