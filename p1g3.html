@@ -86,57 +86,6 @@
   <p id="coordinates"></p>
 
   <script>
-   
-
-  window.onload = function () {
-    const autosavedData = localStorage.getItem("autosave");
-    if (autosavedData) {
-      const savedData = JSON.parse(autosavedData);
-      const selectedFile = savedData.selectedFile;
-
-      // Load the selected file if available
-      if (selectedFile) {
-        document.getElementById('imageInput').addEventListener('change', function () {
-          loadSelectedFile(selectedFile);
-        });
-
-        // Trigger the change event to load the image
-        document.getElementById('imageInput').dispatchEvent(new Event('change'));
-      }
-    }
-  }
-
-  
-
-  function loadSelectedFile(selectedFile) {
-    const savedData = JSON.parse(localStorage.getItem(selectedFile));
-    detectedLines = savedData.detectedLines;
-
-    const savedImage = new Image();
-    savedImage.onload = function () {
-      img = savedImage;
-      context2D.clearRect(0, 0, context2D.canvas.width, context2D.canvas.height);
-      context2D.drawImage(savedImage, 0, 0, context2D.canvas.width, context2D.canvas.height);
-
-      // Update other elements based on loaded data
-      document.getElementById('lineThreshold').value = savedData.lineThreshold;
-      updateLineThreshold(savedData.lineThreshold);
-
-      // Draw the detected lines on the 2D canvas
-      context2D.beginPath();
-      context2D.strokeStyle = 'red'; // Change the color as needed
-      detectedLines.forEach(line => {
-        context2D.moveTo(line.x1, line.y1);
-        context2D.lineTo(line.x2, line.y2);
-      });
-      context2D.stroke();
-    };
-
-    savedImage.src = savedData.imageDataURL;
-  }
-
-  
-  
 
     let img, context2D, babylonCanvas, detectedLines, scene, camera, startPoint; // Move 'scene' to a higher scope
 
@@ -570,29 +519,53 @@ function toggleFullscreen() {
     });
   }
 }
-    function saveToLocalStorage() {
-  const fileName = window.prompt("Enter a file name:");
-  if (fileName) {
+    // Function to save data to local storage
+function saveToLocalStorage() {
+  const input = document.getElementById('imageInput');
+  const selectedFile = input.files[0];
+  
+  if (!selectedFile) {
+    alert('Please select an image first.');
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    const imageDataURL = e.target.result;
+
+    // Other data to save
     const dataToSave = {
       detectedLines: detectedLines,
       lineThreshold: document.getElementById('lineThreshold').value,
       // Add other data to save
-
-      // Save the image as a data URL
-      imageDataURL: img.src,
+      imageDataURL: imageDataURL
     };
-    localStorage.setItem(fileName, JSON.stringify(dataToSave));
-  }
+
+    // Save data to local storage with a filename prompt
+    const filename = window.prompt('Enter a filename to save:');
+    if (filename) {
+      localStorage.setItem(filename, JSON.stringify(dataToSave));
     }
-    function loadFromLocalStorage() {
+  };
+
+  reader.readAsDataURL(selectedFile);
+}
+
+// Function to load data from local storage
+function loadFromLocalStorage() {
   const savedFiles = Object.keys(localStorage);
-  const selectedFile = window.prompt("Choose a file to load:\n" + savedFiles.join("\n"));
-  
+
+  if (savedFiles.length === 0) {
+    alert('No saved files available.');
+    return;
+  }
+
+  const selectedFile = window.prompt('Choose a file to load:\n' + savedFiles.join('\n'));
+
   if (selectedFile && savedFiles.includes(selectedFile)) {
     const savedData = JSON.parse(localStorage.getItem(selectedFile));
     detectedLines = savedData.detectedLines;
-    
-    // Load the saved image
+
     const savedImage = new Image();
     savedImage.onload = function () {
       img = savedImage;
@@ -615,9 +588,8 @@ function toggleFullscreen() {
 
     savedImage.src = savedData.imageDataURL;
   }
-    }
+}
     
-
 
   </script>
 </body>
