@@ -515,7 +515,7 @@ function redrawCanvas() {
 
   handleLineSelection2D( /* provide mouseX and mouseY values */ );
    redrawCanvas();
-   redraw(previousCameraState);
+   reset(previousCameraState);
  }
     
     // Function to save data to local storage
@@ -657,7 +657,6 @@ function loadFromLocalStorage() {
   window.addEventListener('orientationchange', handleResize);
     }
     function redraw(previousCameraState) {
-  reset();
   if (!detectedLines) {
     alert('Please detect lines first.');
     return;
@@ -723,7 +722,8 @@ function loadFromLocalStorage() {
     wallMesh.scaling.y = wallThickness;
   });
     }
- function reset(previousCameraState) {
+ 
+    function reset(previousCameraState) {
   if (babylonCanvas) {
     // Hide the Babylon canvas
     babylonCanvas.style.display = 'none';
@@ -741,7 +741,7 @@ function loadFromLocalStorage() {
     const engine = new BABYLON.Engine(babylonCanvas, true);
     const newScene = new BABYLON.Scene(engine);
 
- const camera = new BABYLON.UniversalCamera('camera', previousCameraState.position, newScene);
+    const camera = new BABYLON.UniversalCamera('camera', previousCameraState.position, newScene);
     camera.rotation = previousCameraState.rotation;
     camera.fov = previousCameraState.fov;
     camera.minZ = previousCameraState.minZ;
@@ -750,6 +750,9 @@ function loadFromLocalStorage() {
     camera.speed = previousCameraState.speed;
 
     newScene.activeCamera = camera;
+
+    // Draw the lines in the new scene
+    redraw(previousCameraState);
 
     // Run the Babylon.js engine for the new scene
     engine.runRenderLoop(function () {
@@ -765,7 +768,6 @@ function loadFromLocalStorage() {
   }
 }
 
-    
   </script>
 </body>
 
