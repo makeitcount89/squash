@@ -499,16 +499,8 @@ function redrawCanvas() {
   });
   context2D.stroke();
 }
-let previousCameraState = {
-  position: camera.position.clone(),
-  rotation: camera.rotation.clone(),
-  fov: camera.fov,
-  minZ: camera.minZ,
-  maxZ: camera.maxZ,
-  target: camera.target.clone(),
-  speed: camera.speed,
-  // Add more properties as needed
-}
+let previousCameraState = [];
+
  
     function deleteSelectedLine() {
   // Call the line deletion function with mouse coordinates
@@ -776,6 +768,32 @@ function loadFromLocalStorage() {
     babylonCanvas.style.display = 'block';
   }
  }
+    // Add an event listener for camera property changes
+camera.onViewMatrixChangedObservable.add(() => {
+  // Update the previousCameraState when the view matrix changes
+  updatePreviousCameraState();
+});
+
+// Add similar event listeners for other camera properties if needed
+// For example:
+// camera.onRotationChangedObservable.add(() => {
+//   updatePreviousCameraState();
+// });
+
+// Function to update previousCameraState with the current camera properties
+function updatePreviousCameraState() {
+  previousCameraState.position = camera.position.clone();
+  previousCameraState.rotation = camera.rotation.clone();
+  previousCameraState.fov = camera.fov;
+  previousCameraState.minZ = camera.minZ;
+  previousCameraState.maxZ = camera.maxZ;
+  previousCameraState.target = camera.target.clone();
+  previousCameraState.speed = camera.speed;
+
+  // Add more properties as needed
+}
+
+
     
     
   </script>
