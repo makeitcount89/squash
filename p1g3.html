@@ -734,6 +734,9 @@ function loadFromLocalStorage() {
     const camera = new BABYLON.UniversalCamera('camera', new BABYLON.Vector3(0, 0, -200), newScene);
     camera.setTarget(BABYLON.Vector3.Zero());
     camera.attachControl(babylonCanvas, true);
+    if (previousCameraPosition) {
+      camera.position = previousCameraPosition;
+    }
     const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(1, 1, 0));
 
     // Set background color to a lighter gray
