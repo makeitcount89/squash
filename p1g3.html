@@ -501,9 +501,11 @@ function redrawCanvas() {
   context2D.stroke();
 }
 
- function deleteSelectedLine() {
+ function deleteSelectedLine(previousCameraPosition) {
   // Call the line deletion function with mouse coordinates
+   const previousCameraPosition = camera.position.clone();
   handleLineSelection2D( /* provide mouseX and mouseY values */ );
+   redrawCanvas();
    redraw(previousCameraPosition);
  }
     
