@@ -502,10 +502,20 @@ function redrawCanvas() {
 
  function deleteSelectedLine() {
   // Call the line deletion function with mouse coordinates
-   const previousCameraPosition = camera.position.clone();
+  const previousCameraState = {
+  position: camera.position.clone(),
+  rotation: camera.rotation.clone(),
+  fov: camera.fov,
+  minZ: camera.minZ,
+  maxZ: camera.maxZ,
+  target: camera.target.clone(),
+  speed: camera.speed,
+  // Add more properties as needed
+}
+
   handleLineSelection2D( /* provide mouseX and mouseY values */ );
    redrawCanvas();
-   redraw(previousCameraPosition);
+   redraw(previousCameraState);
  }
     
     // Function to save data to local storage
@@ -646,7 +656,7 @@ function loadFromLocalStorage() {
   // Additional handling for screen orientation change on mobile devices
   window.addEventListener('orientationchange', handleResize);
     }
-    function redraw(previousCameraPosition) {
+    function redraw(previousCameraState) {
   reset();
   if (!detectedLines) {
     alert('Please detect lines first.');
@@ -713,7 +723,7 @@ function loadFromLocalStorage() {
     wallMesh.scaling.y = wallThickness;
   });
     }
- function reset(previousCameraPosition) {
+ function reset(previousCameraState) {
   if (babylonCanvas) {
     // Hide the Babylon canvas
     babylonCanvas.style.display = 'none';
@@ -731,20 +741,15 @@ function loadFromLocalStorage() {
     const engine = new BABYLON.Engine(babylonCanvas, true);
     const newScene = new BABYLON.Scene(engine);
 
-    // Set up camera and light for the new scene
-    const camera = new BABYLON.UniversalCamera('camera', new BABYLON.Vector3(0, 0, -200), newScene);
-    camera.setTarget(BABYLON.Vector3.Zero());
-    camera.attachControl(babylonCanvas, true);
+ const camera = new BABYLON.UniversalCamera('camera', previousCameraState.position, newScene);
+    camera.rotation = previousCameraState.rotation;
+    camera.fov = previousCameraState.fov;
+    camera.minZ = previousCameraState.minZ;
+    camera.maxZ = previousCameraState.maxZ;
+    camera.setTarget(previousCameraState.target);
+    camera.speed = previousCameraState.speed;
 
-    // Apply the previous camera position
-    if (previousCameraPosition && previousCameraPosition.position) {
-      camera.position.copyFrom(previousCameraPosition.position);
-    }
-
-    const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(1, 1, 0));
-
-    // Set background color to a lighter gray
-    newScene.clearColor = new BABYLON.Color4(0.9, 0.9, 0.9, 1);
+    newScene.activeCamera = camera;
 
     // Run the Babylon.js engine for the new scene
     engine.runRenderLoop(function () {
