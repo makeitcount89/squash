@@ -78,7 +78,7 @@
     
   <button onclick="convertTo3D()">Convert to 3D</button>
   <canvas id="canvas2D" width="600" height="600"></canvas>
-  <button onclick="toggleFullscreen()">Fullscreen</button>
+  <button onclick="enterFullscreen()">Fullscreen</button>
   <button onclick="saveToLocalStorage()">Save</button>
   <button onclick="loadFromLocalStorage()">Load</button>
   <canvas id="canvas3D" width="1200" height="1200"></canvas>
@@ -508,16 +508,6 @@ function redrawCanvas() {
    convertTo3D();
  }
     
-function toggleFullscreen() {
-  const babylonCanvas = document.getElementById('canvas3D');
-
-  if (document.fullscreenElement) {
-    document.exitFullscreen();
-  } else {
-    enterFullscreen();
-    });
-  }
-}
     // Function to save data to local storage
 function saveToLocalStorage() {
   const input = document.getElementById('imageInput');
