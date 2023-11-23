@@ -769,7 +769,7 @@ function loadFromLocalStorage() {
   }
  }
     // Add an event listener for camera property changes
-camera.onViewMatrixChangedObservable.add(() => {
+const camera = camera.onViewMatrixChangedObservable.add(() => {
   // Update the previousCameraState when the view matrix changes
   updatePreviousCameraState();
 });
