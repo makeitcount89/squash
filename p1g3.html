@@ -325,6 +325,9 @@ scene.beginAnimation(camera, 0, animationDuration, false);
       BABYLON.Animation.ANIMATIONTYPE_VECTOR3,
       BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT
     );
+    camera.onViewMatrixChangedObservable.add(() => {
+  // Update the previousCameraState when the view matrix changes
+  updatePreviousCameraState();
 
     // Set keyframes for the animation
     const keys = [
@@ -769,7 +772,7 @@ function loadFromLocalStorage() {
   }
  }
     // Add an event listener for camera property changes
-const camera = camera.onViewMatrixChangedObservable.add(() => {
+camera.onViewMatrixChangedObservable.add(() => {
   // Update the previousCameraState when the view matrix changes
   updatePreviousCameraState();
 });
