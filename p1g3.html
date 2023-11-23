@@ -713,7 +713,7 @@ function loadFromLocalStorage() {
     wallMesh.scaling.y = wallThickness;
   });
     }
-    function reset(previousCameraPosition) {
+ function reset(previousCameraPosition) {
   if (babylonCanvas) {
     // Hide the Babylon canvas
     babylonCanvas.style.display = 'none';
@@ -731,46 +731,20 @@ function loadFromLocalStorage() {
     const engine = new BABYLON.Engine(babylonCanvas, true);
     const newScene = new BABYLON.Scene(engine);
 
-    // Set up camera and light for the new scene (you may need to adjust these parameters)
+    // Set up camera and light for the new scene
     const camera = new BABYLON.UniversalCamera('camera', new BABYLON.Vector3(0, 0, -200), newScene);
     camera.setTarget(BABYLON.Vector3.Zero());
     camera.attachControl(babylonCanvas, true);
-    if (previousCameraPosition) {
-      camera.position = previousCameraPosition;
+
+    // Apply the previous camera position
+    if (previousCameraPosition && previousCameraPosition.position) {
+      camera.position.copyFrom(previousCameraPosition.position);
     }
+
     const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(1, 1, 0));
 
     // Set background color to a lighter gray
     newScene.clearColor = new BABYLON.Color4(0.9, 0.9, 0.9, 1);
-
-    // Animation parameters
-    const animationDuration = 200; // in milliseconds
-    const zoomedOutPosition = new BABYLON.Vector3(0, 120, -1050);
-    camera.rotation.x = Math.PI / 8; 
-
-    // Create a position animation
-    const animation = new BABYLON.Animation(
-      'cameraZoom',
-      'position',
-      60,
-      BABYLON.Animation.ANIMATIONTYPE_VECTOR3,
-      BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT
-    );
-
-    // Set keyframes for the animation
-    const keys = [
-      { frame: 0, value: camera.position.clone() },
-      { frame: animationDuration, value: zoomedOutPosition }
-    ];
-
-    // Add keys to the animation
-    animation.setKeys(keys);
-
-    // Attach the animation to the camera
-    camera.animations.push(animation);
-
-    // Run the animation
-    newScene.beginAnimation(camera, 0, animationDuration, false);
 
     // Run the Babylon.js engine for the new scene
     engine.runRenderLoop(function () {
@@ -784,7 +758,8 @@ function loadFromLocalStorage() {
     // Show the new Babylon canvas
     babylonCanvas.style.display = 'block';
   }
-    }
+}
+
     
   </script>
 </body>
