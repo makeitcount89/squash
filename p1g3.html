@@ -328,6 +328,7 @@ scene.beginAnimation(camera, 0, animationDuration, false);
     camera.onViewMatrixChangedObservable.add(() => {
   // Update the previousCameraState when the view matrix changes
   updatePreviousCameraState();
+    }
 
     // Set keyframes for the animation
     const keys = [
@@ -770,12 +771,13 @@ function loadFromLocalStorage() {
     // Show the new Babylon canvas
     babylonCanvas.style.display = 'block';
   }
- }
+ 
     // Add an event listener for camera property changes
 camera.onViewMatrixChangedObservable.add(() => {
   // Update the previousCameraState when the view matrix changes
   updatePreviousCameraState();
-});
+}
+  }
 
 // Add similar event listeners for other camera properties if needed
 // For example:
