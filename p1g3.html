@@ -616,9 +616,12 @@ function loadFromLocalStorage() {
   }
 }
     function enterFullscreen() {
-  const babylonCanvas = canvas3D; // Replace with your Babylon.js canvas reference
-  babylonCanvas.width = window.innerWidth;
-  babylonCanvas.height = window.innerHeight;
+  const babylonCanvas = document.getElementById('canvas3D'); // Replace with your Babylon.js canvas reference
+
+  function handleResize() {
+    babylonCanvas.width = window.innerWidth;
+    babylonCanvas.height = window.innerHeight;
+  }
 
   if (babylonCanvas.requestFullscreen) {
     babylonCanvas.requestFullscreen();
@@ -629,6 +632,19 @@ function loadFromLocalStorage() {
   } else if (babylonCanvas.msRequestFullscreen) {
     babylonCanvas.msRequestFullscreen();
   }
+
+  // Add event listener for screen rotation
+  window.addEventListener('resize', handleResize);
+
+  // Remove event listener when exiting fullscreen
+  document.addEventListener('fullscreenchange', function () {
+    if (!document.fullscreenElement) {
+      window.removeEventListener('resize', handleResize);
+    }
+  });
+
+  // Additional handling for screen orientation change on mobile devices
+  window.addEventListener('orientationchange', handleResize);
     }
     
   </script>
