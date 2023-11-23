@@ -514,8 +514,7 @@ function toggleFullscreen() {
   if (document.fullscreenElement) {
     document.exitFullscreen();
   } else {
-    babylonCanvas.requestFullscreen().catch(err => {
-      console.error('Failed to enter fullscreen mode:', err);
+    requestFullscreen();
     });
   }
 }
@@ -626,6 +625,21 @@ function loadFromLocalStorage() {
     savedImage.src = savedData.imageDataURL;
   }
 }
+    function enterFullscreen() {
+  const babylonCanvas = canvas3D; // Replace with your Babylon.js canvas reference
+  babylonCanvas.width = window.innerWidth;
+  babylonCanvas.height = window.innerHeight;
+
+  if (babylonCanvas.requestFullscreen) {
+    babylonCanvas.requestFullscreen();
+  } else if (babylonCanvas.mozRequestFullScreen) {
+    babylonCanvas.mozRequestFullScreen();
+  } else if (babylonCanvas.webkitRequestFullscreen) {
+    babylonCanvas.webkitRequestFullscreen();
+  } else if (babylonCanvas.msRequestFullscreen) {
+    babylonCanvas.msRequestFullscreen();
+  }
+    }
     
   </script>
 </body>
