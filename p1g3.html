@@ -499,10 +499,7 @@ function redrawCanvas() {
   });
   context2D.stroke();
 }
-
- function deleteSelectedLine() {
-  // Call the line deletion function with mouse coordinates
-  const previousCameraState = {
+let previousCameraState = {
   position: camera.position.clone(),
   rotation: camera.rotation.clone(),
   fov: camera.fov,
@@ -511,11 +508,15 @@ function redrawCanvas() {
   target: camera.target.clone(),
   speed: camera.speed,
   // Add more properties as needed
-  };
+}
+ 
+    function deleteSelectedLine() {
+  // Call the line deletion function with mouse coordinates
+  
 
   handleLineSelection2D( /* provide mouseX and mouseY values */ );
    redrawCanvas();
-   reset(previousCameraState);
+   redraw();
  }
     
     // Function to save data to local storage
@@ -656,7 +657,8 @@ function loadFromLocalStorage() {
   // Additional handling for screen orientation change on mobile devices
   window.addEventListener('orientationchange', handleResize);
     }
-    function redraw(previousCameraState) {
+    function redraw() {
+  reset();
   if (!detectedLines) {
     alert('Please detect lines first.');
     return;
@@ -723,14 +725,13 @@ function loadFromLocalStorage() {
   });
     }
  
-    function reset(previousCameraState) {
+    function reset() {
   if (babylonCanvas) {
     // Hide the Babylon canvas
     babylonCanvas.style.display = 'none';
 
     // Create a new Babylon canvas element
     const newCanvas = document.createElement('canvas');
-    newCanvas.id = 'canvas3D';
     newCanvas.width = babylonCanvas.width;
     newCanvas.height = babylonCanvas.height;
     babylonCanvas.parentNode.replaceChild(newCanvas, babylonCanvas);
@@ -750,9 +751,6 @@ function loadFromLocalStorage() {
     camera.speed = previousCameraState.speed;
 
     newScene.activeCamera = camera;
-
-    // Draw the lines in the new scene
-    redraw(previousCameraState);
 
     // Run the Babylon.js engine for the new scene
     engine.runRenderLoop(function () {
