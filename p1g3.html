@@ -658,7 +658,7 @@ function loadFromLocalStorage() {
   window.addEventListener('orientationchange', handleResize);
     }
     function redraw() {
-  resetCanvas();
+  reset();
   if (!detectedLines) {
     alert('Please detect lines first.');
     return;
@@ -724,7 +724,59 @@ function loadFromLocalStorage() {
     wallMesh.scaling.y = wallThickness;
   });
     }
- 
+ function reset() {
+  if (!detectedLines) {
+    alert('Please detect lines first.');
+    return;
+  }
+
+  // Clear the Babylon canvas and recreate the scene
+  if (babylonCanvas) {
+    // Hide the Babylon canvas
+    babylonCanvas.style.display = 'none';
+
+    // Create a new Babylon canvas element
+    const newCanvas = document.createElement('canvas');
+    newCanvas.id = 'canvas3D';
+    newCanvas.width = babylonCanvas.width;
+    newCanvas.height = babylonCanvas.height;
+    babylonCanvas.parentNode.replaceChild(newCanvas, babylonCanvas);
+
+    babylonCanvas = newCanvas;
+
+    // Create a new Babylon engine and scene
+    const engine = new BABYLON.Engine(babylonCanvas, true);
+    const newScene = new BABYLON.Scene(engine);
+
+    // Set up camera and light for the new scene (you may need to adjust these parameters)
+    const camera = new BABYLON.UniversalCamera('camera', previousCameraState.position, newScene);
+    camera.rotation.copyFrom(previousCameraState.rotation);
+    camera.fov = previousCameraState.fov;
+    camera.minZ = previousCameraState.minZ;
+    camera.maxZ = previousCameraState.maxZ;
+    camera.target.copyFrom(previousCameraState.target);
+    camera.speed = previousCameraState.speed;
+
+    camera.attachControl(babylonCanvas, true);
+    const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(1, 1, 0));
+
+    // Set background color to a lighter gray
+    newScene.clearColor = new BABYLON.Color4(0.9, 0.9, 0.9, 1);
+
+    // Run the Babylon.js engine for the new scene
+    engine.runRenderLoop(function () {
+      newScene.render();
+    });
+
+    // Update the babylonCanvas and babylonScene variables
+    babylonCanvas._babylonEngine = engine;
+    babylonCanvas._babylonScene = newScene;
+
+    // Show the new Babylon canvas
+    babylonCanvas.style.display = 'block';
+  }
+ }
+    
     
   </script>
 </body>
