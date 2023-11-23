@@ -752,6 +752,41 @@ function loadFromLocalStorage() {
 
     newScene.activeCamera = camera;
 
+    camera.attachControl(babylonCanvas, true);
+    const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(1, 1, 0));
+
+    // Set background color to a lighter gray
+    newScene.clearColor = new BABYLON.Color4(0.9, 0.9, 0.9, 1);
+
+    // Animation parameters
+    const animationDuration = 200; // in milliseconds
+    const zoomedOutPosition = new BABYLON.Vector3(0, 120, -1050);
+    camera.rotation.x = Math.PI / 8; 
+
+    // Create a position animation
+    const animation = new BABYLON.Animation(
+      'cameraZoom',
+      'position',
+      60,
+      BABYLON.Animation.ANIMATIONTYPE_VECTOR3,
+      BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT
+    );
+
+    // Set keyframes for the animation
+    const keys = [
+      { frame: 0, value: camera.position.clone() },
+      { frame: animationDuration, value: zoomedOutPosition }
+    ];
+
+    // Add keys to the animation
+    animation.setKeys(keys);
+
+    // Attach the animation to the camera
+    camera.animations.push(animation);
+
+    // Run the animation
+    newScene.beginAnimation(camera, 0, animationDuration, false);
+
     // Run the Babylon.js engine for the new scene
     engine.runRenderLoop(function () {
       newScene.render();
@@ -764,8 +799,6 @@ function loadFromLocalStorage() {
     // Show the new Babylon canvas
     babylonCanvas.style.display = 'block';
   }
-}
-
   </script>
 </body>
 
