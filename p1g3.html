@@ -84,18 +84,19 @@
 
   <button onclick="toggleOffsetSliders()">Adjust Ground Position</button>
   <div id="offsetSliders" style="display: none;">
+ 
     <label for="leftOffset">Left Offset:</label>
 <input type="range" id="leftOffsetSlider" class="wide-slider" min="-1000" max="1000" value="350" onchange="updateLeftOffset(this.value)">
 <span id="leftOffsetValue">350</span>
-<label for="leftOffsetInput">Left Offset (Input):</label>
-  <input type="number" id="leftOffsetInput" onchange="updateLeftOffset(this.value)">
-</div>
+    <label for="leftOffsetInput">Left Offset (Input):</label>
+    <input type="number" id="leftOffsetInput" onchange="updateLeftOffset(this.value)">
 <div>
   
 </div>
 <label for="closerOffset">Closer Offset:</label>
 <input type="range" id="closerOffsetSlider" class="wide-slider" min="-1000" max="1000" value="-880" onchange="updateCloserOffset(this.value)">
 <span id="closerOffsetValue">-880</span>
+  
   <label for="closerOffsetInput">Closer Offset (Input):</label>
   <input type="number" id="closerOffsetInput" onchange="updateCloserOffset(this.value)">
   
