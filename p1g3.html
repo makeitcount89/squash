@@ -131,16 +131,6 @@
       document.getElementById('lineThicknessValue').textContent = value;
       // You can add real-time adjustment logic for line thickness here if needed
     }
-
-     function updateHorizontalSlider(value) {
-    document.getElementById('HorizontalValue').textContent = value;
-    convertTo3D(); // Trigger canvas update on change
-  }
-
-  function updateForwardSlider(value) {
-    document.getElementById('forwardbackValue').textContent = value;
-    convertTo3D(); // Trigger canvas update on change
-  }
     
     function loadAndDetect() {
   const input = document.getElementById('imageInput');
