@@ -81,13 +81,23 @@
   <button onclick="enterFullscreen()">Fullscreen</button>
   <button onclick="saveToLocalStorage()">Save</button>
   <button onclick="loadFromLocalStorage()">Load</button>
-  <label for="leftOffset">Left Offset:</label>
+
+  <button onclick="toggleOffsetSliders()">Adjust Ground Position</button>
+  <div id="offsetSliders" style="display: none;">
+    <label for="leftOffset">Left Offset:</label>
 <input type="range" id="leftOffsetSlider" class="wide-slider" min="-1000" max="1000" value="350" onchange="updateLeftOffset(this.value)">
 <span id="leftOffsetValue">350</span>
-
+<label for="leftOffsetInput">Left Offset (Input):</label>
+  <input type="number" id="leftOffsetInput" onchange="updateLeftOffset(this.value)">
+</div>
+<div>
+  
+</div>
 <label for="closerOffset">Closer Offset:</label>
 <input type="range" id="closerOffsetSlider" class="wide-slider" min="-1000" max="1000" value="-880" onchange="updateCloserOffset(this.value)">
 <span id="closerOffsetValue">-880</span>
+  <label for="closerOffsetInput">Closer Offset (Input):</label>
+  <input type="number" id="closerOffsetInput" onchange="updateCloserOffset(this.value)">
   
   <canvas id="canvas3D" width="1200" height="1200"></canvas>
 
@@ -99,10 +109,12 @@
 
    function updateLeftOffset(value) {
   document.getElementById('leftOffsetValue').textContent = value;
-}
+document.getElementById('leftOffsetSlider').value;
+   }
 
 function updateCloserOffset(value) {
   document.getElementById('closerOffsetValue').textContent = value;
+document.getElementById('closerOffsetSlider').value;
 }
     
     function onOpenCvReady() {
