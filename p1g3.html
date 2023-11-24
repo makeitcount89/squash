@@ -81,6 +81,14 @@
   <button onclick="enterFullscreen()">Fullscreen</button>
   <button onclick="saveToLocalStorage()">Save</button>
   <button onclick="loadFromLocalStorage()">Load</button>
+  <label for="leftOffset">Left Offset:</label>
+<input type="range" id="leftOffsetSlider" class="wide-slider" min="-1000" max="1000" value="350" onchange="updateLeftOffset(this.value)">
+<span id="leftOffsetValue">350</span>
+
+<label for="closerOffset">Closer Offset:</label>
+<input type="range" id="closerOffsetSlider" class="wide-slider" min="-1000" max="1000" value="-880" onchange="updateCloserOffset(this.value)">
+<span id="closerOffsetValue">-880</span>
+  
   <canvas id="canvas3D" width="1200" height="1200"></canvas>
 
   <p id="coordinates"></p>
@@ -89,6 +97,14 @@
 
     let img, context2D, babylonCanvas, detectedLines, scene, camera, startPoint; // Move 'scene' to a higher scope
 
+   function updateLeftOffset(value) {
+  document.getElementById('leftOffsetValue').textContent = value;
+}
+
+function updateCloserOffset(value) {
+  document.getElementById('closerOffsetValue').textContent = value;
+}
+    
     function onOpenCvReady() {
       // OpenCV is ready
     }
@@ -186,9 +202,10 @@
 
   // Create a ground plane
   const ground = BABYLON.MeshBuilder.CreateGround('ground', { width: width + 50, height: height}, babylonCanvas._babylonScene);
-  const leftOffset = 350;  // Adjust this value to move the ground to the left
-  const closerOffset = -880; // Adjust this value to move the ground closer
-
+  
+  parseFloat(document.getElementById('leftOffsetSlider').value)
+  parseFloat(document.getElementById('closerOffsetSlider').value)
+  
   ground.position = new BABYLON.Vector3(centerX - leftOffset, 0, -centerY + closerOffset);
 
   
