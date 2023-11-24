@@ -94,12 +94,34 @@
   <p id="coordinates"></p>
 
   <script>
-
+    
     let img, context2D, babylonCanvas, detectedLines, scene, camera, startPoint; // Move 'scene' to a higher scope
 
-    function onOpenCvReady() {
-      // OpenCV is ready
-    }
+    document.getElementById('HorizontalSlider').value = 350;
+    document.getElementById('ForwardSlider').value = -880;
+
+    function updateScene() {
+    const leftOffsetSlider = document.getElementById('HorizontalSlider');
+    const closerOffsetSlider = document.getElementById('ForwardSlider');
+
+    const leftOffset = parseFloat(leftOffsetSlider.value);
+    const closerOffset = parseFloat(closerOffsetSlider.value);
+
+    // Call your function to update the scene with new offsets
+    updateOffsets(leftOffset, closerOffset);
+  }
+   
+
+  // Update scene when sliders change
+  function updateHorizontalSlider(value) {
+    document.getElementById('HorizontalValue').textContent = value;
+    updateScene();
+  }
+
+  function updateForwardSlider(value) {
+    document.getElementById('forwardbackValue').textContent = value;
+    updateScene();
+  }
 
     function updateLineThreshold(value) {
       document.getElementById('lineThresholdValue').textContent = value;
@@ -204,22 +226,11 @@
 
   // Create a ground plane
   const ground = BABYLON.MeshBuilder.CreateGround('ground', { width: width + 50, height: height}, babylonCanvas._babylonScene);
-  leftOffsetSlider.oninput = function () {
-    
-     const leftOffsetSlider = document.getElementById('HorizontalSlider');
-  const closerOffsetSlider = document.getElementById('ForwardSlider');
+  
 
-  leftOffsetSlider.oninput = function () {
-    const leftOffset = parseFloat(leftOffsetSlider.value);
-    const closerOffset = parseFloat(closerOffsetSlider.value);
+     function updateOffsets(leftOffset, closerOffset) {
     ground.position = new BABYLON.Vector3(centerX - leftOffset, 0, -centerY + closerOffset);
-  };
-
-  closerOffsetSlider.oninput = function () {
-    const leftOffset = parseFloat(leftOffsetSlider.value);
-    const closerOffset = parseFloat(closerOffsetSlider.value);
-    ground.position = new BABYLON.Vector3(centerX - leftOffset, 0, -centerY + closerOffset);
-  };
+  }
 
   
   // Apply the original image as a texture to the ground
