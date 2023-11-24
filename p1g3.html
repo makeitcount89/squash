@@ -60,11 +60,11 @@
 <input type="range" id="lineThickness" class="wide-slider" min="1" max="100" value="50" onchange="updateLineThickness(this.value)">
 <span id="lineThicknessValue">50</span>
 
-    <label for="HorizontalSlider">Align Left/Right:</label>
+   <label for="HorizontalSlider">Align Left/Right:</label>
 <input type="range" id="HorizontalSlider" class="wide-slider" min="-1000" max="1000" value="350" onchange="updateHorizontalSlider(this.value)">
 <span id="HorizontalValue">350</span>
 
-<label for="forwardbackSlider">Align Forwards/Back:</label>
+<label for="ForwardSlider">Align Forwards/Back:</label>
 <input type="range" id="ForwardSlider" class="wide-slider" min="-1000" max="1000" value="-880" onchange="updateForwardSlider(this.value)">
 <span id="forwardbackValue">-880</span>
   
@@ -111,15 +111,15 @@
       // You can add real-time adjustment logic for line thickness here if needed
     }
 
-      function updateHorizontalSlider(value) {
-      document.getElementById('HorizontalValue').textContent = value;
-      convertTo3D(); // Trigger canvas update on change
-    }
+     function updateHorizontalSlider(value) {
+    document.getElementById('HorizontalValue').textContent = value;
+    convertTo3D(); // Trigger canvas update on change
+  }
 
-    function updateForwardSlider(value) {
-      document.getElementById('forwardbackValue').textContent = value;
-     convertTo3D(); // Trigger canvas update on change
-    }
+  function updateForwardSlider(value) {
+    document.getElementById('forwardbackValue').textContent = value;
+    convertTo3D(); // Trigger canvas update on change
+  }
     
     function loadAndDetect() {
   const input = document.getElementById('imageInput');
