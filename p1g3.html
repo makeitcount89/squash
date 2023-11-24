@@ -113,12 +113,12 @@
 
       function updateHorizontalSlider(value) {
       document.getElementById('HorizontalValue').textContent = value;
-      redraw(); // Trigger canvas update on change
+      convertTo3D(); // Trigger canvas update on change
     }
 
     function updateForwardSlider(value) {
       document.getElementById('forwardbackValue').textContent = value;
-     redraw(); // Trigger canvas update on change
+     convertTo3D(); // Trigger canvas update on change
     }
     
     function loadAndDetect() {
