@@ -100,26 +100,15 @@
     //document.getElementById('HorizontalSlider').value = 350;
     //document.getElementById('ForwardSlider').value = -880;
 
-    function updateScene() {
-      const leftOffsetSlider = document.getElementById('HorizontalSlider');
-      const closerOffsetSlider = document.getElementById('ForwardSlider');
-
-      const leftOffset = parseFloat(leftOffsetSlider.value);
-      const closerOffset = parseFloat(closerOffsetSlider.value);
-
-      // Call your function to update the scene with new offsets
-      updateOffsets(leftOffset, closerOffset);
-    }
    
 
    function updateHorizontalSlider(value) {
       document.getElementById('HorizontalValue').textContent = value;
-      updateScene(); // Trigger scene update on horizontal slider change
+      
     }
 
     function updateForwardSlider(value) {
       document.getElementById('forwardbackValue').textContent = value;
-      updateScene(); // Trigger scene update on forward/back slider change
     }
 
     function updateLineThreshold(value) {
@@ -217,9 +206,10 @@
   const ground = BABYLON.MeshBuilder.CreateGround('ground', { width: width + 50, height: height}, babylonCanvas._babylonScene);
   
 
-     function updateOffsets(leftOffset, closerOffset) {
+    var leftOffset = updateHorizontalSlider();
+    var CloserOffset = updateForwardSlider();
     ground.position = new BABYLON.Vector3(centerX - leftOffset, 0, -centerY + closerOffset);
-  }
+  
 
   
   // Apply the original image as a texture to the ground
