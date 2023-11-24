@@ -60,8 +60,10 @@
 <input type="range" id="lineThickness" class="wide-slider" min="1" max="100" value="50" onchange="updateLineThickness(this.value)">
 <span id="lineThicknessValue">50</span>
 
-  leftOffsetSlider = createSlider('Left Offset', -500, 500, -leftOffset, 1);
-  closerOffsetSlider = createSlider('Closer Offset', -1500, 1500, -closerOffset, 1);
+  <label for="leftOffsetSlider">Align Left/Right:</label>
+<input type="range" id="closerOffsetSlider" min="-1000" max="1000" step="25" value="350" />
+  <label for="closerOffsetSlider">Align Closer:</label>
+<input type="range" id="closerOffsetSlider" min="-1000" max="1000" step="25" value="-880" />
   
   <label for="wallColor">Wall Color:</label>
   <input type="color" id="wallColor" value="#000000">
