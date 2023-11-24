@@ -175,18 +175,6 @@
       dst.delete();
       linesP.delete();
     }
-const leftOffsetSlider = document.getElementById('HorizontalSlider');
-const closerOffsetSlider = document.getElementById('ForwardSlider');
-
-leftOffsetSlider.oninput = function () {
-  const leftOffset = parseFloat(document.getElementById('leftOffsetSlider').value);
-  ground.position = new BABYLON.Vector3(centerX - leftOffset, 0, -centerY + closerOffset);
-  };
-
-closerOffsetSlider.oninput = function () {
-  const closerOffset = parseFloat(document.getElementById('closerOffsetSlider').value);
-  ground.position = new BABYLON.Vector3(centerX - leftOffset, 0, -centerY + closerOffset);
-};
     
     function convertTo3D() {
   resetCanvas();
@@ -218,10 +206,20 @@ closerOffsetSlider.oninput = function () {
   const ground = BABYLON.MeshBuilder.CreateGround('ground', { width: width + 50, height: height}, babylonCanvas._babylonScene);
   leftOffsetSlider.oninput = function () {
     
-    
- const leftOffset = parseFloat(document.getElementById('HorizontalSlider').value);
-  const closerOffset = parseFloat(document.getElementById('ForwardSlider').value);
-  ground.position = new BABYLON.Vector3(centerX - leftOffset, 0, -centerY + closerOffset);
+     const leftOffsetSlider = document.getElementById('HorizontalSlider');
+  const closerOffsetSlider = document.getElementById('ForwardSlider');
+
+  leftOffsetSlider.oninput = function () {
+    const leftOffset = parseFloat(leftOffsetSlider.value);
+    const closerOffset = parseFloat(closerOffsetSlider.value);
+    ground.position = new BABYLON.Vector3(centerX - leftOffset, 0, -centerY + closerOffset);
+  };
+
+  closerOffsetSlider.oninput = function () {
+    const leftOffset = parseFloat(leftOffsetSlider.value);
+    const closerOffset = parseFloat(closerOffsetSlider.value);
+    ground.position = new BABYLON.Vector3(centerX - leftOffset, 0, -centerY + closerOffset);
+  };
 
   
   // Apply the original image as a texture to the ground
