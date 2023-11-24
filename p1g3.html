@@ -90,9 +90,7 @@
 <span id="leftOffsetValue">350</span>
     <label for="leftOffsetInput">Left Offset (Input):</label>
     <input type="number" id="leftOffsetInput" onchange="updateLeftOffset(this.value)">
-<div>
-  
-</div>
+
 <label for="closerOffset">Closer Offset:</label>
 <input type="range" id="closerOffsetSlider" class="wide-slider" min="-1000" max="1000" value="-880" onchange="updateCloserOffset(this.value)">
 <span id="closerOffsetValue">-880</span>
@@ -108,6 +106,12 @@
 
     let img, context2D, babylonCanvas, detectedLines, scene, camera, startPoint; // Move 'scene' to a higher scope
 
+
+    function toggleOffsetSliders() {
+  const offsetSliders = document.getElementById('offsetSliders');
+      offsetSliders.style.display = offsetSliders.style.display === 'none' ? 'block' : 'none';
+    }
+      
    function updateLeftOffset(value) {
   document.getElementById('leftOffsetValue').textContent = value;
 document.getElementById('leftOffsetSlider').value;
