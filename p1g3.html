@@ -59,14 +59,6 @@
 <label for="lineThickness">Line Thickness:</label>
 <input type="range" id="lineThickness" class="wide-slider" min="1" max="100" value="50" onchange="updateLineThickness(this.value)">
 <span id="lineThicknessValue">50</span>
-
-   <label for="HorizontalSlider">Align Left/Right:</label>
-  <input type="range" id="HorizontalSlider" class="wide-slider" min="-1000" max="1000" value="350" onchange="updateHorizontalSlider(this.value)">
-  <span id="HorizontalValue">350</span>
-
-  <label for="ForwardSlider">Align Forwards/Back:</label>
-  <input type="range" id="ForwardSlider" class="wide-slider" min="-1000" max="1000" value="-880" onchange="updateForwardSlider(this.value)">
-  <span id="forwardbackValue">-880</span>
   
   <label for="wallColor">Wall Color:</label>
   <input type="color" id="wallColor" value="#000000">
@@ -94,22 +86,11 @@
   <p id="coordinates"></p>
 
   <script>
-    
+
     let img, context2D, babylonCanvas, detectedLines, scene, camera, startPoint; // Move 'scene' to a higher scope
 
-    //document.getElementById('HorizontalSlider').value = 350;
-    //document.getElementById('ForwardSlider').value = -880;
-
-   
-
-   function updateHorizontalSlider(value) {
-      document.getElementById('HorizontalValue').textContent = value;
-      return value;
-    }
-
-    function updateForwardSlider(value) {
-      document.getElementById('forwardbackValue').textContent = value;
-   return value;
+    function onOpenCvReady() {
+      // OpenCV is ready
     }
 
     function updateLineThreshold(value) {
@@ -121,7 +102,7 @@
       document.getElementById('lineThicknessValue').textContent = value;
       // You can add real-time adjustment logic for line thickness here if needed
     }
-    
+
     function loadAndDetect() {
   const input = document.getElementById('imageInput');
   img = new Image();
@@ -176,7 +157,7 @@
       dst.delete();
       linesP.delete();
     }
-    
+
     function convertTo3D() {
   resetCanvas();
   if (!detectedLines) {
@@ -205,12 +186,10 @@
 
   // Create a ground plane
   const ground = BABYLON.MeshBuilder.CreateGround('ground', { width: width + 50, height: height}, babylonCanvas._babylonScene);
-  
+  const leftOffset = 350;  // Adjust this value to move the ground to the left
+  const closerOffset = -880; // Adjust this value to move the ground closer
 
-    var leftOffset = updateHorizontalSlider();
-    var CloserOffset = updateForwardSlider();
-    ground.position = new BABYLON.Vector3(centerX - leftOffset, 0, -centerY + closerOffset);
-  
+  ground.position = new BABYLON.Vector3(centerX - leftOffset, 0, -centerY + closerOffset);
 
   
   // Apply the original image as a texture to the ground
@@ -246,7 +225,6 @@
     wallMesh.scaling.y = wallThickness;
   });
 }
-    
 
     // Load Babylon canvas on page load
   window.onload = function () {
