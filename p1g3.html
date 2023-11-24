@@ -203,8 +203,8 @@ function updateCloserOffset(value) {
   // Create a ground plane
   const ground = BABYLON.MeshBuilder.CreateGround('ground', { width: width + 50, height: height}, babylonCanvas._babylonScene);
   
-  parseFloat(document.getElementById('leftOffsetSlider').value)
-  parseFloat(document.getElementById('closerOffsetSlider').value)
+  const leftOffset = parseFloat(document.getElementById('leftOffsetSlider').value)
+  const closerOffset = parseFloat(document.getElementById('closerOffsetSlider').value)
   
   ground.position = new BABYLON.Vector3(centerX - leftOffset, 0, -centerY + closerOffset);
 
