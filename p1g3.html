@@ -61,12 +61,12 @@
 <span id="lineThicknessValue">50</span>
 
    <label for="HorizontalSlider">Align Left/Right:</label>
-<input type="range" id="HorizontalSlider" class="wide-slider" min="-1000" max="1000" value="350" onchange="updateHorizontalSlider(this.value)">
-<span id="HorizontalValue">350</span>
+  <input type="range" id="HorizontalSlider" class="wide-slider" min="-1000" max="1000" value="350" onchange="updateHorizontalSlider(this.value)">
+  <span id="HorizontalValue">350</span>
 
-<label for="ForwardSlider">Align Forwards/Back:</label>
-<input type="range" id="ForwardSlider" class="wide-slider" min="-1000" max="1000" value="-880" onchange="updateForwardSlider(this.value)">
-<span id="forwardbackValue">-880</span>
+  <label for="ForwardSlider">Align Forwards/Back:</label>
+  <input type="range" id="ForwardSlider" class="wide-slider" min="-1000" max="1000" value="-880" onchange="updateForwardSlider(this.value)">
+  <span id="forwardbackValue">-880</span>
   
   <label for="wallColor">Wall Color:</label>
   <input type="color" id="wallColor" value="#000000">
@@ -101,27 +101,26 @@
     document.getElementById('ForwardSlider').value = -880;
 
     function updateScene() {
-    const leftOffsetSlider = document.getElementById('HorizontalSlider');
-    const closerOffsetSlider = document.getElementById('ForwardSlider');
+      const leftOffsetSlider = document.getElementById('HorizontalSlider');
+      const closerOffsetSlider = document.getElementById('ForwardSlider');
 
-    const leftOffset = parseFloat(leftOffsetSlider.value);
-    const closerOffset = parseFloat(closerOffsetSlider.value);
+      const leftOffset = parseFloat(leftOffsetSlider.value);
+      const closerOffset = parseFloat(closerOffsetSlider.value);
 
-    // Call your function to update the scene with new offsets
-    updateOffsets(leftOffset, closerOffset);
-  }
+      // Call your function to update the scene with new offsets
+      updateOffsets(leftOffset, closerOffset);
+    }
    
 
-  // Update scene when sliders change
-  function updateHorizontalSlider(value) {
-    document.getElementById('HorizontalValue').textContent = value;
-    updateScene();
-  }
+   function updateHorizontalSlider(value) {
+      document.getElementById('HorizontalValue').textContent = value;
+      updateScene(); // Trigger scene update on horizontal slider change
+    }
 
-  function updateForwardSlider(value) {
-    document.getElementById('forwardbackValue').textContent = value;
-    updateScene();
-  }
+    function updateForwardSlider(value) {
+      document.getElementById('forwardbackValue').textContent = value;
+      updateScene(); // Trigger scene update on forward/back slider change
+    }
 
     function updateLineThreshold(value) {
       document.getElementById('lineThresholdValue').textContent = value;
