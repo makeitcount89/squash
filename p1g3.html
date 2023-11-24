@@ -179,8 +179,12 @@ const leftOffsetSlider = document.getElementById('HorizontalSlider');
 const closerOffsetSlider = document.getElementById('ForwardSlider');
 
 leftOffsetSlider.oninput = function () {
-  const leftOffset = parseFloat(document.getElementById('HorizontalSlider').value);
-  const closerOffset = parseFloat(document.getElementById('ForwardSlider').value);
+  const leftOffset = parseFloat(document.getElementById('leftOffsetSlider').value);
+  ground.position = new BABYLON.Vector3(centerX - leftOffset, 0, -centerY + closerOffset);
+  };
+
+closerOffsetSlider.oninput = function () {
+  const closerOffset = parseFloat(document.getElementById('closerOffsetSlider').value);
   ground.position = new BABYLON.Vector3(centerX - leftOffset, 0, -centerY + closerOffset);
 };
     
