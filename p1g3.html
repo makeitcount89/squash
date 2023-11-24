@@ -60,10 +60,13 @@
 <input type="range" id="lineThickness" class="wide-slider" min="1" max="100" value="50" onchange="updateLineThickness(this.value)">
 <span id="lineThicknessValue">50</span>
 
-  <label for="leftOffsetSlider">Align Left/Right:</label>
-<input type="range" id="closerOffsetSlider" min="-1000" max="1000" step="25" value="350" />
-  <label for="closerOffsetSlider">Align Closer:</label>
-<input type="range" id="closerOffsetSlider" min="-1000" max="1000" step="25" value="-880" />
+    <label for="HorizontalSlider">Align Left/Right:</label>
+<input type="range" id="HorizontalSlider" class="wide-slider" min="-1000" max="1000" value="350" onchange="updateHorizontalSlider(this.value)">
+<span id="HorizontalValue">350</span>
+
+<label for="forwardbackSlider">Align Forwards/Back:</label>
+<input type="range" id="ForwardSlider" class="wide-slider" min="-1000" max="1000" value="-880" onchange="updateForwardSlider(this.value)">
+<span id="forwardbackValue">-880</span>
   
   <label for="wallColor">Wall Color:</label>
   <input type="color" id="wallColor" value="#000000">
@@ -108,6 +111,16 @@
       // You can add real-time adjustment logic for line thickness here if needed
     }
 
+      function updateHorizontalSlider(value) {
+      document.getElementById('HorizontalValue').textContent = value;
+      redraw(); // Trigger canvas update on change
+    }
+
+    function updateForwardSlider(value) {
+      document.getElementById('forwardbackSlider').textContent = value;
+     redraw(); // Trigger canvas update on change
+    }
+    
     function loadAndDetect() {
   const input = document.getElementById('imageInput');
   img = new Image();
@@ -192,27 +205,10 @@
   // Create a ground plane
   const ground = BABYLON.MeshBuilder.CreateGround('ground', { width: width + 50, height: height}, babylonCanvas._babylonScene);
   leftOffsetSlider.oninput = function () {
-    const leftOffset = -parseFloat(this.value);
-    converTo3D();
-  };
-
-  closerOffsetSlider.oninput = function () {
-    closerOffset = -parseFloat(this.value);
-  };
-    // Assuming closerOffsetSlider is the id of your slider element
-const closerOffsetSlider = document.getElementById('closerOffsetSlider');
-
-// Function to be called when the slider changes
-function handleCloserOffsetChange() {
-    closerOffset = -parseFloat(closerOffsetSlider.value);
-    convertTo3D();
-}
-
-// Adding event listener to the slider
-closerOffsetSlider.addEventListener('input', handleCloserOffsetChange);
     
-  
-
+    
+  const leftOffset = parseFloat(document.getElementById('HorizontalSlider').value);
+  const closerOffset = parseFloat(document.getElementById('ForwardSlider').value);
   ground.position = new BABYLON.Vector3(centerX - leftOffset, 0, -centerY + closerOffset);
 
   
