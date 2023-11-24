@@ -59,6 +59,9 @@
 <label for="lineThickness">Line Thickness:</label>
 <input type="range" id="lineThickness" class="wide-slider" min="1" max="100" value="50" onchange="updateLineThickness(this.value)">
 <span id="lineThicknessValue">50</span>
+
+  leftOffsetSlider = createSlider('Left Offset', -500, 500, -leftOffset, 1);
+  closerOffsetSlider = createSlider('Closer Offset', -1500, 1500, -closerOffset, 1);
   
   <label for="wallColor">Wall Color:</label>
   <input type="color" id="wallColor" value="#000000">
@@ -186,8 +189,27 @@
 
   // Create a ground plane
   const ground = BABYLON.MeshBuilder.CreateGround('ground', { width: width + 50, height: height}, babylonCanvas._babylonScene);
-  const leftOffset = 350;  // Adjust this value to move the ground to the left
-  const closerOffset = -880; // Adjust this value to move the ground closer
+  leftOffsetSlider.oninput = function () {
+    const leftOffset = -parseFloat(this.value);
+    converTo3D();
+  };
+
+  closerOffsetSlider.oninput = function () {
+    closerOffset = -parseFloat(this.value);
+  };
+    // Assuming closerOffsetSlider is the id of your slider element
+const closerOffsetSlider = document.getElementById('closerOffsetSlider');
+
+// Function to be called when the slider changes
+function handleCloserOffsetChange() {
+    closerOffset = -parseFloat(closerOffsetSlider.value);
+    convertTo3D();
+}
+
+// Adding event listener to the slider
+closerOffsetSlider.addEventListener('input', handleCloserOffsetChange);
+    
+  
 
   ground.position = new BABYLON.Vector3(centerX - leftOffset, 0, -centerY + closerOffset);
 
