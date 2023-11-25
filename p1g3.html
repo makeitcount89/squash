@@ -52,6 +52,9 @@
 <body>
   <input type="file" id="imageInput" accept="image/*" onchange="loadAndDetect()" class="custom-file-input">
   <button onclick="convertTo3D()">Convert to 3D</button>
+  <!-- Add this button in your HTML body -->
+<button onclick="shareCanvasImage()">Share</button>
+
   
   <label for="lineThreshold">Line Threshold:</label>
 <input type="range" id="lineThreshold" class="wide-slider" min="1" max="1000" value="270" onchange="updateLineThreshold(this.value)">
@@ -101,6 +104,21 @@
   <p id="coordinates"></p>
 
   <script>
+    
+  function shareCanvasImage() {
+    const babylonCanvas = document.getElementById('canvas3D');
+    
+    // Capture the canvas image as a data URL
+    const imageDataURL = babylonCanvas.toDataURL('image/png');
+
+    // Create a temporary link element
+    const link = document.createElement('a');
+    link.href = imageDataURL;
+    link.download = 'canvas_image.png';
+
+    // Trigger a click on the link to start the download or share process
+    link.click();
+  }
 
     let img, context2D, babylonCanvas, detectedLines, scene, camera, startPoint; // Move 'scene' to a higher scope
 
