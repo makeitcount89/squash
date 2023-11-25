@@ -60,7 +60,7 @@
   <input type="file" id="imageInput" accept="image/*" onchange="loadAndDetect()" class="custom-file-input">
  <button id="convertTo3D" onclick="convertTo3D()">Convert to 3D</button>
   
-<button onclick="download()">Download Image</button>
+<button id="downloadButton" onclick="download()">Download Image</button>
   
   <label for="lineThreshold">Line Threshold:</label>
 <input type="range" id="lineThreshold" class="wide-slider" min="1" max="1000" value="270" onchange="updateLineThreshold(this.value)">
@@ -112,37 +112,18 @@
   <script>
   let img, context2D, babylonCanvas, detectedLines, scene, camera, startPoint; // Move 'scene' to a higher scope
     
-  // Assuming you already have these variables and objects in your code
-var canvas = document.getElementById("renderCanvas");
-var engine = new BABYLON.Engine(canvas, true);
-var scene = new BABYLON.Scene(engine);
-var camera = new BABYLON.ArcRotateCamera("camera", 0, 0, 10, BABYLON.Vector3.Zero(), scene);
-camera.attachControl(canvas, true);
-
-// Your existing box creation
-var box = BABYLON.MeshBuilder.CreateBox("box", {}, scene);
-
-// Your existing engine render loop
-engine.runRenderLoop(function () {
-  scene.render();
-});
-
-// Function to download the screenshot
+  // Function to download the screenshot
 function downloadScreenshot() {
-  BABYLON.Tools.CreateScreenshot(engine, camera, 400, function (data) {
+  BABYLON.Tools.CreateScreenshot(engine, camera, babylonCanvas.width, function (data) {
     var link = document.createElement('a');
     link.href = data;
     link.download = '3D_Render_Screenshot.png';
     link.click();
   });
-
-  // Event listener inside the function
-  document.getElementById('downloadButton').removeEventListener('click', downloadScreenshot);
 }
 
 // Assuming you have a button with the ID 'downloadButton'
 document.getElementById('downloadButton').addEventListener('click', downloadScreenshot);
-    
     
 
 
