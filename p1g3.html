@@ -112,10 +112,12 @@
       
    function updateLeftOffset(value) {
   document.getElementById('leftOffsetValue').textContent = value;
+     redraw();
    }
 
 function updateCloserOffset(value) {
   document.getElementById('closerOffsetValue').textContent = value;
+  redraw();
 }
     
 
@@ -708,11 +710,11 @@ function loadFromLocalStorage() {
 
   // Create a ground plane
   const ground = BABYLON.MeshBuilder.CreateGround('ground', { width: width + 50, height: height}, babylonCanvas._babylonScene);
-  const leftOffset = 350;  // Adjust this value to move the ground to the left
-  const closerOffset = -880; // Adjust this value to move the ground closer
 
-  ground.position = new BABYLON.Vector3(centerX - leftOffset, 0, -centerY + closerOffset);
-
+  const horizontalOffset = parseFloat(document.getElementById('leftOffsetSlider').value)
+  const closerOffset = parseFloat(document.getElementById('closerOffsetSlider').value)
+  
+  ground.position = new BABYLON.Vector3(centerX + horizontalOffset, 0, -centerY + closerOffset);
   
   // Apply the original image as a texture to the ground
   const groundMaterial = new BABYLON.StandardMaterial('groundMaterial', babylonCanvas._babylonScene);
