@@ -60,7 +60,7 @@
   <input type="file" id="imageInput" accept="image/*" onchange="loadAndDetect()" class="custom-file-input">
  <button id="convertTo3D" onclick="convertTo3D()">Convert to 3D</button>
   
-<button id="downloadButton" onclick="download()">Download Image</button>
+<button onclick="download()">Download Image</button>
   
   <label for="lineThreshold">Line Threshold:</label>
 <input type="range" id="lineThreshold" class="wide-slider" min="1" max="1000" value="270" onchange="updateLineThreshold(this.value)">
@@ -113,7 +113,7 @@
   let img, context2D, babylonCanvas, detectedLines, scene, camera, startPoint; // Move 'scene' to a higher scope
     
   // Function to download the screenshot
-function downloadScreenshot() {
+function download() {
   BABYLON.Tools.CreateScreenshot(engine, camera, babylonCanvas.width, function (data) {
     var link = document.createElement('a');
     link.href = data;
@@ -122,8 +122,6 @@ function downloadScreenshot() {
   });
 }
 
-// Assuming you have a button with the ID 'downloadButton'
-document.getElementById('downloadButton').addEventListener('click', downloadScreenshot);
     
 
 
