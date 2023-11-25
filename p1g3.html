@@ -112,25 +112,19 @@
   <script>
   let img, context2D, babylonCanvas, detectedLines, scene, camera, startPoint; // Move 'scene' to a higher scope
     
-  function download() {
-  // Replace 'yourCanvasId' with your canvas element's ID
-  const canvas = document.getElementById('canvas3D');
+  function downloadScreenshot() {
+   var box = BABYLON.MeshBuilder.CreateBox("box
+  BABYLON.Tools.CreateScreenshot(engine, camera, 400, function (data) {
+    var link = document.createElement('a');
+    link.href = data;
+    link.download = '3D_Render_Screenshot.png';
+    link.click();
+  });
+}
 
-  // Convert canvas content to data URL
-  const dataUrl = canvas.toDataURL('image/png');
+// Assuming you have a button with the ID 'downloadButton'
+document.getElementById('download').addEventListener('click', downloadScreenshot);
 
-  // Create a link element
-  const link = document.createElement('a');
-
-  // Set the href attribute with the data URL
-  link.href = dataUrl;
-
-  // Specify the download attribute along with a desired filename
-  link.download = 'canvas_screenshot.png';
-
-  // Simulate a click to trigger the download
-  link.click();
-  }
     
 
 
