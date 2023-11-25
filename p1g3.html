@@ -51,6 +51,7 @@
 
 <body>
   <input type="file" id="imageInput" accept="image/*" onchange="loadAndDetect()" class="custom-file-input">
+  <button onclick="convertTo3D()">Convert to 3D</button>
   
   <label for="lineThreshold">Line Threshold:</label>
 <input type="range" id="lineThreshold" class="wide-slider" min="1" max="1000" value="270" onchange="updateLineThreshold(this.value)">
@@ -75,9 +76,8 @@
 <button id="deleteButton" onclick="deleteSelectedLine()">Delete Selected Line</button>
 <button onclick="undo()">Undo</button>
   
-    
-  <button onclick="convertTo3D()">Convert to 3D</button>
-  <canvas id="canvas2D" width="600" height="600"></canvas>
+    <canvas id="canvas2D" width="600" height="600"></canvas>
+  
   <button onclick="enterFullscreen()">Fullscreen</button>
   <button onclick="saveToLocalStorage()">Save</button>
   <button onclick="loadFromLocalStorage()">Load</button>
@@ -86,7 +86,7 @@
   <div id="offsetSliders" style="display: none;">
  
     <label for="leftOffset">Left / Right:</label>
-<input type="range" id="leftOffsetSlider" class="wide-slider" min="500" max="-50" value="350" onchange="updateLeftOffset(this.value)">
+<input type="range" id="leftOffsetSlider" class="wide-slider" min="-50" max="500" value="350" onchange="updateLeftOffset(this.value)">
 <span id="leftOffsetValue">350</span>
 
 
@@ -213,10 +213,10 @@ function updateCloserOffset(value) {
   // Create a ground plane
   const ground = BABYLON.MeshBuilder.CreateGround('ground', { width: width + 50, height: height}, babylonCanvas._babylonScene);
   
-  const leftOffset = parseFloat(document.getElementById('leftOffsetSlider').value)
+  const horizontalOffset = parseFloat(document.getElementById('leftOffsetSlider').value)
   const closerOffset = parseFloat(document.getElementById('closerOffsetSlider').value)
   
-  ground.position = new BABYLON.Vector3(centerX - leftOffset, 0, -centerY + closerOffset);
+  ground.position = new BABYLON.Vector3(centerX + horizontalOffset, 0, -centerY + closerOffset);
 
   
   // Apply the original image as a texture to the ground
