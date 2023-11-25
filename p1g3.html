@@ -60,7 +60,6 @@
   <input type="file" id="imageInput" accept="image/*" onchange="loadAndDetect()" class="custom-file-input">
  <button id="convertTo3D" onclick="convertTo3D()">Convert to 3D</button>
   
-<!-- Change the Share button to Download Image -->
 <button onclick="download()">Download Image</button>
   
   <label for="lineThreshold">Line Threshold:</label>
@@ -111,11 +110,17 @@
   <p id="coordinates"></p>
 
   <script>
+  let img, context2D, babylonCanvas, detectedLines, scene, camera, startPoint; // Move 'scene' to a higher scope
+    
   
-  // Assuming you have your Babylon.js engine, scene, and camera set up
-
-// Function to trigger screenshot and download
 function download(engine, scene, camera, size) {
+
+  // Example usage (replace with your actual Babylon.js engine, scene, and camera variables)
+var canvas = document.getElementById('canvas3D'); // Replace 'yourCanvasId' with your canvas element's ID
+var engine = new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true });
+
+// Trigger download with a specific size (replace 800 with your desired size)
+
     BABYLON.Tools.CreateScreenshotUsingRenderTarget(engine, camera, size, function (data) {
         // Create a link element
         var link = document.createElement('a');
@@ -128,22 +133,13 @@ function download(engine, scene, camera, size) {
 
         // Simulate a click to trigger the download
         link.click();
+
+      downloadCanvasScreenshot(engine, scene, camera, 800);
     });
 }
-
-// Example usage (replace with your actual Babylon.js engine, scene, and camera variables)
-var canvas = document.getElementById('canvas3D'); // Replace 'yourCanvasId' with your canvas element's ID
-var engine = new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true });
-var scene = new BABYLON.Scene(engine);
-var camera = new BABYLON.ArcRotateCamera("camera", 0, 0, 5, BABYLON.Vector3.Zero(), scene);
-
-// Trigger download with a specific size (replace 800 with your desired size)
-downloadCanvasScreenshot(engine, scene, camera, 800);
     
-  
 
-    let img, context2D, babylonCanvas, detectedLines, scene, camera, startPoint; // Move 'scene' to a higher scope
-
+    
 
     function toggleOffsetSliders() {
   const offsetSliders = document.getElementById('offsetSliders');
