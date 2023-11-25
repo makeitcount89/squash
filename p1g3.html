@@ -112,32 +112,27 @@
   <script>
   let img, context2D, babylonCanvas, detectedLines, scene, camera, startPoint; // Move 'scene' to a higher scope
     
-  
-function download() {
+  function download() {
   // Replace 'yourCanvasId' with your canvas element's ID
   const canvas = document.getElementById('canvas3D');
 
-  // Convert canvas content to Blob
-  canvas.toBlob(function (blob) {
-    // Create a link element
-    const link = document.createElement('a');
+  // Convert canvas content to data URL
+  const dataUrl = canvas.toDataURL('image/png');
 
-    // Create a Blob URL for the download link
-    const url = URL.createObjectURL(blob);
+  // Create a link element
+  const link = document.createElement('a');
 
-    // Set the href attribute with the Blob URL
-    link.href = url;
+  // Set the href attribute with the data URL
+  link.href = dataUrl;
 
-    // Specify the download attribute along with a desired filename
-    link.download = 'canvas_screenshot.png';
+  // Specify the download attribute along with a desired filename
+  link.download = 'canvas_screenshot.png';
 
-    // Simulate a click to trigger the download
-    link.click();
+  // Simulate a click to trigger the download
+  link.click();
+  }
+    
 
-    // Release the Blob URL
-    URL.revokeObjectURL(url);
-  });
-}
 
 
     function toggleOffsetSliders() {
