@@ -114,29 +114,31 @@
     
   
 function download() {
-      // Example usage (replace with your actual Babylon.js engine, scene, and camera variables)
-      var canvas = document.getElementById('canvas3D'); // Replace 'yourCanvasId' with your canvas element's ID
-      var engine = new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true });
+  // Replace 'yourCanvasId' with your canvas element's ID
+  const canvas = document.getElementById('canvas3D');
 
-      // Trigger download with a specific size (replace 800 with your desired size)
-      BABYLON.Tools.CreateScreenshotUsingRenderTarget(engine, camera, 800, function (data) {
-        // Create a link element
-        var link = document.createElement('a');
+  // Convert canvas content to Blob
+  canvas.toBlob(function (blob) {
+    // Create a link element
+    const link = document.createElement('a');
 
-        // Set the href attribute with the data URI
-        link.href = data;
+    // Create a Blob URL for the download link
+    const url = URL.createObjectURL(blob);
 
-        // Specify the download attribute along with a desired filename
-        link.download = 'canvas_screenshot.png';
+    // Set the href attribute with the Blob URL
+    link.href = url;
 
-        // Simulate a click to trigger the download
-        link.click();
-      });
+    // Specify the download attribute along with a desired filename
+    link.download = 'canvas_screenshot.png';
+
+    // Simulate a click to trigger the download
+    link.click();
+
+    // Release the Blob URL
+    URL.revokeObjectURL(url);
+  });
 }
 
-    
-
-    
 
     function toggleOffsetSliders() {
   const offsetSliders = document.getElementById('offsetSliders');
