@@ -60,7 +60,7 @@
   <input type="file" id="imageInput" accept="image/*" onchange="loadAndDetect()" class="custom-file-input">
  <button id="convertTo3D" onclick="convertTo3D()">Convert to 3D</button>
   
-<button onclick="download()">Download Image</button>
+<button id="downloadButton" onclick="download()">Download Image</button>
   
   <label for="lineThreshold">Line Threshold:</label>
 <input type="range" id="lineThreshold" class="wide-slider" min="1" max="1000" value="270" onchange="updateLineThreshold(this.value)">
@@ -112,14 +112,37 @@
   <script>
   let img, context2D, babylonCanvas, detectedLines, scene, camera, startPoint; // Move 'scene' to a higher scope
     
-  // Function to download the screenshot
+// Assuming you have already initialized engine, scene, camera, and babylonCanvas
+
+// Function to download the screenshot
 function download() {
+  // Ensure that 'engine', 'camera', and 'babylonCanvas' are in the correct scope
   BABYLON.Tools.CreateScreenshot(engine, camera, babylonCanvas.width, function (data) {
+    // Create a link element
     var link = document.createElement('a');
+
+    // Set the href attribute to the data URI of the image
     link.href = data;
+
+    // Set the download attribute to specify the filename
     link.download = '3D_Render_Screenshot.png';
+
+    // Append the link to the document
+    document.body.appendChild(link);
+
+    // Trigger a click event on the link to initiate the download
     link.click();
+
+    // Remove the link from the document
+    document.body.removeChild(link);
   });
+}
+
+// Example: Trigger the download function on a button click
+document.getElementById('downloadButton').addEventListener('click', function () {
+  download();
+});
+    
 }
 
     
