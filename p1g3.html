@@ -82,11 +82,11 @@
   <button onclick="saveToLocalStorage()">Save</button>
   <button onclick="loadFromLocalStorage()">Load</button>
 
-  <button onclick="toggleOffsetSliders()">Adjust Ground Position</button>
+  <button onclick="toggleOffsetSliders()">Adjust Floor Position</button>
   <div id="offsetSliders" style="display: none;">
  
-    <label for="leftOffset">Left Offset:</label>
-<input type="range" id="leftOffsetSlider" class="wide-slider" min="-500" max="500" value="350" onchange="updateLeftOffset(this.value)">
+    <label for="leftOffset">Left / Right:</label>
+<input type="range" id="leftOffsetSlider" class="wide-slider" min="500" max="-50" value="350" onchange="updateLeftOffset(this.value)">
 <span id="leftOffsetValue">350</span>
 
 
