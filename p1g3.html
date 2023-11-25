@@ -113,15 +113,13 @@
   let img, context2D, babylonCanvas, detectedLines, scene, camera, startPoint; // Move 'scene' to a higher scope
     
   
-function download(engine, scene, camera, size) {
+function download() {
+      // Example usage (replace with your actual Babylon.js engine, scene, and camera variables)
+      var canvas = document.getElementById('canvas3D'); // Replace 'yourCanvasId' with your canvas element's ID
+      var engine = new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true });
 
-  // Example usage (replace with your actual Babylon.js engine, scene, and camera variables)
-var canvas = document.getElementById('canvas3D'); // Replace 'yourCanvasId' with your canvas element's ID
-var engine = new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true });
-
-// Trigger download with a specific size (replace 800 with your desired size)
-
-    BABYLON.Tools.CreateScreenshotUsingRenderTarget(engine, camera, size, function (data) {
+      // Trigger download with a specific size (replace 800 with your desired size)
+      BABYLON.Tools.CreateScreenshotUsingRenderTarget(engine, camera, 800, function (data) {
         // Create a link element
         var link = document.createElement('a');
 
@@ -133,10 +131,8 @@ var engine = new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, ste
 
         // Simulate a click to trigger the download
         link.click();
+      });
 
-      downloadCanvasScreenshot(engine, scene, camera, 800);
-    });
-}
     
 
     
