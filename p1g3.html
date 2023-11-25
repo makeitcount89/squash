@@ -61,7 +61,7 @@
  <button id="convertTo3D" onclick="convertTo3D()">Convert to 3D</button>
   
 <!-- Change the Share button to Download Image -->
-<button onclick="downloadCanvasImage()">Download Image</button>
+<button onclick="download()">Download Image</button>
   
   <label for="lineThreshold">Line Threshold:</label>
 <input type="range" id="lineThreshold" class="wide-slider" min="1" max="1000" value="270" onchange="updateLineThreshold(this.value)">
@@ -111,20 +111,35 @@
   <p id="coordinates"></p>
 
   <script>
-  function downloadCanvasImage() {
-    const babylonCanvas = document.getElementById('canvas3D');
+  
+  // Assuming you have your Babylon.js engine, scene, and camera set up
+
+// Function to trigger screenshot and download
+function download(engine, scene, camera, size) {
+    BABYLON.Tools.CreateScreenshotUsingRenderTarget(engine, camera, size, function (data) {
+        // Create a link element
+        var link = document.createElement('a');
+
+        // Set the href attribute with the data URI
+        link.href = data;
+
+        // Specify the download attribute along with a desired filename
+        link.download = 'canvas_screenshot.png';
+
+        // Simulate a click to trigger the download
+        link.click();
+    });
+}
+
+// Example usage (replace with your actual Babylon.js engine, scene, and camera variables)
+var canvas = document.getElementById('canvas3D'); // Replace 'yourCanvasId' with your canvas element's ID
+var engine = new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true });
+var scene = new BABYLON.Scene(engine);
+var camera = new BABYLON.ArcRotateCamera("camera", 0, 0, 5, BABYLON.Vector3.Zero(), scene);
+
+// Trigger download with a specific size (replace 800 with your desired size)
+downloadCanvasScreenshot(engine, scene, camera, 800);
     
-    // Capture the canvas image as a data URL
-    const imageDataURL = babylonCanvas.toDataURL('image/png');
-
-    // Create a temporary link element
-    const link = document.createElement('a');
-    link.href = imageDataURL;
-    link.download = 'canvas_image.png';
-
-    // Trigger a click on the link to start the download
-    link.click();
-  }
   
 
     let img, context2D, babylonCanvas, detectedLines, scene, camera, startPoint; // Move 'scene' to a higher scope
