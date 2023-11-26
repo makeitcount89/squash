@@ -261,12 +261,14 @@ function convertTo3D() {
     wallMesh.scaling.y = wallThickness;
   });
 
-document.getElementById('download').addEventListener('click', function() {
+document.getElementById('download').addEventListener('click', function () {
+  // Ensure the canvas has a valid size before taking a screenshot
+  babylonCanvas._engine.resize();
 
   BABYLON.Tools.CreateScreenshot(
     babylonCanvas._engine,
-    babylonCanvas._babylonScene.camera,
-    { width: babylonCanvas._babylonScene.width, height: babylonCanvas._babylonScene.height },
+    babylonCanvas._babylonScene.activeCamera,
+    { width: babylonCanvas._engine.getRenderWidth(), height: babylonCanvas._engine.getRenderHeight() },
     function (data) {
       const blob = dataURItoBlob(data);
       const url = window.URL.createObjectURL(blob);
@@ -281,6 +283,7 @@ document.getElementById('download').addEventListener('click', function() {
     }
   );
 });
+
 }
 
 // Function to convert data URI to Blob
