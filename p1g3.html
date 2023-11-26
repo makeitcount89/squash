@@ -60,7 +60,7 @@
   <input type="file" id="imageInput" accept="image/*" onchange="loadAndDetect()" class="custom-file-input">
  <button id="convertTo3D" onclick="convertTo3D()">Convert to 3D</button>
   
-<button onclick="download()">Download Image!</button>
+<button id="download">Download Image!!!</button>
 
   
   <label for="lineThreshold">Line Threshold:</label>
@@ -194,8 +194,7 @@ function updateCloserOffset(value) {
       linesP.delete();
     }
 
-
-    function convertTo3D() {
+function convertTo3D() {
   resetCanvas();
   if (!detectedLines) {
     alert('Please detect lines first.');
@@ -223,13 +222,12 @@ function updateCloserOffset(value) {
 
   // Create a ground plane
   const ground = BABYLON.MeshBuilder.CreateGround('ground', { width: width + 50, height: height}, babylonCanvas._babylonScene);
-  
-  const horizontalOffset = parseFloat(document.getElementById('leftOffsetSlider').value)
-  const closerOffset = parseFloat(document.getElementById('closerOffsetSlider').value)
-  
+
+  const horizontalOffset = parseFloat(document.getElementById('leftOffsetSlider').value);
+  const closerOffset = parseFloat(document.getElementById('closerOffsetSlider').value);
+
   ground.position = new BABYLON.Vector3(centerX + horizontalOffset, 0, -centerY + closerOffset);
 
-  
   // Apply the original image as a texture to the ground
   const groundMaterial = new BABYLON.StandardMaterial('groundMaterial', babylonCanvas._babylonScene);
   groundMaterial.diffuseTexture = new BABYLON.Texture(img.src, babylonCanvas._babylonScene);
@@ -262,8 +260,9 @@ function updateCloserOffset(value) {
 
     wallMesh.scaling.y = wallThickness;
   });
-  
-      document.getElementById('downloadButton').addEventListener('click', function() {
+
+
+document.getElementById('download').addEventListener('click', function() {
   const canvasRect = babylonCanvas._babylonCanvas.getBoundingClientRect();
 
   BABYLON.Tools.CreateScreenshot(
@@ -283,7 +282,8 @@ function updateCloserOffset(value) {
       window.URL.revokeObjectURL(url);
     }
   );
-
+});
+}
 
 // Function to convert data URI to Blob
 function dataURItoBlob(dataURI) {
@@ -296,9 +296,7 @@ function dataURItoBlob(dataURI) {
   }
 
   return new Blob([ab], { type: 'image/jpeg' });
-};
 }
-};
 
     // Load Babylon canvas on page load
   window.onload = function () {
