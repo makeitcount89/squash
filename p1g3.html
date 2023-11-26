@@ -261,6 +261,10 @@ function convertTo3D() {
     wallMesh.scaling.y = wallThickness;
   });
 
+if (!_babylonCanvas) {
+    console.error("_babylonCanvas is undefined");
+    return;
+}
 
 document.getElementById('download').addEventListener('click', function() {
   const canvasRect = babylonCanvas._babylonCanvas.getBoundingClientRect();
