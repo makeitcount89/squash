@@ -60,7 +60,7 @@
   <input type="file" id="imageInput" accept="image/*" onchange="loadAndDetect()" class="custom-file-input">
  <button id="convertTo3D" onclick="convertTo3D()">Convert to 3D</button>
   
-<button onclick="download2()">Download Image2</button>
+<button onclick="download()">Download Image3</button>
   
   <label for="lineThreshold">Line Threshold:</label>
 <input type="range" id="lineThreshold" class="wide-slider" min="1" max="1000" value="270" onchange="updateLineThreshold(this.value)">
@@ -260,36 +260,6 @@ function updateCloserOffset(value) {
 
     wallMesh.scaling.y = wallThickness;
   });
-  
-        function download() {
-    var canvasRect = canvas.getBoundingClientRect();
-    BABYLON.Tools.CreateScreenshot(babylonCanvas._engine, babylonCanvas._babylonScene.activeCamera, {
-        width: canvasRect.width,
-        height: canvasRect.height
-    }, function (data) {
-        // dataURItoBlob function included here
-        var byteString = atob(data.split(',')[1]);
-        var ab = new ArrayBuffer(byteString.length);
-        var ia = new Uint8Array(ab);
-
-        for (var i = 0; i < byteString.length; i++) {
-            ia[i] = byteString.charCodeAt(i);
-        }
-
-        var blob = new Blob([ab], { type: 'image/jpeg' });
-
-        var url = window.URL.createObjectURL(blob);
-
-        var a = document.createElement("a");
-        a.style.display = "none";
-        a.href = url;
-        a.download = "screenshot.jpg";
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-            });
-        }
-  
 }
 
     // Load Babylon canvas on page load
@@ -423,9 +393,9 @@ scene.beginAnimation(camera, 0, animationDuration, false);
     // Show the new Babylon canvas
     babylonCanvas.style.display = 'block';
   }
-      function download2() {
-    var canvasRect = canvas.getBoundingClientRect();
-    BABYLON.Tools.CreateScreenshot(babylonCanvas._engine, babylonCanvas._babylonScene.activeCamera, {
+      function download() {
+    var canvasRect = babylonCanvas.getBoundingClientRect(); // Corrected variable usage
+    BABYLON.Tools.CreateScreenshot(babylonCanvas._babylonEngine, babylonCanvas._babylonScene.activeCamera, {
         width: canvasRect.width,
         height: canvasRect.height
     }, function (data) {
@@ -449,8 +419,9 @@ scene.beginAnimation(camera, 0, animationDuration, false);
         document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(url);
-            });
+    });
       }
+                                   
     }
     
   
