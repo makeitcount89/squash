@@ -265,7 +265,7 @@ document.getElementById('download').addEventListener('click', function() {
 
   BABYLON.Tools.CreateScreenshot(
     babylonCanvas._engine,
-    babylonCanvas._babylonScene.activeCamera,
+    babylonCanvas._babylonScene.camera,
     { width: babylonCanvas._babylonScene.width, height: babylonCanvas._babylonScene.height },
     function (data) {
       const blob = dataURItoBlob(data);
