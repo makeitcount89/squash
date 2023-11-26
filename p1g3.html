@@ -261,18 +261,12 @@ function convertTo3D() {
     wallMesh.scaling.y = wallThickness;
   });
 
-if (!_babylonCanvas) {
-    console.error("_babylonCanvas is undefined");
-    return;
-}
-
 document.getElementById('download').addEventListener('click', function() {
-  const canvasRect = babylonCanvas._babylonCanvas.getBoundingClientRect();
 
   BABYLON.Tools.CreateScreenshot(
     babylonCanvas._engine,
     babylonCanvas._babylonScene.activeCamera,
-    { width: canvasRect.width, height: canvasRect.height },
+    { width: canvas3D.width, height: canvas3D.height },
     function (data) {
       const blob = dataURItoBlob(data);
       const url = window.URL.createObjectURL(blob);
