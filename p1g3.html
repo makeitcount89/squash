@@ -113,33 +113,45 @@
  
 
     function captureScreenshot() {
-     var canvasRect = canvas.getBoundingClientRect()
-      
-      BABYLON.Tools.CreateScreenshot(
-        babylonCanvas._babylonEngine,
-        camera,
-        {
-          width: babylonCanvas.width,
-          height: babylonCanvas.height
-        },
-        function (data) {
-          // Convert data URI to blob
-          var blob = dataURItoBlob(data);
+  // Ensure that Babylon canvas is ready
+  if (!babylonCanvas || !babylonCanvas._babylonEngine || !camera) {
+    alert('Babylon canvas is not ready.');
+    return;
+  }
 
-          // Create a download link for the screenshot
-          var url = window.URL.createObjectURL(blob);
-          var a = document.createElement("a");
-          a.style.display = "none";
-          a.href = url;
-          a.download = "screenshot.jpg";
-          document.body.appendChild(a);
-          a.click();
+  // Set the canvas size to match Babylon canvas
+  const babylonEngine = babylonCanvas._babylonEngine;
+  babylonEngine.setSize(babylonCanvas.width, babylonCanvas.height);
 
-          // Revoke the object URL to free up resources
-          window.URL.revokeObjectURL(url);
-        }
-      );
+  // Capture screenshot using Babylon's built-in function
+  babylonEngine.render(); // Ensure a render is done to capture the latest frame
+  const screenshotData = babylonEngine.readPixels(0, 0, babylonCanvas.width, babylonCanvas.height);
+
+  // Create a temporary canvas to convert the data to an image
+  const tempCanvas = document.createElement('canvas');
+  tempCanvas.width = babylonCanvas.width;
+  tempCanvas.height = babylonCanvas.height;
+  const tempContext = tempCanvas.getContext('2d');
+
+  // Convert the screenshot data to an image
+  const imageData = tempContext.createImageData(babylonCanvas.width, babylonCanvas.height);
+  imageData.data.set(screenshotData);
+  tempContext.putImageData(imageData, 0, 0);
+
+  // Create a download link for the screenshot
+  const url = tempCanvas.toDataURL('image/jpeg');
+  const a = document.createElement('a');
+  a.style.display = 'none';
+  a.href = url;
+  a.download = 'screenshot.jpg';
+  document.body.appendChild(a);
+  a.click();
+
+  // Clean up
+  document.body.removeChild(a);
     }
+    
+    
 
     function toggleOffsetSliders() {
   const offsetSliders = document.getElementById('offsetSliders');
