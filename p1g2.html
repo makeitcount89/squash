@@ -23,9 +23,13 @@
     function initializeBabylon() {
       babylonCanvas = document.getElementById('renderCanvas');
       engine = new BABYLON.Engine(babylonCanvas, true);
-      camera = new BABYLON.FreeCamera('camera', new BABYLON.Vector3(0, 5, -10), scene);
       scene = new BABYLON.Scene(engine);
-      scene.clearColor = new BABYLON.Color4(0, 0, 0, 0); // Set clear color to transparent
+      camera = new BABYLON.FreeCamera('camera', new BABYLON.Vector3(0, 5, -10), scene);
+      camera.setTarget(BABYLON.Vector3.Zero());
+      camera.attachControl(babylonCanvas, true);
+      
+      // Set clear color to transparent
+      scene.clearColor = new BABYLON.Color4(0, 0, 0, 0);
 
       cube = BABYLON.MeshBuilder.CreateBox("cube", { size: 2 }, scene);
 
