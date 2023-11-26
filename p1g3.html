@@ -59,7 +59,7 @@
 <body>
   <input type="file" id="imageInput" accept="image/*" onchange="loadAndDetect()" class="custom-file-input">
  <button id="convertTo3D" onclick="convertTo3D()">Convert to 3D</button>
-
+<button onclick="screenshot()">Download Screenshot</button>
   
   <label for="lineThreshold">Line Threshold:</label>
 <input type="range" id="lineThreshold" class="wide-slider" min="1" max="1000" value="270" onchange="updateLineThreshold(this.value)">
@@ -191,7 +191,38 @@ function updateCloserOffset(value) {
       dst.delete();
       linesP.delete();
     }
+ function screenshot() {
+            var canvasRect = canvas.getBoundingClientRect();
 
+            BABYLON.Tools.CreateScreenshot(engine, scene.activeCamera, {
+                width: canvasRect.width,
+                height: canvasRect.height
+            }, function (data) {
+                var blob = dataURItoBlob(data);
+                var url = window.URL.createObjectURL(blob);
+
+                var a = document.createElement("a");
+                a.style.display = "none";
+                a.href = url;
+                a.download = "screenshot.jpg";
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+            });
+        };
+
+        function dataURItoBlob(dataURI) {
+            var byteString = atob(dataURI.split(',')[1]);
+            var ab = new ArrayBuffer(byteString.length);
+            var ia = new Uint8Array(ab);
+
+            for (var i = 0; i < byteString.length; i++) {
+                ia[i] = byteString.charCodeAt(i);
+            }
+
+            return new Blob([ab], { type: 'image/jpeg' });
+        }
+    
 function convertTo3D() {
   resetCanvas();
   if (!detectedLines) {
