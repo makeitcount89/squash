@@ -112,26 +112,7 @@
 
   <script>
   let img, context2D, babylonCanvas, detectedLines, scene, camera, startPoint; // Move 'scene' to a higher scope
-    function captureScreenshot() {
-      // Ensure that 'engine', 'camera', and 'babylonCanvas' are in the correct scope
-      BABYLON.Tools.CreateScreenshot(engine, camera, Canvas3D.width, function (data) {
-        // Create a link element
-        var link = document.createElement('a');
-
-        // Set the href attribute to the data URI of the image
-        link.href = data;
-
-        // Set the download attribute to specify the filename
-        link.download = '3D_Render_Screenshot.png';
-
-        // Append the link to the document
-        document.body.appendChild(link);
-
-        // Trigger a click event on the link to initiate the download
-        link.click();
-        document.body.removeChild(link);
-      });
-    }
+    
 // Assuming you have already initialized engine, scene, camera, and babylonCanvas
 
 // Function to download the screenshot
@@ -884,7 +865,26 @@ function updatePreviousCameraState() {
   // Add more properties as needed
 }
 
+function captureScreenshot() {
+      // Ensure that 'engine', 'camera', and 'babylonCanvas' are in the correct scope
+      BABYLON.Tools.CreateScreenshot(engine, camera, babylonCanvas.width, function (data) {
+        // Create a link element
+        var link = document.createElement('a');
 
+        // Set the href attribute to the data URI of the image
+        link.href = data;
+
+        // Set the download attribute to specify the filename
+        link.download = '3D_Render_Screenshot.png';
+
+        // Append the link to the document
+        document.body.appendChild(link);
+
+        // Trigger a click event on the link to initiate the download
+        link.click();
+        document.body.removeChild(link);
+      });
+    }
     
     
   </script>
