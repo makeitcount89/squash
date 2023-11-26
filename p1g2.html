@@ -16,7 +16,6 @@
 <body>
     <canvas id="renderCanvas"></canvas>
     <button id="takescreenshot">Create Screenshot</button>
-    <a id="downloadLink" style="display: none" download="screenshot.png">Download Screenshot</a>
 
     <script type="text/javascript">
         var canvas = document.getElementById("renderCanvas");
@@ -40,7 +39,6 @@
 
         var scene = createScene();
         var ssButton = document.getElementById("takescreenshot");
-        var downloadLink = document.getElementById("downloadLink");
 
         if (ssButton == null) {
             ssButton = document.createElement("button");
@@ -53,15 +51,30 @@
         ssButton.onclick = function () {
             BABYLON.Tools.CreateScreenshot(engine, scene.activeCamera, { width: 1024, height: 300 },
                 function (data) {
-                    var img = document.createElement("img");
-                    img.src = data;
-                    document.body.appendChild(img);
+                    var blob = dataURItoBlob(data);
+                    var url = window.URL.createObjectURL(blob);
 
-                    // Show download link
-                    downloadLink.href = data;
-                    downloadLink.style.display = "block";
+                    var a = document.createElement("a");
+                    a.style.display = "none";
+                    a.href = url;
+                    a.download = "screenshot.jpg";
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
                 });
         };
+
+        function dataURItoBlob(dataURI) {
+            var byteString = atob(dataURI.split(',')[1]);
+            var ab = new ArrayBuffer(byteString.length);
+            var ia = new Uint8Array(ab);
+
+            for (var i = 0; i < byteString.length; i++) {
+                ia[i] = byteString.charCodeAt(i);
+            }
+
+            return new Blob([ab], { type: 'image/jpeg' });
+        }
 
         engine.runRenderLoop(function () {
             scene.render();
