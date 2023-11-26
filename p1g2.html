@@ -16,6 +16,7 @@
 <body>
     <canvas id="renderCanvas"></canvas>
     <button id="takescreenshot">Create Screenshot</button>
+    <a id="downloadLink" style="display: none" download="screenshot.png">Download Screenshot</a>
 
     <script type="text/javascript">
         var canvas = document.getElementById("renderCanvas");
@@ -39,6 +40,7 @@
 
         var scene = createScene();
         var ssButton = document.getElementById("takescreenshot");
+        var downloadLink = document.getElementById("downloadLink");
 
         if (ssButton == null) {
             ssButton = document.createElement("button");
@@ -54,6 +56,10 @@
                     var img = document.createElement("img");
                     img.src = data;
                     document.body.appendChild(img);
+
+                    // Show download link
+                    downloadLink.href = data;
+                    downloadLink.style.display = "block";
                 });
         };
 
