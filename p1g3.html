@@ -60,7 +60,7 @@
   <input type="file" id="imageInput" accept="image/*" onchange="loadAndDetect()" class="custom-file-input">
  <button id="convertTo3D" onclick="convertTo3D()">Convert to 3D</button>
   
-<button id="screenshot()">Download Image4</button>
+<button id="screenshot()">Download Image5</button>
   
   <label for="lineThreshold">Line Threshold:</label>
 <input type="range" id="lineThreshold" class="wide-slider" min="1" max="1000" value="270" onchange="updateLineThreshold(this.value)">
@@ -341,7 +341,7 @@ scene.beginAnimation(camera, 0, animationDuration, false);
   engine.runRenderLoop(function () {
     scene.render();
   });
-    screenshot(newScene, engine, camera, canvas3D);
+    screenshot(scene, engine, camera, babylonCanvas);
 };
 
 
@@ -421,10 +421,10 @@ scene.beginAnimation(camera, 0, animationDuration, false);
 }
 
     
-   function screenshot(newScene, engine, camera, canvas3D) {
- var canvasRect = canvas3D.getBoundingClientRect();
+   function screenshot(scene, engine, camera, babylonCanvas) {
+ var canvasRect = babylonCanvas.getBoundingClientRect();
 
-    BABYLON.Tools.CreateScreenshot(engine, newScene.activeCamera, {
+    BABYLON.Tools.CreateScreenshot(engine, scene.activeCamera, {
       width: canvasRect.width,
       height: canvasRect.height
     }, function (data) {
