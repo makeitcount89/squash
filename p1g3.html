@@ -59,10 +59,7 @@
 <body>
   <input type="file" id="imageInput" accept="image/*" onchange="loadAndDetect()" class="custom-file-input">
  <button id="convertTo3D" onclick="convertTo3D()">Convert to 3D</button>
-  <button id="screenshotButton" onclick="captureScreenshot()">Capture Screenshot</button>
-  
-<button id="downloadButton" onclick="takeScreenshot()">Download Image</button>
-  
+ 
   <label for="lineThreshold">Line Threshold:</label>
 <input type="range" id="lineThreshold" class="wide-slider" min="1" max="1000" value="270" onchange="updateLineThreshold(this.value)">
 <span id="lineThresholdValue">270</span>
@@ -92,7 +89,7 @@
   <button onclick="saveToLocalStorage()">Save</button>
   <button onclick="loadFromLocalStorage()">Load</button>
 
-  <button onclick="toggleOffsetSliders()">Adjust Floor Position</button>
+  <button onclick="toggleOffsetSders()">Adjust Floor Position</button>
   <div id="offsetSliders" style="display: none;">
  
     <label for="leftOffset">Left / Right:</label>
@@ -112,52 +109,7 @@
 
   <script>
   let img, context2D, babylonCanvas, detectedLines, scene, camera, startPoint; // Move 'scene' to a higher scope
-    
-function takeScreenshot() {
-            var canvasRect = canvas.getBoundingClientRect();
-
-            BABYLON.Tools.CreateScreenshot(engine, scene.activeCamera, {
-                width: canvasRect.width,
-                height: canvasRect.height
-            }, function (data) {
-                var blob = dataURItoBlob(data);
-                var url = window.URL.createObjectURL(blob);
-
-                var a = document.createElement("a");
-                a.style.display = "none";
-                a.href = url;
-                a.download = "screenshot.jpg";
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-            });
-        }
-
-        function dataURItoBlob(dataURI) {
-            var byteString = atob(dataURI.split(',')[1]);
-            var ab = new ArrayBuffer(byteString.length);
-            var ia = new Uint8Array(ab);
-
-            for (var i = 0; i < byteString.length; i++) {
-                ia[i] = byteString.charCodeAt(i);
-            }
-
-            return new Blob([ab], { type: 'image/jpeg' });
-        }
-
-        engine.runRenderLoop(function () {
-            scene.render();
-        });
-
-        window.addEventListener('resize', function () {
-            engine.resize();
-        });
-    
-
-    
-
-
-
+   
     function toggleOffsetSliders() {
   const offsetSliders = document.getElementById('offsetSliders');
       offsetSliders.style.display = offsetSliders.style.display === 'none' ? 'block' : 'none';
