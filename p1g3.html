@@ -109,7 +109,7 @@
   <p id="coordinates"></p>
 
   <script>
-let babylonCanvas = document.getElementById("babylonCanvas");
+let babylonCanvas = document.getElementById("canvas3D");
 let engine = new BABYLON.Engine(babylonCanvas, true);
 let scene = new BABYLON.Scene(engine);
 let camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 2, Math.PI / 2, 2, BABYLON.Vector3.Zero(), scene);
@@ -315,12 +315,6 @@ function updateCloserOffset(value) {
 
     // Load Babylon canvas on page load
   window.onload = function () {
-  babylonCanvas = document.getElementById('canvas3D');
-  const engine = new BABYLON.Engine(babylonCanvas, true);
-  const scene = new BABYLON.Scene(engine);
-
-  // Set up camera and light
-  camera = new BABYLON.UniversalCamera('camera', new BABYLON.Vector3(0, 0, -200), scene);
 camera.setTarget(BABYLON.Vector3.Zero());
 camera.attachControl(babylonCanvas, true);
 
