@@ -193,6 +193,7 @@ function updateCloserOffset(value) {
       dst.delete();
       linesP.delete();
     }
+document.addEventListener('DOMContentLoaded', function () {
 
     function convertTo3D() {
   resetCanvas();
@@ -295,6 +296,7 @@ function dataURItoBlob(dataURI) {
   }
 
   return new Blob([ab], { type: 'image/jpeg' });
+}
 }
 }
 
