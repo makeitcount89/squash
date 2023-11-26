@@ -114,7 +114,7 @@
   let img, context2D, babylonCanvas, detectedLines, scene, camera, startPoint; // Move 'scene' to a higher scope
     function captureScreenshot() {
       // Ensure that 'engine', 'camera', and 'babylonCanvas' are in the correct scope
-      BABYLON.Tools.CreateScreenshot(engine, camera, babylonCanvas.width, function (data) {
+      BABYLON.Tools.CreateScreenshot(engine, camera, Canvas3D.width, function (data) {
         // Create a link element
         var link = document.createElement('a');
 
