@@ -392,15 +392,14 @@ scene.beginAnimation(camera, 0, animationDuration, false);
     // Show the new Babylon canvas
     babylonCanvas.style.display = 'block';
   } 
-      screenshot(newScene, engine, camera, canvas3D);
-    }
+  var shot = document.getElementById('screenshot');
+
+shot.onclick = function () {
+    screenshot(newScene, engine, camera, canvas3D);
+};
     
    function screenshot(newScene, engine, camera, canvas3D) {
-  var shot = document.getElementById('screenshot');
-  
-  // Attach click event handler to the button
-  shot.onclick = function () {
-    var canvasRect = canvas3D.getBoundingClientRect();
+ var canvasRect = canvas3D.getBoundingClientRect();
 
     BABYLON.Tools.CreateScreenshot(engine, newScene.activeCamera, {
       width: canvasRect.width,
