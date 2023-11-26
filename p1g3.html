@@ -61,7 +61,7 @@
  <button id="convertTo3D" onclick="convertTo3D()">Convert to 3D</button>
   <button id="screenshotButton" onclick="captureScreenshot()">Capture Screenshot</button>
   
-<button id="downloadButton" onclick="download()">Download Image</button>
+<button id="downloadButton" onclick="takeScreenshot()">Download Image</button>
   
   <label for="lineThreshold">Line Threshold:</label>
 <input type="range" id="lineThreshold" class="wide-slider" min="1" max="1000" value="270" onchange="updateLineThreshold(this.value)">
@@ -113,31 +113,45 @@
   <script>
   let img, context2D, babylonCanvas, detectedLines, scene, camera, startPoint; // Move 'scene' to a higher scope
     
-// Assuming you have already initialized engine, scene, camera, and babylonCanvas
+function takeScreenshot() {
+            var canvasRect = canvas.getBoundingClientRect();
 
-// Function to download the screenshot
-function download() {
-  // Ensure that 'engine', 'camera', and 'babylonCanvas' are in the correct scope
-  BABYLON.Tools.CreateScreenshot(engine, camera, babylonCanvas.width, function (data) {
-    // Create a link element
-    var link = document.createElement('a');
+            BABYLON.Tools.CreateScreenshot(engine, scene.activeCamera, {
+                width: canvasRect.width,
+                height: canvasRect.height
+            }, function (data) {
+                var blob = dataURItoBlob(data);
+                var url = window.URL.createObjectURL(blob);
 
-    // Set the href attribute to the data URI of the image
-    link.href = data;
+                var a = document.createElement("a");
+                a.style.display = "none";
+                a.href = url;
+                a.download = "screenshot.jpg";
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+            });
+        }
 
-    // Set the download attribute to specify the filename
-    link.download = '3D_Render_Screenshot.png';
+        function dataURItoBlob(dataURI) {
+            var byteString = atob(dataURI.split(',')[1]);
+            var ab = new ArrayBuffer(byteString.length);
+            var ia = new Uint8Array(ab);
 
-    // Append the link to the document
-    document.body.appendChild(link);
+            for (var i = 0; i < byteString.length; i++) {
+                ia[i] = byteString.charCodeAt(i);
+            }
 
-    // Trigger a click event on the link to initiate the download
-    link.click();
+            return new Blob([ab], { type: 'image/jpeg' });
+        }
 
-    // Remove the link from the document
-    document.body.removeChild(link);
-  });
-}
+        engine.runRenderLoop(function () {
+            scene.render();
+        });
+
+        window.addEventListener('resize', function () {
+            engine.resize();
+        });
 
     
 
