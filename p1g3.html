@@ -109,7 +109,17 @@
   <p id="coordinates"></p>
 
   <script>
-  let img, context2D, babylonCanvas, detectedLines, scene, camera, startPoint; // Move 'scene' to a higher scope
+let babylonCanvas = document.getElementById("babylonCanvas");
+let engine = new BABYLON.Engine(babylonCanvas, true);
+let scene = new BABYLON.Scene(engine);
+let camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 2, Math.PI / 2, 2, BABYLON.Vector3.Zero(), scene);
+let startPoint = new BABYLON.Vector3(0, 0, 0);
+let img = new Image();
+let context2D = babylonCanvas.getContext("2d");
+let detectedLines = [];
+let deletedLines = [];
+    
+  let img, context2D, detectedLines, scene, camera, startPoint; // Move 'scene' to a higher scope
  
 
     function captureScreenshot() {
