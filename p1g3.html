@@ -59,7 +59,8 @@
 <body>
   <input type="file" id="imageInput" accept="image/*" onchange="loadAndDetect()" class="custom-file-input">
  <button id="convertTo3D" onclick="convertTo3D()">Convert to 3D</button>
-<button id="screenshot()">Download Screenshot6</button>
+  
+<button id="screenshot()">Download Image</button>
   
   <label for="lineThreshold">Line Threshold:</label>
 <input type="range" id="lineThreshold" class="wide-slider" min="1" max="1000" value="270" onchange="updateLineThreshold(this.value)">
@@ -110,6 +111,29 @@
 
   <script>
   let img, context2D, babylonCanvas, detectedLines, scene, camera, startPoint; // Move 'scene' to a higher scope
+    
+  function download() {
+  // Replace 'yourCanvasId' with your canvas element's ID
+  const canvas = document.getElementById('canvas3D');
+
+  // Convert canvas content to data URL
+  const dataUrl = canvas.toDataURL('image/png');
+
+  // Create a link element
+  const link = document.createElement('a');
+
+  // Set the href attribute with the data URL
+  link.href = dataUrl;
+
+  // Specify the download attribute along with a desired filename
+  link.download = 'canvas_screenshot.png';
+
+  // Simulate a click to trigger the download
+  link.click();
+  }
+    
+
+
 
     function toggleOffsetSliders() {
   const offsetSliders = document.getElementById('offsetSliders');
@@ -192,8 +216,7 @@ function updateCloserOffset(value) {
       linesP.delete();
     }
 
-    
-function convertTo3D() {
+    function convertTo3D() {
   resetCanvas();
   if (!detectedLines) {
     alert('Please detect lines first.');
@@ -221,12 +244,13 @@ function convertTo3D() {
 
   // Create a ground plane
   const ground = BABYLON.MeshBuilder.CreateGround('ground', { width: width + 50, height: height}, babylonCanvas._babylonScene);
-
-  const horizontalOffset = parseFloat(document.getElementById('leftOffsetSlider').value);
-  const closerOffset = parseFloat(document.getElementById('closerOffsetSlider').value);
-
+  
+  const horizontalOffset = parseFloat(document.getElementById('leftOffsetSlider').value)
+  const closerOffset = parseFloat(document.getElementById('closerOffsetSlider').value)
+  
   ground.position = new BABYLON.Vector3(centerX + horizontalOffset, 0, -centerY + closerOffset);
 
+  
   // Apply the original image as a texture to the ground
   const groundMaterial = new BABYLON.StandardMaterial('groundMaterial', babylonCanvas._babylonScene);
   groundMaterial.diffuseTexture = new BABYLON.Texture(img.src, babylonCanvas._babylonScene);
@@ -258,7 +282,7 @@ function convertTo3D() {
     }
 
     wallMesh.scaling.y = wallThickness;
-});
+  });
 }
 
     // Load Babylon canvas on page load
@@ -391,14 +415,14 @@ scene.beginAnimation(camera, 0, animationDuration, false);
 
     // Show the new Babylon canvas
     babylonCanvas.style.display = 'block';
-  } 
-      var shot = document.getElementById('screenshot');
+  }
+          var shot = document.getElementById('screenshot');
 if (shot)
   shot.onclick = function () {
         screenshot(newScene, engine, camera, canvas3D);
     }
 }
-    };
+
     
    function screenshot(newScene, engine, camera, canvas3D) {
  var canvasRect = canvas3D.getBoundingClientRect();
@@ -433,6 +457,8 @@ if (shot)
 
             return new Blob([ab], { type: 'image/jpeg' });
         }
+    
+  
 function pointToLineDistance(point, line, isSelected) {
   const { x, y } = point;
   const { x1, y1, x2, y2 } = line;
