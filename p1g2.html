@@ -1,59 +1,66 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Babylon.js Cube Screenshot Example</title>
-  <!-- Babylon.js dependencies -->
-  <script src="https://cdn.babylonjs.com/babylon.js"></script>
-  <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
-  <style>
-    canvas {
-      display: block;
-    }
-  </style>
+    <meta charset="utf-8">
+    <title>BabylonJS Cube Scene with Screenshot</title>
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+    <style>
+        canvas {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
 </head>
+
 <body>
-  <canvas id="renderCanvas"></canvas>
-  <button onclick="captureScreenshot()">Capture Screenshot</button>
+    <canvas id="renderCanvas"></canvas>
+    <button id="takescreenshot">Create Screenshot</button>
 
-  <script>
-    var engine, scene, camera, cube, babylonCanvas;
+    <script type="text/javascript">
+        var canvas = document.getElementById("renderCanvas");
+        var engine = new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true });
+        var createScene = function () {
+            var scene = new BABYLON.Scene(engine);
 
-    function initializeBabylon() {
-      babylonCanvas = document.getElementById('renderCanvas');
-      engine = new BABYLON.Engine(babylonCanvas, true);
-      scene = new BABYLON.Scene(engine);
-      camera = new BABYLON.FreeCamera('camera', new BABYLON.Vector3(0, 5, -10), scene);
-      camera.setTarget(BABYLON.Vector3.Zero());
-      camera.attachControl(babylonCanvas, true);
-      
-      // Set clear color to transparent
-      scene.clearColor = new BABYLON.Color4(0, 0, 0, 0);
+            // Create cube
+            var cube = BABYLON.MeshBuilder.CreateBox("cube", { size: 2 });
+            cube.position = new BABYLON.Vector3(0, 1, 0);
 
-      cube = BABYLON.MeshBuilder.CreateBox("cube", { size: 2 }, scene);
+            // Create camera
+            var camera = new BABYLON.ArcRotateCamera("ArcRotateCamera", 1, 0.8, 20, new BABYLON.Vector3(0, 0, 0), scene);
+            camera.attachControl(canvas, true);
 
-      // Babylon.js rendering loop
-      engine.runRenderLoop(function () {
-        scene.render();
-      });
+            // Create light
+            var light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(1, 0.5, 0), scene);
 
-      // Handle window resize event
-      window.addEventListener('resize', function () {
-        engine.resize();
-      });
-    }
+            return scene;
+        };
 
-    function captureScreenshot() {
-      if (engine && camera && babylonCanvas) {
-        engine.render();
-        BABYLON.Tools.CreateScreenshot(engine, camera, { width: engine.getRenderWidth(), height: engine.getRenderHeight() });
-      } else {
-        console.error("Babylon.js components not properly initialized.");
-      }
-    }
+        var scene = createScene();
+        var ssButton = document.getElementById("takescreenshot");
 
-    initializeBabylon();
-  </script>
+        if (ssButton == null) {
+            ssButton = document.createElement("button");
+            document.body.appendChild(ssButton);
+        }
+
+        ssButton.id = "takescreenshot";
+        ssButton.textContent = "Create Screenshot";
+
+        ssButton.onclick = function () {
+            BABYLON.Tools.CreateScreenshot(engine, scene.activeCamera, { width: 1024, height: 300 },
+                function (data) {
+                    var img = document.createElement("img");
+                    img.src = data;
+                    document.body.appendChild(img);
+                });
+        };
+
+        engine.runRenderLoop(function () {
+            scene.render();
+        });
+    </script>
 </body>
+
 </html>
