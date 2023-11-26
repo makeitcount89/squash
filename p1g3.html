@@ -113,6 +113,15 @@
  
 
     function captureScreenshot() {
+      babylonCanvas = document.getElementById('canvas3D');
+  const engine = new BABYLON.Engine(babylonCanvas, true);
+  const scene = new BABYLON.Scene(engine);
+
+  // Set up camera and light
+  camera = new BABYLON.UniversalCamera('camera', new BABYLON.Vector3(0, 0, -200), scene);
+camera.setTarget(BABYLON.Vector3.Zero());
+camera.attachControl(babylonCanvas, true);
+      
       // Capture a screenshot using Babylon.js method
       BABYLON.Tools.CreateScreenshot(
         babylonCanvas._babylonEngine,
