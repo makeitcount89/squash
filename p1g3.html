@@ -262,31 +262,31 @@ function updateCloserOffset(value) {
   });
   
         function download() {
-            var canvasRect = canvas.getBoundingClientRect();
-            BABYLON.Tools.CreateScreenshot(engine, scene.activeCamera, {
-                width: canvasRect.width,
-                height: canvasRect.height
-            }, function (data) {
-                // dataURItoBlob function included here
-                var byteString = atob(data.split(',')[1]);
-                var ab = new ArrayBuffer(byteString.length);
-                var ia = new Uint8Array(ab);
+    var canvasRect = canvas.getBoundingClientRect();
+    BABYLON.Tools.CreateScreenshot(babylonCanvas._engine, babylonCanvas._babylonScene.activeCamera, {
+        width: canvasRect.width,
+        height: canvasRect.height
+    }, function (data) {
+        // dataURItoBlob function included here
+        var byteString = atob(data.split(',')[1]);
+        var ab = new ArrayBuffer(byteString.length);
+        var ia = new Uint8Array(ab);
 
-                for (var i = 0; i < byteString.length; i++) {
-                    ia[i] = byteString.charCodeAt(i);
-                }
+        for (var i = 0; i < byteString.length; i++) {
+            ia[i] = byteString.charCodeAt(i);
+        }
 
-                var blob = new Blob([ab], { type: 'image/jpeg' });
+        var blob = new Blob([ab], { type: 'image/jpeg' });
 
-                var url = window.URL.createObjectURL(blob);
+        var url = window.URL.createObjectURL(blob);
 
-                var a = document.createElement("a");
-                a.style.display = "none";
-                a.href = url;
-                a.download = "screenshot.jpg";
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
+        var a = document.createElement("a");
+        a.style.display = "none";
+        a.href = url;
+        a.download = "screenshot.jpg";
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
             });
         }
   
