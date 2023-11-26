@@ -111,29 +111,6 @@
 
   <script>
   let img, context2D, babylonCanvas, detectedLines, scene, camera, startPoint; // Move 'scene' to a higher scope
-    
-  function download() {
-  // Replace 'yourCanvasId' with your canvas element's ID
-  const canvas = document.getElementById('canvas3D');
-
-  // Convert canvas content to data URL
-  const dataUrl = canvas.toDataURL('image/png');
-
-  // Create a link element
-  const link = document.createElement('a');
-
-  // Set the href attribute with the data URL
-  link.href = dataUrl;
-
-  // Specify the download attribute along with a desired filename
-  link.download = 'canvas_screenshot.png';
-
-  // Simulate a click to trigger the download
-  link.click();
-  }
-    
-
-
 
     function toggleOffsetSliders() {
   const offsetSliders = document.getElementById('offsetSliders');
@@ -283,6 +260,36 @@ function updateCloserOffset(value) {
 
     wallMesh.scaling.y = wallThickness;
   });
+  
+        function download() {
+            var canvasRect = canvas.getBoundingClientRect();
+            BABYLON.Tools.CreateScreenshot(engine, scene.activeCamera, {
+                width: canvasRect.width,
+                height: canvasRect.height
+            }, function (data) {
+                // dataURItoBlob function included here
+                var byteString = atob(data.split(',')[1]);
+                var ab = new ArrayBuffer(byteString.length);
+                var ia = new Uint8Array(ab);
+
+                for (var i = 0; i < byteString.length; i++) {
+                    ia[i] = byteString.charCodeAt(i);
+                }
+
+                var blob = new Blob([ab], { type: 'image/jpeg' });
+
+                var url = window.URL.createObjectURL(blob);
+
+                var a = document.createElement("a");
+                a.style.display = "none";
+                a.href = url;
+                a.download = "screenshot.jpg";
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+            });
+        }
+  
 }
 
     // Load Babylon canvas on page load
