@@ -260,15 +260,17 @@ function convertTo3D() {
 
     wallMesh.scaling.y = wallThickness;
   });
-
 document.getElementById('download').addEventListener('click', function () {
   // Ensure the canvas has a valid size before taking a screenshot
   babylonCanvas._engine.resize();
 
+  // Access the Babylon engine from the convertTo3D function
+  const engine = babylonCanvas._engine;
+
   BABYLON.Tools.CreateScreenshot(
-    babylonCanvas._engine,
+    engine,
     babylonCanvas._babylonScene.activeCamera,
-    { width: babylonCanvas._engine.getRenderWidth(), height: babylonCanvas._engine.getRenderHeight() },
+    { width: engine.getRenderWidth(), height: engine.getRenderHeight() },
     function (data) {
       const blob = dataURItoBlob(data);
       const url = window.URL.createObjectURL(blob);
@@ -283,6 +285,7 @@ document.getElementById('download').addEventListener('click', function () {
     }
   );
 });
+
 
 }
 
