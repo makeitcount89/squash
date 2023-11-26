@@ -59,7 +59,8 @@
 <body>
   <input type="file" id="imageInput" accept="image/*" onchange="loadAndDetect()" class="custom-file-input">
  <button id="convertTo3D" onclick="convertTo3D()">Convert to 3D</button>
- 
+ <button onclick="captureScreenshot()">Capture Screenshot</button>
+    
   <label for="lineThreshold">Line Threshold:</label>
 <input type="range" id="lineThreshold" class="wide-slider" min="1" max="1000" value="270" onchange="updateLineThreshold(this.value)">
 <span id="lineThresholdValue">270</span>
@@ -109,7 +110,36 @@
 
   <script>
   let img, context2D, babylonCanvas, detectedLines, scene, camera, startPoint; // Move 'scene' to a higher scope
-   
+ 
+
+    function captureScreenshot() {
+      // Capture a screenshot using Babylon.js method
+      BABYLON.Tools.CreateScreenshot(
+        babylonCanvas._babylonEngine,
+        camera,
+        {
+          width: babylonCanvas.width,
+          height: babylonCanvas.height
+        },
+        function (data) {
+          // Convert data URI to blob
+          var blob = dataURItoBlob(data);
+
+          // Create a download link for the screenshot
+          var url = window.URL.createObjectURL(blob);
+          var a = document.createElement("a");
+          a.style.display = "none";
+          a.href = url;
+          a.download = "screenshot.jpg";
+          document.body.appendChild(a);
+          a.click();
+
+          // Revoke the object URL to free up resources
+          window.URL.revokeObjectURL(url);
+        }
+      );
+    }
+
     function toggleOffsetSliders() {
   const offsetSliders = document.getElementById('offsetSliders');
       offsetSliders.style.display = offsetSliders.style.display === 'none' ? 'block' : 'none';
