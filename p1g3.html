@@ -60,7 +60,7 @@
   <input type="file" id="imageInput" accept="image/*" onchange="loadAndDetect()" class="custom-file-input">
  <button id="convertTo3D" onclick="convertTo3D()">Convert to 3D</button>
   
-<button id="download">Download Image!</button>
+<button id="download">Download Image!!!</button>
 
   
   <label for="lineThreshold">Line Threshold:</label>
@@ -259,7 +259,7 @@ function convertTo3D() {
     }
 
     wallMesh.scaling.y = wallThickness;
-  });
+  
 document.getElementById('download').addEventListener('click', function () {
   // Ensure the canvas has a valid size before taking a screenshot
   babylonCanvas._engine.resize();
@@ -285,7 +285,7 @@ document.getElementById('download').addEventListener('click', function () {
     }
   );
 });
-
+});
 
 }
 
