@@ -60,7 +60,8 @@
   <input type="file" id="imageInput" accept="image/*" onchange="loadAndDetect()" class="custom-file-input">
  <button id="convertTo3D" onclick="convertTo3D()">Convert to 3D</button>
   
-<button onclick="download()">Download Image2</button>
+<button id="downloadButton">Download Image2</button>
+
   
   <label for="lineThreshold">Line Threshold:</label>
 <input type="range" id="lineThreshold" class="wide-slider" min="1" max="1000" value="270" onchange="updateLineThreshold(this.value)">
@@ -260,8 +261,8 @@ function updateCloserOffset(value) {
 
     wallMesh.scaling.y = wallThickness;
   });
-      // Function to take a screenshot
-function download() {
+  
+      document.getElementById('downloadButton').addEventListener('click', function() {
   const canvasRect = babylonCanvas._babylonCanvas.getBoundingClientRect();
 
   BABYLON.Tools.CreateScreenshot(
