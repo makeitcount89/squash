@@ -259,47 +259,7 @@ function convertTo3D() {
     }
 
     wallMesh.scaling.y = wallThickness;
-  
-document.getElementById('download').addEventListener('click', function () {
-  // Ensure the canvas has a valid size before taking a screenshot
-  babylonCanvas._engine.resize();
-
-  // Access the Babylon engine from the convertTo3D function
-  const engine = babylonCanvas._engine;
-
-  BABYLON.Tools.CreateScreenshot(
-    engine,
-    babylonCanvas._babylonScene.activeCamera,
-    { width: engine.getRenderWidth(), height: engine.getRenderHeight() },
-    function (data) {
-      const blob = dataURItoBlob(data);
-      const url = window.URL.createObjectURL(blob);
-
-      const a = document.createElement('a');
-      a.style.display = 'none';
-      a.href = url;
-      a.download = 'screenshot.jpg';
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-    }
-  );
 });
-});
-
-}
-
-// Function to convert data URI to Blob
-function dataURItoBlob(dataURI) {
-  const byteString = atob(dataURI.split(',')[1]);
-  const ab = new ArrayBuffer(byteString.length);
-  const ia = new Uint8Array(ab);
-
-  for (let i = 0; i < byteString.length; i++) {
-    ia[i] = byteString.charCodeAt(i);
-  }
-
-  return new Blob([ab], { type: 'image/jpeg' });
 }
 
     // Load Babylon canvas on page load
