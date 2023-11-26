@@ -59,7 +59,7 @@
 <body>
   <input type="file" id="imageInput" accept="image/*" onchange="loadAndDetect()" class="custom-file-input">
  <button id="convertTo3D" onclick="convertTo3D()">Convert to 3D</button>
-<button onclick="screenshot()">Download Screenshot</button>
+<button id="screenshot()">Download Screenshot</button>
   
   <label for="lineThreshold">Line Threshold:</label>
 <input type="range" id="lineThreshold" class="wide-slider" min="1" max="1000" value="270" onchange="updateLineThreshold(this.value)">
@@ -109,7 +109,7 @@
   <p id="coordinates"></p>
 
   <script>
-  let img, context2D, babylonCanvas, detectedLines, scene, camera, startPoint, canvas; // Move 'scene' to a higher scope
+  let img, context2D, babylonCanvas, detectedLines, scene, camera, startPoint; // Move 'scene' to a higher scope
 
     function toggleOffsetSliders() {
   const offsetSliders = document.getElementById('offsetSliders');
@@ -191,10 +191,14 @@ function updateCloserOffset(value) {
       dst.delete();
       linesP.delete();
     }
- function screenshot() {
-            var canvasRect = canvas.getBoundingClientRect();
+ function screenshot(newScene, engine, camera, canvas3D) {
 
-            BABYLON.Tools.CreateScreenshot(engine, scene.activeCamera, {
+  var shot = document.getElementById('screenshot');
+   if shot.onclick funtion () {
+
+            var canvasRect = canvas3D.getBoundingClientRect();
+
+            BABYLON.Tools.CreateScreenshot(engine, newScene.activeCamera, {
                 width: canvasRect.width,
                 height: canvasRect.height
             }, function (data) {
@@ -421,7 +425,8 @@ scene.beginAnimation(camera, 0, animationDuration, false);
 
     // Show the new Babylon canvas
     babylonCanvas.style.display = 'block';
-  }                              
+  } 
+      screenshot(newScene, engine, camera, canvas3D);
     }
     
   
