@@ -283,6 +283,7 @@ function updateCloserOffset(value) {
 
     wallMesh.scaling.y = wallThickness;
   });
+      screenshot(scene, engine, camera, babylonCanvas);
 }
 
     // Load Babylon canvas on page load
@@ -341,7 +342,7 @@ scene.beginAnimation(camera, 0, animationDuration, false);
   engine.runRenderLoop(function () {
     scene.render();
   });
-    screenshot(scene, engine, camera, babylonCanvas);
+    
 };
 
 
