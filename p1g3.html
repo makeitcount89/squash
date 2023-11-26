@@ -60,7 +60,7 @@
   <input type="file" id="imageInput" accept="image/*" onchange="loadAndDetect()" class="custom-file-input">
  <button id="convertTo3D" onclick="convertTo3D()">Convert to 3D</button>
   
-<button id="screenshot()">Download Image2</button>
+<button id="screenshot()">Download Image3</button>
   
   <label for="lineThreshold">Line Threshold:</label>
 <input type="range" id="lineThreshold" class="wide-slider" min="1" max="1000" value="270" onchange="updateLineThreshold(this.value)">
@@ -416,8 +416,7 @@ scene.beginAnimation(camera, 0, animationDuration, false);
     // Show the new Babylon canvas
     babylonCanvas.style.display = 'block';
   }
-      
-        screenshot(newScene, engine, camera, canvas3D);
+      //creenshot(newScene, engine, camera, canvas3D);
     
 }
 
