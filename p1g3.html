@@ -59,8 +59,9 @@
 <body>
   <input type="file" id="imageInput" accept="image/*" onchange="loadAndDetect()" class="custom-file-input">
  <button id="convertTo3D" onclick="convertTo3D()">Convert to 3D</button>
- <button onclick="captureScreenshot()">Capture Screenshot</button>
-    
+  
+<button onclick="download()">Download Image</button>
+  
   <label for="lineThreshold">Line Threshold:</label>
 <input type="range" id="lineThreshold" class="wide-slider" min="1" max="1000" value="270" onchange="updateLineThreshold(this.value)">
 <span id="lineThresholdValue">270</span>
@@ -90,7 +91,7 @@
   <button onclick="saveToLocalStorage()">Save</button>
   <button onclick="loadFromLocalStorage()">Load</button>
 
-  <button onclick="toggleOffsetSders()">Adjust Floor Position</button>
+  <button onclick="toggleOffsetSliders()">Adjust Floor Position</button>
   <div id="offsetSliders" style="display: none;">
  
     <label for="leftOffset">Left / Right:</label>
@@ -109,59 +110,30 @@
   <p id="coordinates"></p>
 
   <script>
-let babylonCanvas = document.getElementById("canvas3D");
-let engine = new BABYLON.Engine(babylonCanvas, true);
-let scene = new BABYLON.Scene(engine);
-let camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 2, Math.PI / 2, 2, BABYLON.Vector3.Zero(), scene);
-let startPoint = new BABYLON.Vector3(0, 0, 0);
-let img = new Image();
-let context2D = babylonCanvas.getContext("2d");
-let detectedLines = [];
-let deletedLines = [];
+  let img, context2D, babylonCanvas, detectedLines, scene, camera, startPoint; // Move 'scene' to a higher scope
     
-  let img, context2D, detectedLines, scene, camera, startPoint; // Move 'scene' to a higher scope
- 
+  function download() {
+  // Replace 'yourCanvasId' with your canvas element's ID
+  const canvas = document.getElementById('canvas3D');
 
-    function captureScreenshot() {
-  // Ensure that Babylon canvas is ready
-  if (!babylonCanvas || !babylonCanvas._babylonEngine || !camera) {
-    alert('Babylon canvas is not ready.');
-    return;
+  // Convert canvas content to data URL
+  const dataUrl = canvas.toDataURL('image/png');
+
+  // Create a link element
+  const link = document.createElement('a');
+
+  // Set the href attribute with the data URL
+  link.href = dataUrl;
+
+  // Specify the download attribute along with a desired filename
+  link.download = 'canvas_screenshot.png';
+
+  // Simulate a click to trigger the download
+  link.click();
   }
-
-  // Set the canvas size to match Babylon canvas
-  const babylonEngine = babylonCanvas._babylonEngine;
-  babylonEngine.setSize(babylonCanvas.width, babylonCanvas.height);
-
-  // Capture screenshot using Babylon's built-in function
-  babylonEngine.render(); // Ensure a render is done to capture the latest frame
-  const screenshotData = babylonEngine.readPixels(0, 0, babylonCanvas.width, babylonCanvas.height);
-
-  // Create a temporary canvas to convert the data to an image
-  const tempCanvas = document.createElement('canvas');
-  tempCanvas.width = babylonCanvas.width;
-  tempCanvas.height = babylonCanvas.height;
-  const tempContext = tempCanvas.getContext('2d');
-
-  // Convert the screenshot data to an image
-  const imageData = tempContext.createImageData(babylonCanvas.width, babylonCanvas.height);
-  imageData.data.set(screenshotData);
-  tempContext.putImageData(imageData, 0, 0);
-
-  // Create a download link for the screenshot
-  const url = tempCanvas.toDataURL('image/jpeg');
-  const a = document.createElement('a');
-  a.style.display = 'none';
-  a.href = url;
-  a.download = 'screenshot.jpg';
-  document.body.appendChild(a);
-  a.click();
-
-  // Clean up
-  document.body.removeChild(a);
-    }
     
-    
+
+
 
     function toggleOffsetSliders() {
   const offsetSliders = document.getElementById('offsetSliders');
@@ -315,6 +287,12 @@ function updateCloserOffset(value) {
 
     // Load Babylon canvas on page load
   window.onload = function () {
+  babylonCanvas = document.getElementById('canvas3D');
+  const engine = new BABYLON.Engine(babylonCanvas, true);
+  const scene = new BABYLON.Scene(engine);
+
+  // Set up camera and light
+  camera = new BABYLON.UniversalCamera('camera', new BABYLON.Vector3(0, 0, -200), scene);
 camera.setTarget(BABYLON.Vector3.Zero());
 camera.attachControl(babylonCanvas, true);
 
