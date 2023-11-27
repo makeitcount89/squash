@@ -283,26 +283,10 @@ function updateCloserOffset(value) {
 
     wallMesh.scaling.y = wallThickness;
   });
-      screenshot(newScene, engine, camera);
-}
-<canvas id="re"></canvas>
-    <button id="takescreenshot">Create Screenshot</button>
+      screenshot(newScene, engine, camera); {    
+            var canvasRect = canvas3D.getBoundingClientRect();
 
- 
-        };
-
-        var scene = createScene();
-        var ssButton = document.getElementById("takescreenshot");
-
-        if (ssButton == null) {
-            ssButton = document.createElement("button");
-            document.body.appendChild(ssButton);
-        }
-
-        screenshot() {
-            var canvasRect = canvas.getBoundingClientRect();
-
-            BABYLON.Tools.CreateScreenshot(engine, scene.activeCamera, {
+            BABYLON.Tools.CreateScreenshot(engine, newScene.activeCamera, {
                 width: canvasRect.width,
                 height: canvasRect.height
             }, function (data) {
