@@ -285,8 +285,16 @@ function updateCloserOffset(value) {
   
   });
       screenshot() {    
-            var canvasRect = canvas3D.getBoundingClientRect();
+        const canvas3D = document.getElementById('canvas3D'); // Replace with your Babylon.js canvas reference
 
+      // Ensure the Babylon.js scene is active and has rendered
+      if (canvas3D._babylonEngine && canvas3D._babylonScene) {
+        const engine = canvas3D._babylonEngine;
+        const scene = canvas3D._babylonScene;
+
+        // Replace 'yourCanvasId' with your canvas element's ID
+        const canvasRect = canvas3D.getBoundingClientRect();
+        
             BABYLON.Tools.CreateScreenshot(engine, newScene.activeCamera, {
                 width: canvasRect.width,
                 height: canvasRect.height
