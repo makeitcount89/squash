@@ -284,6 +284,7 @@ function updateCloserOffset(value) {
     wallMesh.scaling.y = wallThickness;
   
   });
+    }
    
     screenshot() {    
         const canvas3D = document.getElementById('canvas3D'); // Replace with your Babylon.js canvas reference
@@ -311,7 +312,8 @@ function updateCloserOffset(value) {
                 a.click();
                 window.URL.revokeObjectURL(url);
             });
-        };
+      }
+      }
 
         function dataURItoBlob(dataURI) {
             var byteString = atob(dataURI.split(',')[1]);
@@ -324,6 +326,7 @@ function updateCloserOffset(value) {
 
             return new Blob([ab], { type: 'image/jpeg' });
         }
+  
 
     // Load Babylon canvas on page load
   window.onload = function () {
