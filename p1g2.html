@@ -297,7 +297,7 @@ function updateCloserOffset(value) {
         // Replace 'yourCanvasId' with your canvas element's ID
         const canvasRect = canvas3D.getBoundingClientRect();
         
-            BABYLON.Tools.CreateScreenshot(engine, newScene.activeCamera, {
+            BABYLON.Tools.CreateScreenshot(engine, scene.activeCamera, {
                 width: canvasRect.width,
                 height: canvasRect.height
             }, function (data) {
