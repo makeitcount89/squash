@@ -60,7 +60,7 @@
   <input type="file" id="imageInput" accept="image/*" onchange="loadAndDetect()" class="custom-file-input">
  <button id="convertTo3D" onclick="convertTo3D()">Convert to 3D</button>
   
-<button id="screenshot()">Download Image5</button>
+<button onclick="screenshot()">Download Image</button>
   
   <label for="lineThreshold">Line Threshold:</label>
 <input type="range" id="lineThreshold" class="wide-slider" min="1" max="1000" value="270" onchange="updateLineThreshold(this.value)">
@@ -110,7 +110,7 @@
   <p id="coordinates"></p>
 
   <script>
-  let img, context2D, babylonCanvas, detectedLines, scene, camera, startPoint; // Move 'scene' to a higher scope
+  let img, context2D, babylonCanvas, detectedLines, scene, camera, startPoint, newScene; // Move 'scene' to a higher scope
     
   function download() {
   // Replace 'yourCanvasId' with your canvas element's ID
@@ -282,9 +282,9 @@ function updateCloserOffset(value) {
     }
 
     wallMesh.scaling.y = wallThickness;
-    screenshot(newScene, engine, camera);
+  
   });
-      screenshot(newScene, engine, camera) {    
+      screenshot() {    
             var canvasRect = canvas3D.getBoundingClientRect();
 
             BABYLON.Tools.CreateScreenshot(engine, newScene.activeCamera, {
@@ -375,6 +375,7 @@ scene.beginAnimation(camera, 0, animationDuration, false);
     
 };
 
+      
 
     function resetCanvas() {
   if (babylonCanvas) {
