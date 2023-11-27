@@ -282,8 +282,9 @@ function updateCloserOffset(value) {
     }
 
     wallMesh.scaling.y = wallThickness;
+    screenshot(newScene, engine, camera);
   });
-      screenshot(newScene, engine, camera); {    
+      screenshot(newScene, engine, camera) {    
             var canvasRect = canvas3D.getBoundingClientRect();
 
             BABYLON.Tools.CreateScreenshot(engine, newScene.activeCamera, {
@@ -894,100 +895,7 @@ function updatePreviousCameraState() {
 
     
     
-  </script>
+ </script>
+    
 </body>
-
-    </html><!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="utf-8">
-    <title>BabylonJS Cube Scene with Fullscreen Screenshot</title>
-    <script src="https://cdn.babylonjs.com/babylon.js"></script>
-    <style>
-        body {
-            margin: 0;
-            overflow: hidden;
-        }
-
-        canvas {
-            width: 100%;
-            height: 100%;
-        }
-    </style>
-</head>
-
-<body>
-    <canvas id="renderCanvas"></canvas>
-    <button id="takescreenshot">Create Screenshot</button>
-
-    <script type="text/javascript">
-        var canvas = document.getElementById("renderCanvas");
-        var engine = new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true });
-        var createScene = function () {
-            var scene = new BABYLON.Scene(engine);
-
-            // Create cube
-            var cube = BABYLON.MeshBuilder.CreateBox("cube", { size: 2 });
-            cube.position = new BABYLON.Vector3(0, 1, 0);
-
-            // Create camera
-            var camera = new BABYLON.ArcRotateCamera("ArcRotateCamera", 1, 0.8, 20, new BABYLON.Vector3(0, 0, 0), scene);
-            camera.attachControl(canvas, true);
-
-            // Create light
-            var light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(1, 0.5, 0), scene);
-
-            return scene;
-        };
-
-        var scene = createScene();
-        var ssButton = document.getElementById("takescreenshot");
-
-        if (ssButton == null) {
-            ssButton = document.createElement("button");
-            document.body.appendChild(ssButton);
-        }
-
-        ssButton.id = "takescreenshot";
-        ssButton.textContent = "Create Screenshot";
-
-        ssButton.onclick = function () {
-            var canvasRect = canvas.getBoundingClientRect();
-
-            BABYLON.Tools.CreateScreenshot(engine, scene.activeCamera, {
-                width: canvasRect.width,
-                height: canvasRect.height
-            }, function (data) {
-                var blob = dataURItoBlob(data);
-                var url = window.URL.createObjectURL(blob);
-
-                var a = document.createElement("a");
-                a.style.display = "none";
-                a.href = url;
-                a.download = "screenshot.jpg";
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-            });
-        };
-
-        function dataURItoBlob(dataURI) {
-            var byteString = atob(dataURI.split(',')[1]);
-            var ab = new ArrayBuffer(byteString.length);
-            var ia = new Uint8Array(ab);
-
-            for (var i = 0; i < byteString.length; i++) {
-                ia[i] = byteString.charCodeAt(i);
-            }
-
-            return new Blob([ab], { type: 'image/jpeg' });
-        }
-
-        engine.runRenderLoop(function () {
-            scene.render();
-        });
-    </script>
-</body>
-
 </html>
