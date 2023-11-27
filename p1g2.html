@@ -68,24 +68,24 @@
   
 <button onclick="screenshot()">Download 3D Image</button>
   
-  <label for="lineThreshold">Line Threshold:</label>
+  <label for="lineThreshold">More / Less Walls:</label>
 <input type="range" id="lineThreshold" class="wide-slider" min="1" max="1000" value="270" onchange="updateLineThreshold(this.value)">
 <span id="lineThresholdValue">270</span>
 
-<label for="lineThickness">Line Thickness:</label>
+<label for="lineThickness"></label>
 <input type="range" id="lineThickness" class="wide-slider" min="1" max="100" value="50" onchange="updateLineThickness(this.value)">
-<span id="lineThicknessValue">50</span>
+<span id="lineThicknessValue"></span>
   
-  <label for="wallColor">Wall Color:</label>
+  <label for="wallColor"></label>
   <input type="color" id="wallColor" value="#000000">
 
-  <label for="wallTexture">Wall Texture:</label>
+  <label for="wallTexture"></label>
   <input type="text" id="wallTexture" placeholder="Texture URL" value="https://www.babylonjs-playground.com/textures/brick.jpg">
 
   <label for="wallHeight">Wall Height:</label>
   <input type="number" id="wallHeight" value="250">
 
-  <label for="wallThickness">Wall Thickness:</label>
+  <label for="wallThickness"></label>
   <input type="number" id="wallThickness" value="0.2">
   
 <button id="deleteButton" onclick="deleteSelectedLine()">Delete Selected Line</button>
