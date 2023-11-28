@@ -222,12 +222,29 @@ function updateCloserOffset(value) {
       linesP.delete();
     }
 
- function convertTo3D() {
+function convertTo3D() {
   resetCanvas();
   if (!detectedLines) {
     alert('Please detect lines first.');
     return;
   }
+
+  // Determine the bounding box of the 3D object
+  let minX = Number.MAX_VALUE;
+  let minY = Number.MAX_VALUE;
+  let maxX = Number.MIN_VALUE;
+  let maxY = Number.MIN_VALUE;
+
+  detectedLines.forEach(line => {
+    minX = Math.min(minX, line.x1, line.x2);
+    minY = Math.min(minY, -line.y1, -line.y2);
+    maxX = Math.max(maxX, line.x1, line.x2);
+    maxY = Math.max(maxY, -line.y1, -line.y2);
+  });
+
+  // Calculate the center and dimensions of the bounding box
+  const width = maxX - minX;
+  const height = maxY - minY;
 
   // Get the image dimensions
   const imgWidth = img.width;
@@ -244,6 +261,18 @@ function updateCloserOffset(value) {
   // Create a ground plane
   const ground = BABYLON.MeshBuilder.CreateGround('ground', { width: groundWidth, height: groundHeight }, babylonCanvas._babylonScene);
   ground.position = new BABYLON.Vector3(centerX, 0, -centerY); // Adjust the position to the center
+
+  // Mark the center of the bounding box on the image
+  const ctx = canvas.getContext('2d');
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, 5, 0, 2 * Math.PI);
+  ctx.fillStyle = 'red';
+  ctx.fill();
+
+  // Apply the original image as a texture to the ground
+  const groundMaterial = new BABYLON.StandardMaterial('groundMaterial', babylonCanvas._babylonScene);
+  groundMaterial.diffuseTexture = new BABYLON.Texture(img.src, babylonCanvas._babylonScene);
+  ground.material = groundMaterial;
 
   detectedLines.forEach(line => {
     const lineThickness = parseFloat(document.getElementById('lineThickness').value);
@@ -273,6 +302,7 @@ function updateCloserOffset(value) {
     wallMesh.scaling.y = wallThickness;
   });
 }
+
 
 
 
