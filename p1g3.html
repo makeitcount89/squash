@@ -66,7 +66,7 @@
   <input type="file" id="imageInput" accept="image/*" onchange="loadAndDetect()" class="custom-file-input">
  <button id="convertTo3D" onclick="convertTo3D()">Convert to 3D</button>
   
-<button onclick="screenshot()">Download 3D Image</button>
+<button onclick="screenshot()">Download 3D Image!</button>
   
   <label for="lineThreshold">More / Less Walls:</label>
 <input type="range" id="lineThreshold" class="wide-slider" min="1" max="1000" value="270" onchange="updateLineThreshold(this.value)">
@@ -222,7 +222,7 @@ function updateCloserOffset(value) {
       linesP.delete();
     }
 
- function convertTo3D() {
+function convertTo3D() {
   resetCanvas();
   if (!detectedLines) {
     alert('Please detect lines first.');
@@ -260,11 +260,7 @@ function updateCloserOffset(value) {
 
   // Create a ground plane
   const ground = BABYLON.MeshBuilder.CreateGround('ground', { width: groundWidth, height: groundHeight }, babylonCanvas._babylonScene);
-
-  const horizontalOffset = parseFloat(document.getElementById('leftOffsetSlider').value);
-  const closerOffset = parseFloat(document.getElementById('closerOffsetSlider').value);
-
-  //ground.position = new BABYLON.Vector3(centerX + horizontalOffset, 0, -centerY + closerOffset);
+  ground.position = new BABYLON.Vector3(centerX, 0, -centerY); // Adjust the position to the center
 
   // Apply the original image as a texture to the ground
   const groundMaterial = new BABYLON.StandardMaterial('groundMaterial', babylonCanvas._babylonScene);
@@ -299,6 +295,7 @@ function updateCloserOffset(value) {
     wallMesh.scaling.y = wallThickness;
   });
 }
+
 
    
     const screenshot = function() {    
