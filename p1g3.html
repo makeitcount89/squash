@@ -66,7 +66,7 @@
   <input type="file" id="imageInput" accept="image/*" onchange="loadAndDetect()" class="custom-file-input">
  <button id="convertTo3D" onclick="convertTo3D()">Convert to 3D</button>
   
-<button onclick="screenshot()">Download 3D Image!!!</button>
+<button onclick="screenshot()">Download 3D Image</button>
   
   <label for="lineThreshold">More / Less Walls:</label>
 <input type="range" id="lineThreshold" class="wide-slider" min="1" max="1000" value="270" onchange="updateLineThreshold(this.value)">
@@ -222,7 +222,7 @@ function updateCloserOffset(value) {
       linesP.delete();
     }
 
-    function convertTo3D() {
+ function convertTo3D() {
   resetCanvas();
   if (!detectedLines) {
     alert('Please detect lines first.');
@@ -243,28 +243,29 @@ function updateCloserOffset(value) {
   });
 
   // Calculate the center and dimensions of the bounding box
-  const centerX = (minX + maxX) / 2;
-  const centerY = (minY + maxY) / 2;
   const width = maxX - minX;
   const height = maxY - minY;
 
-       // Get the image dimensions
-      const imgWidth = img.width;
-      const imgHeight = img.height;
+  // Get the image dimensions
+  const imgWidth = img.width;
+  const imgHeight = img.height;
 
-      // Use the image dimensions for the ground size
-      const groundWidth = imgWidth;
-      const groundHeight = imgHeight;
+  // Use the image dimensions for the ground size
+  const groundWidth = imgWidth;
+  const groundHeight = imgHeight;
+
+  // Calculate the center based on image dimensions
+  const centerX = imgWidth / 2;
+  const centerY = imgHeight / 2;
+
   // Create a ground plane
-       const ground = BABYLON.MeshBuilder.CreateGround('ground', { width: groundWidth, height: groundHeight }, babylonCanvas._babylonScene);
- 
-  
-  const horizontalOffset = parseFloat(document.getElementById('leftOffsetSlider').value)
-  const closerOffset = parseFloat(document.getElementById('closerOffsetSlider').value)
-  
+  const ground = BABYLON.MeshBuilder.CreateGround('ground', { width: groundWidth, height: groundHeight }, babylonCanvas._babylonScene);
+
+  const horizontalOffset = parseFloat(document.getElementById('leftOffsetSlider').value);
+  const closerOffset = parseFloat(document.getElementById('closerOffsetSlider').value);
+
   //ground.position = new BABYLON.Vector3(centerX + horizontalOffset, 0, -centerY + closerOffset);
 
-  
   // Apply the original image as a texture to the ground
   const groundMaterial = new BABYLON.StandardMaterial('groundMaterial', babylonCanvas._babylonScene);
   groundMaterial.diffuseTexture = new BABYLON.Texture(img.src, babylonCanvas._babylonScene);
@@ -277,6 +278,14 @@ function updateCloserOffset(value) {
     const wallHeight = parseFloat(document.getElementById('wallHeight').value);
     const wallThickness = parseFloat(document.getElementById('wallThickness').value);
 
+    // Center and normalize the object using image dimensions
+    const points = [
+      new BABYLON.Vector3(line.x1 - centerX, 0, -line.y1 + centerY),
+      new BABYLON.Vector3(line.x1 - centerX, wallHeight, -line.y1 + centerY),
+      new BABYLON.Vector3(line.x2 - centerX, wallHeight, -line.y2 + centerY),
+      new BABYLON.Vector3(line.x2 - centerX, 0, -line.y2 + centerY),
+      new BABYLON.Vector3(line.x1 - centerX, 0, -line.y1 + centerY)
+    ];
 
     const wallMesh = BABYLON.MeshBuilder.CreateDashedLines(null, { points, dashSize: lineThickness, updatable: true });
     wallMesh.color = new BABYLON.Color3.FromHexString(wallColor);
@@ -288,9 +297,9 @@ function updateCloserOffset(value) {
     }
 
     wallMesh.scaling.y = wallThickness;
-  
   });
-    }
+}
+
    
     const screenshot = function() {    
         const canvas3D = document.getElementById('canvas3D'); // Replace with your Babylon.js canvas reference
