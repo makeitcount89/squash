@@ -248,8 +248,16 @@ function updateCloserOffset(value) {
   const width = maxX - minX;
   const height = maxY - minY;
 
+       // Get the image dimensions
+      const imgWidth = img.width;
+      const imgHeight = img.height;
+
+      // Use the image dimensions for the ground size
+      const groundWidth = imgWidth + 50;
+      const groundHeight = imgHeight + 50;
   // Create a ground plane
-  const ground = BABYLON.MeshBuilder.CreateGround('ground', { width: width + 50, height: height}, babylonCanvas._babylonScene);
+       const ground = BABYLON.MeshBuilder.CreateGround('ground', { width: groundWidth, height: groundHeight }, babylonCanvas._babylonScene);
+ 
   
   const horizontalOffset = parseFloat(document.getElementById('leftOffsetSlider').value)
   const closerOffset = parseFloat(document.getElementById('closerOffsetSlider').value)
