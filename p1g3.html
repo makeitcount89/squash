@@ -66,7 +66,7 @@
   <input type="file" id="imageInput" accept="image/*" onchange="loadAndDetect()" class="custom-file-input">
  <button id="convertTo3D" onclick="convertTo3D()">Convert to 3D</button>
   
-<button onclick="screenshot()">Download 3D Image</button>
+<button onclick="screenshot()">Download 3D Image!</button>
   
   <label for="lineThreshold">More / Less Walls:</label>
 <input type="range" id="lineThreshold" class="wide-slider" min="1" max="1000" value="270" onchange="updateLineThreshold(this.value)">
@@ -101,13 +101,13 @@
   <div id="offsetSliders" style="display: none;">
  
     <label for="leftOffset">Left / Right:</label>
-<input type="range" id="leftOffsetSlider" class="wide-slider" min="-500" max="100" value="-350" onchange="updateLeftOffset(this.value)">
-<span id="leftOffsetValue">-350</span>
+<input type="range" id="leftOffsetSlider" class="wide-slider" min="-500" max="100" value="0" onchange="updateLeftOffset(this.value)">
+<span id="leftOffsetValue">-0</span>
 
 
 <label for="closerOffset">Closer Offset:</label>
-<input type="range" id="closerOffsetSlider" class="wide-slider" min="-1200" max="200" value="-880" onchange="updateCloserOffset(this.value)">
-<span id="closerOffsetValue">-880</span>
+<input type="range" id="closerOffsetSlider" class="wide-slider" min="-1200" max="200" value="0" onchange="updateCloserOffset(this.value)">
+<span id="closerOffsetValue">0</span>
   
  </div>
   
