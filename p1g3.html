@@ -66,7 +66,7 @@
   <input type="file" id="imageInput" accept="image/*" onchange="loadAndDetect()" class="custom-file-input">
  <button id="convertTo3D" onclick="convertTo3D()">Convert to 3D</button>
   
-<button onclick="screenshot()">Download 3D Image!!!</button>
+<button onclick="screenshot()">Download 3D Image</button>
   
   <label for="lineThreshold">More / Less Walls:</label>
 <input type="range" id="lineThreshold" class="wide-slider" min="1" max="1000" value="270" onchange="updateLineThreshold(this.value)">
@@ -235,7 +235,7 @@ function convertTo3D() {
   const img = document.getElementById('img1'); // Replace 'yourImageId' with the actual ID of your image element
 
   // Ensure the image is loaded before processing its dimensions
-  img.onload = function () {
+  
     // Determine the bounding box of the 3D object
     let minX = Number.MAX_VALUE;
     let minY = Number.MAX_VALUE;
@@ -311,7 +311,7 @@ function convertTo3D() {
       wallMesh.scaling.y = wallThickness;
     });
   };
-}
+
 
 
 
