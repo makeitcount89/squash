@@ -170,6 +170,7 @@ function updateCloserOffset(value) {
    function loadAndDetect() {
   const input = document.getElementById('imageInput');
   img = new Image();
+  img.id = 'img1';
   img.onload = function () {
     context2D = document.getElementById('canvas2D').getContext('2d');
     context2D.clearRect(0, 0, context2D.canvas.width, context2D.canvas.height);
@@ -231,7 +232,7 @@ function convertTo3D() {
   }
 
   // Get the image dimensions
-  //const img = document.getElementById('yourImageId'); // Replace 'yourImageId' with the actual ID of your image element
+  const img = document.getElementById('img1'); // Replace 'yourImageId' with the actual ID of your image element
 
   // Ensure the image is loaded before processing its dimensions
   img.onload = function () {
