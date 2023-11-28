@@ -170,10 +170,6 @@ function updateCloserOffset(value) {
    function loadAndDetect() {
   const input = document.getElementById('imageInput');
   img = new Image();
-
-  // Set an ID for the image element
-  img.id = 'yourImageId'; // Replace 'yourImageId' with the desired ID
-
   img.onload = function () {
     context2D = document.getElementById('canvas2D').getContext('2d');
     context2D.clearRect(0, 0, context2D.canvas.width, context2D.canvas.height);
@@ -190,9 +186,8 @@ function updateCloserOffset(value) {
     });
     context2D.stroke();
   };
-
   img.src = URL.createObjectURL(input.files[0]);
-}
+    }
 
     
     function detectLines(threshold) {
@@ -235,11 +230,8 @@ function convertTo3D() {
     return;
   }
 
-  // Get the image dimensions
-  const img = document.getElementById('yourImageId'); // replace 'yourImageId' with the actual ID of your image element
-
   // Ensure the image is loaded before processing its dimensions
-  img.onload = function () {
+  
     // Determine the bounding box of the 3D object
     let minX = Number.MAX_VALUE;
     let minY = Number.MAX_VALUE;
@@ -310,7 +302,7 @@ function convertTo3D() {
       wallMesh.scaling.y = wallThickness;
     });
   };
-}
+
 
 
 
