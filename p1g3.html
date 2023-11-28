@@ -10,7 +10,13 @@
   <!-- Include Babylon.js -->
   <script src="https://cdn.babylonjs.com/babylon.js"></script>
   <style>
-
+    
+#wallTexture,
+#wallThickness,
+#wallColor,
+#lineThickness {
+  display: none;
+}
     button#convertTo3D {
   font-size: 48px;
   font-weight: bold;
@@ -60,26 +66,26 @@
   <input type="file" id="imageInput" accept="image/*" onchange="loadAndDetect()" class="custom-file-input">
  <button id="convertTo3D" onclick="convertTo3D()">Convert to 3D</button>
   
-<button id="screenshot()">Download Image5</button>
+<button onclick="screenshot()">Download 3D Image</button>
   
-  <label for="lineThreshold">Line Threshold:</label>
+  <label for="lineThreshold">More / Less Walls:</label>
 <input type="range" id="lineThreshold" class="wide-slider" min="1" max="1000" value="270" onchange="updateLineThreshold(this.value)">
 <span id="lineThresholdValue">270</span>
 
-<label for="lineThickness">Line Thickness:</label>
+<label for="lineThickness"></label>
 <input type="range" id="lineThickness" class="wide-slider" min="1" max="100" value="50" onchange="updateLineThickness(this.value)">
-<span id="lineThicknessValue">50</span>
+<span id="lineThicknessValue"></span>
   
-  <label for="wallColor">Wall Color:</label>
+  <label for="wallColor"></label>
   <input type="color" id="wallColor" value="#000000">
 
-  <label for="wallTexture">Wall Texture:</label>
+  <label for="wallTexture"></label>
   <input type="text" id="wallTexture" placeholder="Texture URL" value="https://www.babylonjs-playground.com/textures/brick.jpg">
 
   <label for="wallHeight">Wall Height:</label>
   <input type="number" id="wallHeight" value="250">
 
-  <label for="wallThickness">Wall Thickness:</label>
+  <label for="wallThickness"></label>
   <input type="number" id="wallThickness" value="0.2">
   
 <button id="deleteButton" onclick="deleteSelectedLine()">Delete Selected Line</button>
@@ -105,12 +111,12 @@
   
  </div>
   
-  <canvas id="canvas3D" width="1200" height="1200"></canvas>
+  <canvas id="canvas3D" width="600" height="600"></canvas>
 
   <p id="coordinates"></p>
 
   <script>
-  let img, context2D, babylonCanvas, detectedLines, scene, camera, startPoint; // Move 'scene' to a higher scope
+  let canvas3D, img, context2D, babylonCanvas, detectedLines, scene, camera, startPoint, newScene; // Move 'scene' to a higher scope
     
   function download() {
   // Replace 'yourCanvasId' with your canvas element's ID
@@ -282,9 +288,51 @@ function updateCloserOffset(value) {
     }
 
     wallMesh.scaling.y = wallThickness;
+  
   });
-      screenshot(scene, engine, camera, babylonCanvas);
-}
+    }
+   
+    const screenshot = function() {    
+        const canvas3D = document.getElementById('canvas3D'); // Replace with your Babylon.js canvas reference
+
+      // Ensure the Babylon.js scene is active and has rendered
+      if (canvas3D._babylonEngine && canvas3D._babylonScene) {
+        const engine = canvas3D._babylonEngine;
+        const scene = canvas3D._babylonScene;
+
+        // Replace 'yourCanvasId' with your canvas element's ID
+        const canvasRect = canvas3D.getBoundingClientRect();
+        
+            BABYLON.Tools.CreateScreenshot(engine, scene.activeCamera, {
+                width: canvasRect.width,
+                height: canvasRect.height
+            }, function (data) {
+                var blob = dataURItoBlob(data);
+                var url = window.URL.createObjectURL(blob);
+
+                var a = document.createElement("a");
+                a.style.display = "none";
+                a.href = url;
+                a.download = "screenshot.jpg";
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+            });
+      }
+      };
+
+        function dataURItoBlob(dataURI) {
+            var byteString = atob(dataURI.split(',')[1]);
+            var ab = new ArrayBuffer(byteString.length);
+            var ia = new Uint8Array(ab);
+
+            for (var i = 0; i < byteString.length; i++) {
+                ia[i] = byteString.charCodeAt(i);
+            }
+
+            return new Blob([ab], { type: 'image/jpeg' });
+        }
+  
 
     // Load Babylon canvas on page load
   window.onload = function () {
@@ -345,6 +393,7 @@ scene.beginAnimation(camera, 0, animationDuration, false);
     
 };
 
+      
 
     function resetCanvas() {
   if (babylonCanvas) {
@@ -422,40 +471,7 @@ scene.beginAnimation(camera, 0, animationDuration, false);
 }
 
     
-   function screenshot(scene, engine, camera, babylonCanvas) {
- var canvasRect = babylonCanvas.getBoundingClientRect();
-
-    BABYLON.Tools.CreateScreenshot(engine, scene.activeCamera, {
-      width: canvasRect.width,
-      height: canvasRect.height
-    }, function (data) {
-      var blob = dataURItoBlob(data);
-      var url = window.URL.createObjectURL(blob);
-
-      var a = document.createElement("a");
-      a.style.display = "none";
-      a.href = url;
-      a.download = "screenshot.jpg";
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-    });
-  }
-
-
-
-        function dataURItoBlob(dataURI) {
-            var byteString = atob(dataURI.split(',')[1]);
-            var ab = new ArrayBuffer(byteString.length);
-            var ia = new Uint8Array(ab);
-
-            for (var i = 0; i < byteString.length; i++) {
-                ia[i] = byteString.charCodeAt(i);
-            }
-
-            return new Blob([ab], { type: 'image/jpeg' });
-        }
-    
+   
   
 function pointToLineDistance(point, line, isSelected) {
   const { x, y } = point;
@@ -898,7 +914,7 @@ function updatePreviousCameraState() {
 
     
     
-  </script>
+ </script>
+    
 </body>
-
 </html>
