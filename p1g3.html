@@ -66,7 +66,7 @@
   <input type="file" id="imageInput" accept="image/*" onchange="loadAndDetect()" class="custom-file-input">
  <button id="convertTo3D" onclick="convertTo3D()">Convert to 3D</button>
   
-<button onclick="screenshot()">Download 3D Image!</button>
+<button onclick="screenshot()">Download 3D Image</button>
   
   <label for="lineThreshold">More / Less Walls:</label>
 <input type="range" id="lineThreshold" class="wide-slider" min="1" max="1000" value="270" onchange="updateLineThreshold(this.value)">
@@ -274,16 +274,13 @@ function convertTo3D() {
     const wallHeight = parseFloat(document.getElementById('wallHeight').value);
     const wallThickness = parseFloat(document.getElementById('wallThickness').value);
 
-    const horizontalOffset = parseFloat(document.getElementById('leftOffsetSlider').value);
-    const closerOffset = parseFloat(document.getElementById('closerOffsetSlider').value);
-
-    // Center and normalize the object using image dimensions and offsets
+    // Normalize the object using image dimensions
     const points = [
-      new BABYLON.Vector3(line.x1 - centerX + horizontalOffset, 0, -line.y1 + centerY + closerOffset),
-      new BABYLON.Vector3(line.x1 - centerX + horizontalOffset, wallHeight, -line.y1 + centerY + closerOffset),
-      new BABYLON.Vector3(line.x2 - centerX + horizontalOffset, wallHeight, -line.y2 + centerY + closerOffset),
-      new BABYLON.Vector3(line.x2 - centerX + horizontalOffset, 0, -line.y2 + centerY + closerOffset),
-      new BABYLON.Vector3(line.x1 - centerX + horizontalOffset, 0, -line.y1 + centerY + closerOffset)
+      new BABYLON.Vector3(line.x1 - centerX, 0, -line.y1 + centerY),
+      new BABYLON.Vector3(line.x1 - centerX, wallHeight, -line.y1 + centerY),
+      new BABYLON.Vector3(line.x2 - centerX, wallHeight, -line.y2 + centerY),
+      new BABYLON.Vector3(line.x2 - centerX, 0, -line.y2 + centerY),
+      new BABYLON.Vector3(line.x1 - centerX, 0, -line.y1 + centerY)
     ];
 
     const wallMesh = BABYLON.MeshBuilder.CreateDashedLines(null, { points, dashSize: lineThickness, updatable: true });
@@ -298,6 +295,7 @@ function convertTo3D() {
     wallMesh.scaling.y = wallThickness;
   });
 }
+
 
 
 
